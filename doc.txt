@@ -1,0 +1,560 @@
+📋 Documentação da API - Dashboard MCP Server
+🏠 Base URL
+text
+
+http://localhost:8081/api/v1
+
+🔐 Autenticação
+
+Todas as rotas (exceto /login) requerem um token JWT no header:
+text
+
+Authorization: Bearer <seu_token_jwt>
+
+📍 Endpoints
+1. Login
+
+POST /login
+
+Request Body:
+json
+
+{
+  "email": "admin@admin.com",
+  "password": "admin123"
+}
+
+Response (200 OK):
+json
+
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": 1,
+      "email": "admin@admin.com"
+    }
+  }
+}
+
+Error (401):
+json
+
+{
+  "success": false,
+  "error": "Invalid credentials"
+}
+
+2. Dashboard - Visão Geral
+
+GET /dashboard
+
+Response (200 OK):
+json
+
+{
+  "success": true,
+  "message": "Dashboard data retrieved",
+  "data": {
+    "total_pedidos_hoje": 15,
+    "total_pedidos_semana": 120,
+    "total_clientes": 45,
+    "pedidos_pendentes": 5,
+    "pedidos_por_status": {
+      "pendente": 5,
+      "confirmado": 20,
+      "preparando": 8,
+      "entregue": 30,
+      "cancelado": 2
+    },
+    "faturamento_hoje": 750.50,
+    "faturamento_mes": 15200.00
+  }
+}
+
+3. Pedidos
+3.1 Listar Pedidos
+
+GET /pedidos?page=1&limit=20&status=confirmado&cliente_id=1&data_inicio=2026-01-01&data_fim=2026-01-31
+
+Query Params:
+Parâmetro	Tipo	Obrigatório	Descrição
+page	int	❌	Página (default: 1)
+limit	int	❌	Itens por página (default: 20, max: 100)
+status	string	❌	Filtro por status (pendente, confirmado, preparando, entregue, cancelado)
+cliente_id	int	❌	Filtro por cliente
+data_inicio	date	❌	Data inicial (YYYY-MM-DD)
+data_fim	date	❌	Data final (YYYY-MM-DD)
+
+Response (200 OK):
+json
+
+{
+  "success": true,
+  "message": "Orders retrieved successfully",
+  "data": {
+    "data": [
+      {
+        "id": 1,
+        "tenant_id": 1,
+        "cliente_id": 1,
+        "cliente_nome": "João Silva",
+        "cliente_telefone": "5511999999999",
+        "endereco_entrega_id": 1,
+        "endereco_entrega": {
+          "id": 1,
+          "logradouro": "Rua das Flores",
+          "numero": "123",
+          "complemento": "Apto 42",
+          "bairro": "Jardim Paulista",
+          "cidade": "São Paulo",
+          "estado": "SP",
+          "cep": "01234-567"
+        },
+        "itens": [
+          {
+            "nome": "X-Bacon",
+            "quantidade": 2,
+            "preco": 29.90,
+            "observacao": "sem cebola"
+          }
+        ],
+        "total": 59.80,
+        "status": "confirmado",
+        "observacoes": "Entregar no portão",
+        "tempo_estimado": 25,
+        "origem": "whatsapp",
+        "created_at": "2026-08-12T10:00:00Z",
+        "updated_at": "2026-08-12T10:00:00Z"
+      }
+    ],
+    "total": 45,
+    "page": 1,
+    "limit": 20,
+    "pages": 3
+  }
+}
+
+3.2 Obter Pedido por ID
+
+GET /pedidos/{id}
+
+Response (200 OK):
+json
+
+{
+  "success": true,
+  "message": "Order retrieved successfully",
+  "data": {
+    "id": 1,
+    "tenant_id": 1,
+    "cliente_id": 1,
+    "cliente_nome": "João Silva",
+    "cliente_telefone": "5511999999999",
+    "endereco_entrega_id": 1,
+    "endereco_entrega": {
+      "id": 1,
+      "logradouro": "Rua das Flores",
+      "numero": "123",
+      "complemento": "Apto 42",
+      "bairro": "Jardim Paulista",
+      "cidade": "São Paulo",
+      "estado": "SP",
+      "cep": "01234-567"
+    },
+    "itens": [
+      {
+        "nome": "X-Bacon",
+        "quantidade": 2,
+        "preco": 29.90,
+        "observacao": "sem cebola"
+      }
+    ],
+    "total": 59.80,
+    "status": "confirmado",
+    "observacoes": "Entregar no portão",
+    "tempo_estimado": 25,
+    "origem": "whatsapp",
+    "created_at": "2026-08-12T10:00:00Z",
+    "updated_at": "2026-08-12T10:00:00Z"
+  }
+}
+
+Error (404):
+json
+
+{
+  "success": false,
+  "error": "Order not found"
+}
+
+3.3 Atualizar Status do Pedido
+
+PATCH /pedidos/{id}/status
+
+Request Body:
+json
+
+{
+  "status": "confirmado"
+}
+
+Status válidos: pendente, confirmado, preparando, entregue, cancelado
+
+Response (200 OK):
+json
+
+{
+  "success": true,
+  "message": "Order status updated successfully",
+  "data": {
+    "id": 1,
+    "status": "confirmado",
+    "updated_at": "2026-08-12T10:05:00Z"
+    // ... dados completos do pedido
+  }
+}
+
+4. Clientes
+4.1 Listar Clientes
+
+GET /clientes?page=1&limit=20&nome=joao&telefone=11999999999
+
+Query Params:
+Parâmetro	Tipo	Obrigatório	Descrição
+page	int	❌	Página (default: 1)
+limit	int	❌	Itens por página (default: 20)
+nome	string	❌	Filtro por nome (busca parcial)
+telefone	string	❌	Filtro por telefone
+
+Response (200 OK):
+json
+
+{
+  "success": true,
+  "message": "Clients retrieved successfully",
+  "data": {
+    "data": [
+      {
+        "id": 1,
+        "tenant_id": 1,
+        "telefone": "5511999999999",
+        "nome": "João Silva",
+        "nome_perfil": "João Silva",
+        "email": "joao@email.com",
+        "inscricao_federal": "00000000191",
+        "status": "ativo",
+        "ultimo_pedido_at": "2026-08-12T10:00:00Z",
+        "created_at": "2026-08-10T10:00:00Z",
+        "updated_at": "2026-08-12T10:00:00Z"
+      }
+    ],
+    "total": 45,
+    "page": 1,
+    "limit": 20,
+    "pages": 3
+  }
+}
+
+4.2 Obter Cliente por ID
+
+GET /clientes/{id}
+
+Response (200 OK):
+json
+
+{
+  "success": true,
+  "message": "Client retrieved successfully",
+  "data": {
+    "id": 1,
+    "tenant_id": 1,
+    "telefone": "5511999999999",
+    "nome": "João Silva",
+    "nome_perfil": "João Silva",
+    "email": "joao@email.com",
+    "inscricao_federal": "00000000191",
+    "status": "ativo",
+    "ultimo_pedido_at": "2026-08-12T10:00:00Z",
+    "created_at": "2026-08-10T10:00:00Z",
+    "updated_at": "2026-08-12T10:00:00Z"
+  }
+}
+
+4.3 Listar Pedidos do Cliente
+
+GET /clientes/{id}/pedidos?page=1&limit=20
+
+Response:
+json
+
+{
+  "success": true,
+  "message": "Client orders retrieved successfully",
+  "data": {
+    "data": [
+      {
+        "id": 1,
+        "total": 59.80,
+        "status": "confirmado",
+        "created_at": "2026-08-12T10:00:00Z"
+      }
+    ],
+    "total": 5,
+    "page": 1,
+    "limit": 20,
+    "pages": 1
+  }
+}
+
+4.4 Listar Endereços do Cliente
+
+GET /clientes/{id}/enderecos
+
+Response:
+json
+
+{
+  "success": true,
+  "message": "Client addresses retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "cliente_id": 1,
+      "cep": "01234-567",
+      "logradouro": "Rua das Flores",
+      "numero": "123",
+      "complemento": "Apto 42",
+      "bairro": "Jardim Paulista",
+      "cidade": "São Paulo",
+      "estado": "SP",
+      "pais": "Brasil",
+      "referencia": "Próximo ao mercado",
+      "latitude": -23.550520,
+      "longitude": -46.633308,
+      "tipo": "residencial",
+      "principal": true,
+      "created_at": "2026-08-10T10:00:00Z",
+      "updated_at": "2026-08-10T10:00:00Z"
+    }
+  ]
+}
+
+5. Produtos
+5.1 Listar Produtos
+
+GET /produtos?page=1&limit=20&categoria_id=1&disponivel=true&nome=burger
+
+Query Params:
+Parâmetro	Tipo	Obrigatório	Descrição
+page	int	❌	Página (default: 1)
+limit	int	❌	Itens por página (default: 20)
+categoria_id	int	❌	Filtro por categoria
+disponivel	bool	❌	Filtro por disponibilidade
+nome	string	❌	Filtro por nome (busca parcial)
+
+Response (200 OK):
+json
+
+{
+  "success": true,
+  "message": "Products retrieved successfully",
+  "data": {
+    "data": [
+      {
+        "id": 1,
+        "tenant_id": 1,
+        "categoria_id": 1,
+        "categoria_nome": "Lanches",
+        "nome": "X-Bacon",
+        "descricao": "Pão, hambúrguer, bacon, queijo, alface, tomate",
+        "preco": 29.90,
+        "disponivel": true,
+        "created_at": "2026-08-10T10:00:00Z",
+        "updated_at": "2026-08-10T10:00:00Z"
+      }
+    ],
+    "total": 45,
+    "page": 1,
+    "limit": 20,
+    "pages": 3
+  }
+}
+
+5.2 Obter Produto por ID
+
+GET /produtos/{id}
+
+Response (200 OK):
+json
+
+{
+  "success": true,
+  "message": "Product retrieved successfully",
+  "data": {
+    "id": 1,
+    "tenant_id": 1,
+    "categoria_id": 1,
+    "categoria_nome": "Lanches",
+    "nome": "X-Bacon",
+    "descricao": "Pão, hambúrguer, bacon, queijo, alface, tomate",
+    "preco": 29.90,
+    "disponivel": true,
+    "created_at": "2026-08-10T10:00:00Z",
+    "updated_at": "2026-08-10T10:00:00Z"
+  }
+}
+
+6. Health Checks
+
+GET /health
+GET /ready
+GET /status
+
+Response (200 OK):
+json
+
+{
+  "status": "up",
+  "timestamp": "2026-08-12T10:00:00Z",
+  "checks": {
+    "database": { "status": "up" },
+    "redis": { "status": "up" }
+  }
+}
+
+📊 Resumo dos Endpoints
+Método	Endpoint	Autenticação	Descrição
+POST	/login	❌	Login
+GET	/dashboard	✅	Dashboard
+GET	/pedidos	✅	Listar pedidos
+GET	/pedidos/{id}	✅	Detalhe pedido
+PATCH	/pedidos/{id}/status	✅	Atualizar status
+GET	/clientes	✅	Listar clientes
+GET	/clientes/{id}	✅	Detalhe cliente
+GET	/clientes/{id}/pedidos	✅	Pedidos do cliente
+GET	/clientes/{id}/enderecos	✅	Endereços do cliente
+GET	/produtos	✅	Listar produtos
+GET	/produtos/{id}	✅	Detalhe produto
+GET	/health	❌	Health check
+GET	/ready	❌	Readiness check
+GET	/status	❌	Status detalhado
+📁 Arquivo para o Frontend
+
+Salve como api-docs.json:
+json
+
+{
+  "baseUrl": "http://localhost:8081/api/v1",
+  "auth": {
+    "type": "JWT",
+    "header": "Authorization",
+    "prefix": "Bearer"
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/login",
+      "auth": false,
+      "description": "Login",
+      "body": {
+        "email": "string",
+        "password": "string"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/dashboard",
+      "auth": true,
+      "description": "Dashboard - Visão geral"
+    },
+    {
+      "method": "GET",
+      "path": "/pedidos",
+      "auth": true,
+      "description": "Listar pedidos",
+      "params": {
+        "page": "int (opcional)",
+        "limit": "int (opcional)",
+        "status": "string (opcional)",
+        "cliente_id": "int (opcional)",
+        "data_inicio": "date (opcional)",
+        "data_fim": "date (opcional)"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/pedidos/{id}",
+      "auth": true,
+      "description": "Detalhe do pedido"
+    },
+    {
+      "method": "PATCH",
+      "path": "/pedidos/{id}/status",
+      "auth": true,
+      "description": "Atualizar status do pedido",
+      "body": {
+        "status": "string (pendente, confirmado, preparando, entregue, cancelado)"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/clientes",
+      "auth": true,
+      "description": "Listar clientes",
+      "params": {
+        "page": "int (opcional)",
+        "limit": "int (opcional)",
+        "nome": "string (opcional)",
+        "telefone": "string (opcional)"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/clientes/{id}",
+      "auth": true,
+      "description": "Detalhe do cliente"
+    },
+    {
+      "method": "GET",
+      "path": "/clientes/{id}/pedidos",
+      "auth": true,
+      "description": "Pedidos do cliente"
+    },
+    {
+      "method": "GET",
+      "path": "/clientes/{id}/enderecos",
+      "auth": true,
+      "description": "Endereços do cliente"
+    },
+    {
+      "method": "GET",
+      "path": "/produtos",
+      "auth": true,
+      "description": "Listar produtos",
+      "params": {
+        "page": "int (opcional)",
+        "limit": "int (opcional)",
+        "categoria_id": "int (opcional)",
+        "disponivel": "bool (opcional)",
+        "nome": "string (opcional)"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/produtos/{id}",
+      "auth": true,
+      "description": "Detalhe do produto"
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "auth": false,
+      "description": "Health check"
+    }
+  ]
+}
+
+Documentação completa para o frontend! 🚀

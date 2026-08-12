@@ -1,0 +1,11 @@
+// lib/presentation/pages/pages.dart
+export 'auth/login_page.dart';
+export 'clientes/clientes_page.dart';
+export 'clientes/detalhe_cliente_page.dart';
+export 'dashboard/dashboard_page.dart';
+export 'home_page.dart';
+export 'pedidos/detalhe_pedido_page.dart';
+export 'pedidos/pedidos_page.dart';
+export 'produtos/detalhe_produto_page.dart';
+export 'produtos/produtos_page.dart';
+export 'splash_page.dart';

@@ -15,3 +15,22 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+
+# Setup inicial do projeto
+make setup
+
+# Desenvolvimento rápido
+make dev
+
+# Verificar dependências desatualizadas
+make deps-outdated
+
+# Atualizar todas as dependências
+make deps-upgrade
+
+# Gerar build de release
+make release
+
+# Servir build web localmente
+make serve
