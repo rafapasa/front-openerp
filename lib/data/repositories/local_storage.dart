@@ -3,6 +3,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 class LocalStorage {
   static const String boxName = 'front_openerp_cache';
   static const String tokenKey = 'auth_token';
+  static const String tokenExpiresKey = 'token_expires';
+  static const String contasLoginKey = 'contas_login';
   static const String dashboardKey = 'dashboard';
   static const String pedidosKey = 'pedidos';
   static const String produtosKey = 'produtos';
@@ -36,8 +38,43 @@ class LocalStorage {
     return _box.get(tokenKey);
   }
 
+  static Future<void> setTokenExpires(String tokenExpires) async {
+    await _box.put(tokenExpiresKey, tokenExpires);
+  }
+
+  static String? getTokenExpires() {
+    return _box.get(tokenExpiresKey);
+  }
+
   static Future<void> clearToken() async {
     await _box.delete(tokenKey);
+  }
+
+  static Future<void> clearTokenExpires() async {
+    await _box.delete(tokenExpiresKey);
+  }
+
+  // ============================================================
+  // 🔎 Validação de autenticação (fonte única: Hive)
+  // ============================================================
+
+  // Token expirado? Considera 1 minuto de folga para evitar chamadas com
+  // token já vencido (RFC3339).
+  static bool isTokenExpired() {
+    final expiresString = getTokenExpires();
+    if (expiresString == null) return true;
+    try {
+      final expiresAt = DateTime.parse(expiresString);
+      return DateTime.now().isAfter(expiresAt.subtract(const Duration(minutes: 1)));
+    } catch (_) {
+      return true;
+    }
+  }
+
+  // Existe um token persistido, não vazio e ainda válido?
+  static bool hasValidToken() {
+    final token = getToken();
+    return token != null && token.isNotEmpty && !isTokenExpired();
   }
 
   // ============================================================
@@ -65,10 +102,7 @@ class LocalStorage {
   }
 
   // Verificar se cache é válido (ex: 5 minutos)
-  static bool isCacheValid(
-    String key, {
-    Duration maxAge = const Duration(minutes: 5),
-  }) {
+  static bool isCacheValid(String key, {Duration maxAge = const Duration(minutes: 5)}) {
     final timestamp = getTimestamp(key);
     if (timestamp == null) return false;
 

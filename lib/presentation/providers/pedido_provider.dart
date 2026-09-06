@@ -240,12 +240,4 @@ class PedidoProvider extends ChangeNotifier {
   void _clearError() {
     _error = null;
   }
-
-  // ============================================================
-  // 🗑️ Dispose
-  // ============================================================
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

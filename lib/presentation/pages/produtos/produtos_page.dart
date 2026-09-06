@@ -21,7 +21,10 @@ class _ProdutosPageState extends State<ProdutosPage> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    // ✅ Usar addPostFrameCallback
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
     _scrollController.addListener(_onScroll);
   }
 
@@ -38,8 +41,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 100) {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
       final provider = context.read<ProdutoProvider>();
       if (!provider.isLoadingMore && provider.hasMore) {
         provider.loadMore();
@@ -86,10 +88,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
                         },
                       )
                     : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 filled: true,
                 fillColor: Colors.grey[200],
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -108,10 +107,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
                 children: [
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text(
-                    'Erro ao carregar produtos',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
+                  Text('Erro ao carregar produtos', style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 8),
                   Text(
                     provider.error!,
@@ -119,10 +115,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
                     style: const TextStyle(color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadData,
-                    child: const Text('Tentar novamente'),
-                  ),
+                  ElevatedButton(onPressed: _loadData, child: const Text('Tentar novamente')),
                 ],
               ),
             )
@@ -131,16 +124,9 @@ class _ProdutosPageState extends State<ProdutosPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.inventory_outlined,
-                    size: 64,
-                    color: Colors.grey[400],
-                  ),
+                  Icon(Icons.inventory_outlined, size: 64, color: Colors.grey[400]),
                   const SizedBox(height: 16),
-                  Text(
-                    'Nenhum produto encontrado',
-                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                  ),
+                  Text('Nenhum produto encontrado', style: TextStyle(fontSize: 18, color: Colors.grey[600])),
                 ],
               ),
             )
@@ -155,8 +141,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                 ),
-                itemCount:
-                    provider.produtos.length + (provider.hasMore ? 1 : 0),
+                itemCount: provider.produtos.length + (provider.hasMore ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index == provider.produtos.length) {
                     return const Center(child: CircularProgressIndicator());
@@ -183,12 +168,7 @@ class _ProdutoCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => DetalheProdutoPage(produtoId: produto.id),
-            ),
-          );
+          Navigator.push(context, MaterialPageRoute(builder: (_) => DetalheProdutoPage(produtoId: produto.id)));
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -202,10 +182,7 @@ class _ProdutoCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: produto.disponivel
                           ? Colors.green.withValues(alpha: 0.1)
@@ -214,17 +191,11 @@ class _ProdutoCard extends StatelessWidget {
                     ),
                     child: Text(
                       produto.disponivel ? 'Disponível' : 'Indisponível',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: produto.disponivel ? Colors.green : Colors.red,
-                      ),
+                      style: TextStyle(fontSize: 10, color: produto.disponivel ? Colors.green : Colors.red),
                     ),
                   ),
                   if (produto.categoriaNome != null)
-                    Text(
-                      produto.categoriaNome!,
-                      style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                    ),
+                    Text(produto.categoriaNome!, style: TextStyle(fontSize: 10, color: Colors.grey[600])),
                 ],
               ),
               const SizedBox(height: 8),
@@ -234,10 +205,7 @@ class _ProdutoCard extends StatelessWidget {
                 produto.nome,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 4),
 
@@ -255,11 +223,7 @@ class _ProdutoCard extends StatelessWidget {
               // Preço
               Text(
                 numberFormat.format(produto.preco),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
               ),
             ],
           ),

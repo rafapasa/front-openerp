@@ -20,7 +20,7 @@ Request Body:
 json
 
 {
-  "email": "admin@admin.com",
+  "email": " etoolstec@etoolstec.com.br",
   "password": "admin123"
 }
 
@@ -34,7 +34,7 @@ json
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "user": {
       "id": 1,
-      "email": "admin@admin.com"
+      "email": "etoolstec@etoolstec.com.br"
     }
   }
 }

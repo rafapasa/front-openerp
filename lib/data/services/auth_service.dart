@@ -1,36 +1,39 @@
+// lib/data/services/auth_service.dart
 import 'package:dio/dio.dart';
 import 'package:front_openerp/data/models/models.dart';
-
-import 'services.dart';
+import 'package:front_openerp/data/services/api_service.dart';
 
 class AuthService {
   final ApiService _apiService;
 
   AuthService(this._apiService);
 
-  /// Faz login do usuário
-  Future<UsuarioModel> login(String email, String password) async {
+  // ============================================================
+  // 🔐 Login
+  // ============================================================
+  // O backend responde com um LoginResponseList:
+  // {
+  //   "count": N,
+  //   "users": [
+  //     { "token": "...", "user": {...}, "expires_at": "..." },
+  //     ...
+  //   ]
+  // }
+  // Cada item representa uma conta do e-mail em um tenant, com token próprio.
+  Future<LoginResultado> login(String email, String password) async {
     try {
-      final response = await _apiService.post(
-        '/login',
-        data: {'email': email, 'password': password},
-      );
+      final response = await _apiService.post('/login', data: {'email': email, 'password': password});
 
-      final data = response.data['data'];
+      final data = response.data;
+      if (data is! Map<String, dynamic>) {
+        throw Exception('Resposta de login inválida');
+      }
 
-      // Extrair token e usuário
-      final token = data['token'] as String;
-      final userData = data['user'] as Map<String, dynamic>;
-
-      // Salvar token no ApiService
-      await _apiService.setToken(token);
-
-      // Retornar usuário com token
-      return UsuarioModel(
-        id: userData['id'],
-        email: userData['email'],
-        token: token,
-      );
+      final resultado = LoginResultado.fromJson(data);
+      if (resultado.contas.isEmpty) {
+        throw Exception('Credenciais inválidas');
+      }
+      return resultado;
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         throw Exception('Credenciais inválidas');
@@ -39,11 +42,25 @@ class AuthService {
     }
   }
 
-  /// Faz logout
+  // ============================================================
+  // ▶️ Ativar conta selecionada (define token/expiração no ApiService)
+  // ============================================================
+  // Não faz requisição ao backend: cada conta do /login já possui o seu
+  // próprio token JWT. Ativar a conta = passar a usar esse token.
+  Future<void> ativarConta(LoginConta conta) async {
+    await _apiService.setToken(conta.token);
+    await _apiService.setTokenExpires(conta.expiresAt);
+  }
+
+  // ============================================================
+  // 🚪 Logout
+  // ============================================================
   Future<void> logout() async {
     await _apiService.logout();
   }
 
-  /// Verifica se está autenticado
+  // ============================================================
+  // 🔍 Verificar autenticação
+  // ============================================================
   bool get isAuthenticated => _apiService.isAuthenticated;
 }

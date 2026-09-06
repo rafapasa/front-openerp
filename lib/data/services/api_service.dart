@@ -1,12 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:front_openerp/data/repositories/local_storage.dart';
+import 'package:uuid/uuid.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:8081/api/v1';
+  static const String baseUrl = 'https://mcp-server.etoolstec.com.br/api/v1';
+  // static const String baseUrl = 'http://localhost:8080/api/v1';
+  static const String defaultTenantId = '0';
 
   late final Dio _dio;
-  String? _token;
+  final Uuid _uuid = const Uuid();
 
   ApiService() {
     _dio = Dio(
@@ -14,23 +17,14 @@ class ApiService {
         baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Tenant-ID': defaultTenantId},
       ),
     );
 
     // Interceptor para log (útil para debug)
     if (kDebugMode) {
       _dio.interceptors.add(
-        LogInterceptor(
-          request: true,
-          requestHeader: true,
-          requestBody: true,
-          responseHeader: true,
-          responseBody: true,
-        ),
+        LogInterceptor(request: true, requestHeader: true, requestBody: true, responseHeader: true, responseBody: true),
       );
     }
 
@@ -38,15 +32,17 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Carregar token do SharedPreferences
-          if (_token == null) {
-            final prefs = await SharedPreferences.getInstance();
-            _token = prefs.getString('auth_token');
-          }
+          // Headers exigidos pelos middlewares do Fiber.
+          final tenantId = LocalStorage.getData<dynamic>('tenant_ativo_id');
+          options.headers['X-Tenant-ID'] = tenantId?.toString() ?? defaultTenantId;
+          options.headers['X-Request-ID'] = _uuid.v4();
+
+          // Token persistido no LocalStorage (fonte única, junto com a expiração).
+          final token = LocalStorage.getToken();
 
           // Adicionar token no header se existir
-          if (_token != null && !options.path.contains('/login')) {
-            options.headers['Authorization'] = 'Bearer $_token';
+          if (token != null && token.isNotEmpty && !options.path.contains('/login')) {
+            options.headers['Authorization'] = 'Bearer $token';
           }
           return handler.next(options);
         },
@@ -66,17 +62,18 @@ class ApiService {
   // Getters
   Dio get dio => _dio;
 
-  // Gerenciar token
+  // Gerenciar token (persistido no LocalStorage/Hive)
   Future<void> setToken(String token) async {
-    _token = token;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_token', token);
+    await LocalStorage.setToken(token);
+  }
+
+  Future<void> setTokenExpires(String tokenExpires) async {
+    await LocalStorage.setTokenExpires(tokenExpires);
   }
 
   Future<void> _clearToken() async {
-    _token = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
+    await LocalStorage.clearToken();
+    await LocalStorage.clearTokenExpires();
   }
 
   Future<void> logout() async {
@@ -84,87 +81,41 @@ class ApiService {
   }
 
   // Métodos genéricos para requisições
-  Future<Response> get(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
+  Future<Response> get(String path, {Map<String, dynamic>? queryParameters, Options? options}) async {
     try {
-      return await _dio.get(
-        path,
-        queryParameters: queryParameters,
-        options: options,
-      );
+      return await _dio.get(path, queryParameters: queryParameters, options: options);
     } on DioException catch (e) {
       throw _handleError(e);
     }
   }
 
-  Future<Response> post(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
+  Future<Response> post(String path, {dynamic data, Map<String, dynamic>? queryParameters, Options? options}) async {
     try {
-      return await _dio.post(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-        options: options,
-      );
+      return await _dio.post(path, data: data, queryParameters: queryParameters, options: options);
     } on DioException catch (e) {
       throw _handleError(e);
     }
   }
 
-  Future<Response> patch(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
+  Future<Response> patch(String path, {dynamic data, Map<String, dynamic>? queryParameters, Options? options}) async {
     try {
-      return await _dio.patch(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-        options: options,
-      );
+      return await _dio.patch(path, data: data, queryParameters: queryParameters, options: options);
     } on DioException catch (e) {
       throw _handleError(e);
     }
   }
 
-  Future<Response> put(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
+  Future<Response> put(String path, {dynamic data, Map<String, dynamic>? queryParameters, Options? options}) async {
     try {
-      return await _dio.put(
-        path,
-        data: data,
-        queryParameters: queryParameters,
-        options: options,
-      );
+      return await _dio.put(path, data: data, queryParameters: queryParameters, options: options);
     } on DioException catch (e) {
       throw _handleError(e);
     }
   }
 
-  Future<Response> delete(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
+  Future<Response> delete(String path, {Map<String, dynamic>? queryParameters, Options? options}) async {
     try {
-      return await _dio.delete(
-        path,
-        queryParameters: queryParameters,
-        options: options,
-      );
+      return await _dio.delete(path, queryParameters: queryParameters, options: options);
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -197,8 +148,7 @@ class ApiService {
         default:
           message = data?['error'] ?? data?['message'] ?? message;
       }
-    } else if (error.type == DioExceptionType.connectionTimeout ||
-        error.type == DioExceptionType.receiveTimeout) {
+    } else if (error.type == DioExceptionType.connectionTimeout || error.type == DioExceptionType.receiveTimeout) {
       message = 'Tempo de conexão esgotado. Verifique sua internet.';
     } else if (error.type == DioExceptionType.connectionError) {
       message = 'Erro de conexão. Verifique sua internet.';
@@ -207,6 +157,11 @@ class ApiService {
     return Exception(message);
   }
 
-  // Verificar se está autenticado
-  bool get isAuthenticated => _token != null;
+  // ============================================================
+  // 🔎 Verificar autenticação
+  // ============================================================
+  // Checa o token persistido (LocalStorage/Hive) e a data de expiração.
+  // Não depende de variável em memória, então funciona logo no boot do app,
+  // antes de qualquer requisição HTTP.
+  bool get isAuthenticated => LocalStorage.hasValidToken();
 }

@@ -40,6 +40,7 @@ class _DetalheClientePageState extends State<DetalheClientePage> {
       final provider = context.read<ClienteProvider>();
       final cliente = await provider.getClienteById(widget.clienteId);
 
+      if (!mounted) return;
       setState(() {
         _cliente = cliente;
         _isLoading = false;
@@ -48,6 +49,7 @@ class _DetalheClientePageState extends State<DetalheClientePage> {
       // Buscar endereços
       await _loadEnderecos();
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -68,11 +70,13 @@ class _DetalheClientePageState extends State<DetalheClientePage> {
         widget.clienteId,
       );
 
+      if (!mounted) return;
       setState(() {
         _enderecos = enderecos;
         _isLoadingEnderecos = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoadingEnderecos = false;
       });

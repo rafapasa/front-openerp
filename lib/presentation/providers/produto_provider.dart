@@ -218,10 +218,4 @@ class ProdutoProvider extends ChangeNotifier {
   }
 
   // ============================================================
-  // 🗑️ Dispose
-  // ============================================================
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

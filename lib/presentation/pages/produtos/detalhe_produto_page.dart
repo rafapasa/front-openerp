@@ -35,11 +35,13 @@ class _DetalheProdutoPageState extends State<DetalheProdutoPage> {
       final provider = context.read<ProdutoProvider>();
       final produto = await provider.getProdutoById(widget.produtoId);
 
+      if (!mounted) return;
       setState(() {
         _produto = produto;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;

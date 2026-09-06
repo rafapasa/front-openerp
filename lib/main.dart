@@ -12,9 +12,13 @@ void main() async {
   // Inicializar LocalStorage
   await LocalStorage.init();
 
-  runApp(
-    MultiProvider(
-      providers: [
+  runApp(buildApp());
+}
+
+/// Constrói a árvore de widgets principal do app com todos os providers.
+Widget buildApp() {
+  return MultiProvider(
+    providers: [
         // Services
         Provider<ApiService>(create: (_) => ApiService()),
         Provider<AuthService>(
@@ -74,7 +78,6 @@ void main() async {
         ),
       ],
       child: const MyApp(),
-    ),
   );
 }
 

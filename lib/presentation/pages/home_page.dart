@@ -4,6 +4,7 @@ import 'package:front_openerp/presentation/pages/clientes/clientes_page.dart';
 import 'package:front_openerp/presentation/pages/dashboard/dashboard_page.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pedidos_page.dart';
 import 'package:front_openerp/presentation/pages/produtos/produtos_page.dart';
+import 'package:front_openerp/presentation/pages/tenants/tenants_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,6 +21,7 @@ class _HomePageState extends State<HomePage> {
     const PedidosPage(),
     const ClientesPage(),
     const ProdutosPage(),
+    const TenantsPage(), // Adicionar
   ];
 
   final List<BottomNavigationBarItem> _bottomNavItems = const [
@@ -27,6 +29,7 @@ class _HomePageState extends State<HomePage> {
     BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Pedidos'),
     BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Clientes'),
     BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Produtos'),
+    BottomNavigationBarItem(icon: Icon(Icons.business), label: 'Empresas'),
   ];
 
   @override

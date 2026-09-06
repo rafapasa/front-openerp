@@ -1,5 +1,6 @@
 // lib/presentation/pages/auth/login_page.dart
 import 'package:flutter/material.dart';
+import 'package:front_openerp/presentation/pages/auth/selecionar_tenant_page.dart';
 import 'package:front_openerp/presentation/pages/home_page.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +14,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController(text: 'admin@admin.com');
+  final _emailController = TextEditingController(text: 'etoolstec@etoolstec.com.br');
   final _passwordController = TextEditingController(text: 'admin123');
   bool _obscurePassword = true;
 
@@ -28,16 +29,15 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.login(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-    );
+    final success = await authProvider.login(_emailController.text.trim(), _passwordController.text.trim());
 
-    if (success && mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
-      );
+    if (!success || !mounted) return;
+
+    // Login com mais de uma empresa: exige seleção antes de entrar.
+    if (authProvider.precisaSelecionarConta) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const SelecionarTenantPage()));
+    } else {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage()));
     }
   }
 
@@ -63,28 +63,21 @@ class _LoginPageState extends State<LoginPage> {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor
-                          .withValues(alpha: 0.1),
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(50),
                     ),
-                    child: Icon(
-                      Icons.storefront,
-                      size: 50,
-                      color: Theme.of(context).primaryColor,
-                    ),
+                    child: Icon(Icons.storefront, size: 50, color: Theme.of(context).primaryColor),
                   ),
                   const SizedBox(height: 32),
                   Text(
                     'Bem-vindo!',
-                    style: Theme.of(context).textTheme.headlineMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Faça login para acessar o dashboard',
-                    style: Theme.of(context).textTheme.bodyLarge
-                        ?.copyWith(color: Colors.grey[600]),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -117,11 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                       labelText: 'Senha',
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
+                        icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
                         onPressed: () {
                           setState(() {
                             _obscurePassword = !_obscurePassword;
@@ -158,17 +147,12 @@ class _LoginPageState extends State<LoginPage> {
                   // Login Button
                   ElevatedButton(
                     onPressed: isLoading ? null : _login,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
+                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                     child: isLoading
                         ? const SizedBox(
                             height: 20,
                             width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                           )
                         : const Text('Entrar', style: TextStyle(fontSize: 16)),
                   ),

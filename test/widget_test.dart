@@ -1,30 +1,56 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// test/widget_test.dart
+// Smoke test da aplicação: verifica a inicialização (SplashPage) e a
+// navegação para a tela de login quando não há sessão salva.
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive/hive.dart';
 
+import 'package:front_openerp/data/repositories/local_storage.dart';
 import 'package:front_openerp/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  setUpAll(() async {
+    // Simula o path_provider para permitir a inicialização do Hive em testes.
+    final tempDir = await Directory.systemTemp.createTemp('hive_test');
+    const pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(pathProviderChannel, (call) async {
+      if (call.method == 'getApplicationDocumentsDirectory') {
+        return tempDir.path;
+      }
+      return null;
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await LocalStorage.init();
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  tearDownAll(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          null,
+        );
+    await Hive.close();
+  });
+
+  testWidgets('App inicializa na SplashPage e navega para o Login',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(buildApp());
+
+    // A SplashPage exibe o nome do app e o indicador de carregamento.
+    expect(find.text('Front-OpenERP'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    // Avança o tempo do timer de 2s do splash e completa a navegação.
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    // Sem token salvo, o app deve ir para a tela de login.
+    expect(find.text('Bem-vindo!'), findsOneWidget);
   });
 }

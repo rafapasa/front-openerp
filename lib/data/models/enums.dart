@@ -144,3 +144,65 @@ enum OrigemPedido {
     }
   }
 }
+
+// lib/data/models/enums.dart - Adicionar:
+enum TenantStatus {
+  ativo,
+  inativo,
+  bloqueado,
+  suspenso;
+
+  static TenantStatus fromString(String value) {
+    switch (value.toLowerCase()) {
+      case 'ativo':
+        return TenantStatus.ativo;
+      case 'inativo':
+        return TenantStatus.inativo;
+      case 'bloqueado':
+        return TenantStatus.bloqueado;
+      case 'suspenso':
+        return TenantStatus.suspenso;
+      default:
+        return TenantStatus.ativo;
+    }
+  }
+
+  String toStringValue() {
+    switch (this) {
+      case TenantStatus.ativo:
+        return 'ativo';
+      case TenantStatus.inativo:
+        return 'inativo';
+      case TenantStatus.bloqueado:
+        return 'bloqueado';
+      case TenantStatus.suspenso:
+        return 'suspenso';
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case TenantStatus.ativo:
+        return 'Ativo';
+      case TenantStatus.inativo:
+        return 'Inativo';
+      case TenantStatus.bloqueado:
+        return 'Bloqueado';
+      case TenantStatus.suspenso:
+        return 'Suspenso';
+    }
+  }
+
+  String get colorHex {
+    switch (this) {
+      case TenantStatus.ativo:
+        return '#4CAF50';
+      case TenantStatus.inativo:
+        return '#9E9E9E';
+      case TenantStatus.bloqueado:
+        return '#F44336';
+      case TenantStatus.suspenso:
+        return '#FF9800';
+    }
+  }
+}

@@ -18,11 +18,13 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
   PedidoModel? _pedido;
   bool _isLoading = true;
   String? _error;
-
   @override
   void initState() {
     super.initState();
-    _loadPedido();
+    // ✅ Usar addPostFrameCallback
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadPedido();
+    });
   }
 
   Future<void> _loadPedido() async {
@@ -34,11 +36,13 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
     try {
       final provider = context.read<PedidoProvider>();
       final pedido = await provider.getPedidoById(widget.pedidoId);
+      if (!mounted) return;
       setState(() {
         _pedido = pedido;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -50,20 +54,17 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
     final provider = context.read<PedidoProvider>();
     final success = await provider.updateStatus(widget.pedidoId, novoStatus);
 
-    if (success && mounted) {
+    if (!mounted) return;
+
+    if (success) {
       await _loadPedido();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Status atualizado para ${novoStatus.label}'),
-          backgroundColor: Colors.green,
-        ),
+        SnackBar(content: Text('Status atualizado para ${novoStatus.label}'), backgroundColor: Colors.green),
       );
-    } else if (mounted) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(provider.error ?? 'Erro ao atualizar status'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(provider.error ?? 'Erro ao atualizar status'), backgroundColor: Colors.red),
       );
     }
   }
@@ -94,10 +95,7 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                 children: [
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text(
-                    'Erro ao carregar pedido',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
+                  Text('Erro ao carregar pedido', style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 8),
                   Text(
                     _error!,
@@ -105,10 +103,7 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                     style: const TextStyle(color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadPedido,
-                    child: const Text('Tentar novamente'),
-                  ),
+                  ElevatedButton(onPressed: _loadPedido, child: const Text('Tentar novamente')),
                 ],
               ),
             )
@@ -128,26 +123,12 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Color(
-                                int.parse(
-                                  _pedido!.statusColor.replaceFirst(
-                                    '#',
-                                    '0xff',
-                                  ),
-                                ),
-                              ).withValues(),
+                              color: Color(int.parse(_pedido!.statusColor.replaceFirst('#', '0xff'))).withValues(),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               _getStatusIcon(_pedido!.status),
-                              color: Color(
-                                int.parse(
-                                  _pedido!.statusColor.replaceFirst(
-                                    '#',
-                                    '0xff',
-                                  ),
-                                ),
-                              ),
+                              color: Color(int.parse(_pedido!.statusColor.replaceFirst('#', '0xff'))),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -157,15 +138,9 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                               children: [
                                 Text(
                                   _pedido!.statusLabel,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                 ),
-                                Text(
-                                  'Status atual do pedido',
-                                  style: TextStyle(color: Colors.grey[600]),
-                                ),
+                                Text('Status atual do pedido', style: TextStyle(color: Colors.grey[600])),
                               ],
                             ),
                           ),
@@ -174,10 +149,7 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                             DropdownButton<StatusPedido>(
                               value: _pedido!.status,
                               items: StatusPedido.values.map((status) {
-                                return DropdownMenuItem(
-                                  value: status,
-                                  child: Text(status.label),
-                                );
+                                return DropdownMenuItem(value: status, child: Text(status.label));
                               }).toList(),
                               onChanged: (newStatus) {
                                 if (newStatus != null) {
@@ -198,35 +170,17 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            '👤 Cliente',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          const Text('👤 Cliente', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 8),
-                          Text(
-                            _pedido!.clienteNome,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          Text(
-                            _pedido!.clienteTelefone,
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
+                          Text(_pedido!.clienteNome, style: const TextStyle(fontSize: 16)),
+                          Text(_pedido!.clienteTelefone, style: TextStyle(color: Colors.grey[600])),
                           if (_pedido!.enderecoEntrega != null) ...[
                             const SizedBox(height: 8),
                             const Divider(),
                             const SizedBox(height: 8),
-                            const Text(
-                              '📍 Endereço de Entrega',
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                            ),
+                            const Text('📍 Endereço de Entrega', style: TextStyle(fontWeight: FontWeight.w500)),
                             const SizedBox(height: 4),
-                            Text(
-                              _pedido!.enderecoEntrega!.enderecoCompleto,
-                              style: TextStyle(color: Colors.grey[700]),
-                            ),
+                            Text(_pedido!.enderecoEntrega!.enderecoCompleto, style: TextStyle(color: Colors.grey[700])),
                           ],
                         ],
                       ),
@@ -241,13 +195,7 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            '📦 Itens',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          const Text('📦 Itens', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 8),
                           ..._pedido!.itens.map(
                             (item) => Padding(
@@ -255,19 +203,10 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                               child: Row(
                                 children: [
                                   Expanded(flex: 3, child: Text(item.nome)),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Text(
-                                      '${item.quantidade}x',
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
+                                  Expanded(flex: 1, child: Text('${item.quantidade}x', textAlign: TextAlign.center)),
                                   Expanded(
                                     flex: 2,
-                                    child: Text(
-                                      numberFormat.format(item.subtotal),
-                                      textAlign: TextAlign.right,
-                                    ),
+                                    child: Text(numberFormat.format(item.subtotal), textAlign: TextAlign.right),
                                   ),
                                 ],
                               ),
@@ -277,20 +216,10 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Total',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              const Text('Total', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               Text(
                                 numberFormat.format(_pedido!.total),
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
                               ),
                             ],
                           ),
@@ -308,13 +237,7 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              '📝 Observações',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            const Text('📝 Observações', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 8),
                             Text(_pedido!.observacoes!),
                           ],
@@ -326,10 +249,7 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                   // Metadados
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(8)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -359,10 +279,7 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                           children: [
                             const Icon(Icons.source, size: 16),
                             const SizedBox(width: 8),
-                            Text(
-                              'Origem: ${_pedido!.origemLabel}',
-                              style: const TextStyle(fontSize: 12),
-                            ),
+                            Text('Origem: ${_pedido!.origemLabel}', style: const TextStyle(fontSize: 12)),
                           ],
                         ),
                         if (_pedido!.tempoEstimado != null) ...[
