@@ -31,12 +31,12 @@ class AuthService {
 
       final resultado = LoginResultado.fromJson(data);
       if (resultado.contas.isEmpty) {
-        throw Exception('Credenciais inválidas');
+        throw Exception('Credenciais inválidas: nenhuma conta encontrada para o e-mail informado');
       }
       return resultado;
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        throw Exception('Credenciais inválidas');
+        throw Exception('Credenciais inválidas: e-mail ou senha incorretos');
       }
       rethrow;
     }

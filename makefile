@@ -27,6 +27,7 @@ help: ## Mostra esta ajuda
 	@echo ""
 	@echo "$(YELLOW)Exemplos:$(NC)"
 	@echo "  make run-web       - Rodar no navegador"
+	@echo "  make run-web-ssh   - Rodar web server exposto na rede (SSH)"
 	@echo "  make build-apk     - Gerar APK para Android"
 	@echo "  make clean         - Limpar projeto"
 
@@ -41,6 +42,10 @@ run: ## Rodar em todas as plataformas (web + desktop + mobile)
 run-web: ## Rodar no navegador (Chrome)
 	@echo "$(BLUE)🌐 Rodando no Chrome...$(NC)"
 	$(FLUTTER) run -d chrome
+
+run-web-ssh: ## Rodar web server exposto na rede (acesso via SSH)
+	@echo "$(BLUE)🌐 Rodando web server em http://0.0.0.0:8080...$(NC)"
+	$(FLUTTER) run -d web-server --web-hostname 0.0.0.0 --web-port 8080
 
 run-linux: ## Rodar no Linux Desktop
 	@echo "$(BLUE)🐧 Rodando no Linux Desktop...$(NC)"
@@ -265,7 +270,7 @@ release: build-web build-apk build-linux ## Gerar todas as builds de release
 # ============================================================
 # PHONY (evita conflitos com arquivos de mesmo nome)
 # ============================================================
-.PHONY: help run run-web run-linux run-android run-ios run-profile run-release \
+.PHONY: help run run-web run-web-ssh run-linux run-android run-ios run-profile run-release \
         build build-web build-apk build-appbundle build-linux build-windows build-macos \
         clean clean-all deps deps-upgrade deps-outdated \
         analyze test test-coverage format \

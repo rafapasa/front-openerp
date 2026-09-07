@@ -1,0 +1,5 @@
+{
+    "workbench.externalBrowser": "chrome",
+    "dart.flutterShowWebServerDevice": "always",
+    "liveServer.settings.CustomBrowser": "chrome"
+}

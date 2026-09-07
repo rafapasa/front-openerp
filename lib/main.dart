@@ -19,65 +19,31 @@ void main() async {
 Widget buildApp() {
   return MultiProvider(
     providers: [
-        // Services
-        Provider<ApiService>(create: (_) => ApiService()),
-        Provider<AuthService>(
-          create: (context) => AuthService(context.read<ApiService>()),
-        ),
-        Provider<DashboardService>(
-          create: (context) => DashboardService(context.read<ApiService>()),
-        ),
-        Provider<PedidoService>(
-          create: (context) => PedidoService(context.read<ApiService>()),
-        ),
-        Provider<ClienteService>(
-          create: (context) => ClienteService(context.read<ApiService>()),
-        ),
-        Provider<ProdutoService>(
-          create: (context) => ProdutoService(context.read<ApiService>()),
-        ),
+      // Services
+      Provider<ApiService>(create: (_) => ApiService()),
+      Provider<AuthService>(create: (context) => AuthService(context.read<ApiService>())),
+      Provider<DashboardService>(create: (context) => DashboardService(context.read<ApiService>())),
+      Provider<PedidoService>(create: (context) => PedidoService(context.read<ApiService>())),
+      Provider<ClienteService>(create: (context) => ClienteService(context.read<ApiService>())),
+      Provider<ProdutoService>(create: (context) => ProdutoService(context.read<ApiService>())),
 
-        // Repositories
-        Provider<AuthRepository>(
-          create: (context) => AuthRepository(context.read<AuthService>()),
-        ),
-        Provider<DashboardRepository>(
-          create: (context) =>
-              DashboardRepository(context.read<DashboardService>()),
-        ),
-        Provider<PedidoRepository>(
-          create: (context) => PedidoRepository(context.read<PedidoService>()),
-        ),
-        Provider<ClienteRepository>(
-          create: (context) =>
-              ClienteRepository(context.read<ClienteService>()),
-        ),
-        Provider<ProdutoRepository>(
-          create: (context) =>
-              ProdutoRepository(context.read<ProdutoService>()),
-        ),
+      // Repositories
+      Provider<AuthRepository>(create: (context) => AuthRepository(context.read<AuthService>())),
+      Provider<DashboardRepository>(create: (context) => DashboardRepository(context.read<DashboardService>())),
+      Provider<PedidoRepository>(create: (context) => PedidoRepository(context.read<PedidoService>())),
+      Provider<ClienteRepository>(create: (context) => ClienteRepository(context.read<ClienteService>())),
+      Provider<ProdutoRepository>(create: (context) => ProdutoRepository(context.read<ProdutoService>())),
 
-        // Providers
-        ChangeNotifierProvider<AuthProvider>(
-          create: (context) => AuthProvider(context.read<AuthRepository>()),
-        ),
-        ChangeNotifierProvider<DashboardProvider>(
-          create: (context) =>
-              DashboardProvider(context.read<DashboardRepository>()),
-        ),
-        ChangeNotifierProvider<PedidoProvider>(
-          create: (context) => PedidoProvider(context.read<PedidoRepository>()),
-        ),
-        ChangeNotifierProvider<ClienteProvider>(
-          create: (context) =>
-              ClienteProvider(context.read<ClienteRepository>()),
-        ),
-        ChangeNotifierProvider<ProdutoProvider>(
-          create: (context) =>
-              ProdutoProvider(context.read<ProdutoRepository>()),
-        ),
-      ],
-      child: const MyApp(),
+      // Providers
+      ChangeNotifierProvider<AuthProvider>(create: (context) => AuthProvider(context.read<AuthRepository>())),
+      ChangeNotifierProvider<DashboardProvider>(
+        create: (context) => DashboardProvider(context.read<DashboardRepository>()),
+      ),
+      ChangeNotifierProvider<PedidoProvider>(create: (context) => PedidoProvider(context.read<PedidoRepository>())),
+      ChangeNotifierProvider<ClienteProvider>(create: (context) => ClienteProvider(context.read<ClienteRepository>())),
+      ChangeNotifierProvider<ProdutoProvider>(create: (context) => ProdutoProvider(context.read<ProdutoRepository>())),
+    ],
+    child: const MyApp(),
   );
 }
 
@@ -88,11 +54,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Front-OpenERP',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-        fontFamily: 'Roboto',
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true, fontFamily: 'Roboto'),
       debugShowCheckedModeBanner: false,
       home: const SplashPage(),
     );
