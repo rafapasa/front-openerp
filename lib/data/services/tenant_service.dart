@@ -1,4 +1,5 @@
 // lib/data/services/tenant_service.dart
+import 'package:dio/dio.dart';
 import 'package:front_openerp/data/models/tenant_model.dart';
 import 'package:front_openerp/data/services/api_service.dart';
 
@@ -10,16 +11,13 @@ class TenantService {
   Future<List<TenantModel>> listar() async {
     try {
       final response = await _api.get('/tenants');
-      if (response.isSuccess) {
-        List data;
-        if (response.data is Map && response.data['data'] != null) {
-          data = response.data['data'];
-        } else if (response.data is List) {
-          data = response.data;
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is List) {
+          return data.map((json) => TenantModel.fromJson(json)).toList();
         } else {
-          throw Exception('Formato de resposta inesperado');
+          throw Exception('Resposta inesperada: esperava uma lista');
         }
-        return data.map((json) => TenantModel.fromJson(json)).toList();
       }
       throw _extractErrorMessage(response);
     } catch (e) {
@@ -30,11 +28,13 @@ class TenantService {
   Future<TenantModel> obter(int id) async {
     try {
       final response = await _api.get('/tenants/$id');
-      if (response.isSuccess) {
-        final data = response.data is Map && response.data['data'] != null
-            ? response.data['data']
-            : response.data;
-        return TenantModel.fromJson(data);
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          return TenantModel.fromJson(data);
+        } else {
+          throw Exception('Resposta inesperada: esperava um mapa');
+        }
       }
       throw _extractErrorMessage(response);
     } catch (e) {
@@ -45,11 +45,13 @@ class TenantService {
   Future<TenantModel> criar(TenantModel tenant) async {
     try {
       final response = await _api.post('/tenants', data: tenant.toJson());
-      if (response.isSuccess) {
-        final data = response.data is Map && response.data['data'] != null
-            ? response.data['data']
-            : response.data;
-        return TenantModel.fromJson(data);
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          return TenantModel.fromJson(data);
+        } else {
+          throw Exception('Resposta inesperada: esperava um mapa');
+        }
       }
       throw _extractErrorMessage(response);
     } catch (e) {
@@ -63,11 +65,13 @@ class TenantService {
     }
     try {
       final response = await _api.put('/tenants/${tenant.id}', data: tenant.toJson());
-      if (response.isSuccess) {
-        final data = response.data is Map && response.data['data'] != null
-            ? response.data['data']
-            : response.data;
-        return TenantModel.fromJson(data);
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          return TenantModel.fromJson(data);
+        } else {
+          throw Exception('Resposta inesperada: esperava um mapa');
+        }
       }
       throw _extractErrorMessage(response);
     } catch (e) {
@@ -78,7 +82,7 @@ class TenantService {
   Future<void> excluir(int id) async {
     try {
       final response = await _api.delete('/tenants/$id');
-      if (!response.isSuccess) {
+      if (response.statusCode != 204 && response.statusCode != 200) {
         throw _extractErrorMessage(response);
       }
     } catch (e) {
@@ -86,7 +90,7 @@ class TenantService {
     }
   }
 
-  String _extractErrorMessage(ApiResponse response) {
+  String _extractErrorMessage(Response response) {
     try {
       final data = response.data;
       if (data is Map) {
