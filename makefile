@@ -8,6 +8,7 @@ PROJECT_NAME = front_openerp
 FLUTTER = flutter
 DART = dart
 PUB = flutter pub
+GIT = git
 
 # Cores para output
 GREEN = \033[0;32m
@@ -270,3 +271,28 @@ release: build-web build-apk build-linux ## Gerar todas as builds de release
         analyze test test-coverage format \
         dev watch gen gen-watch serve \
         setup env logs pub-cache release
+
+
+# ============================================================
+# 📦 GIT
+# ============================================================
+
+git-up: ## Add commit e push das alterações no git
+	@echo "$(YELLOW)🧹 git add...$(NC)"
+	$(GIT) add .
+	@echo "$(YELLOW)🧹 git commit...$(NC)"
+	$(GIT) commit -m "${MSG}"
+	@echo "$(YELLOW)🧹 git push...$(NC)"
+	$(GIT) push origin main
+	@echo "$(GREEN)✅ Alterações adicionadas ao git!$(NC)"
+
+# ============================================================
+# PHONY (evita conflitos com arquivos de mesmo nome)
+# ============================================================
+.PHONY: help run run-web run-web-ssh run-linux run-android run-ios run-profile run-release \
+        build build-web build-apk build-appbundle build-linux build-windows build-macos \
+        clean clean-all deps deps-upgrade deps-outdated \
+        analyze test test-coverage format \
+        dev watch gen gen-watch serve \
+        setup env logs pub-cache release \
+		git-up	

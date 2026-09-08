@@ -26,12 +26,9 @@ class PedidoService {
         'data_fim': ?dataFim,
       };
 
-      final response = await _apiService.get(
-        '/pedidos',
-        queryParameters: queryParams,
-      );
+      final response = await _apiService.get('/pedidos', queryParameters: queryParams);
 
-      final data = response.data['data'] as Map<String, dynamic>;
+      Map<String, dynamic> data = {for (var item in response.data) ...?item};
 
       return PaginatedResponse<PedidoModel>.fromJson(
         data,
@@ -57,10 +54,7 @@ class PedidoService {
   /// Atualiza status do pedido
   Future<PedidoModel> updateStatusPedido(int id, StatusPedido status) async {
     try {
-      final response = await _apiService.patch(
-        '/pedidos/$id/status',
-        data: {'status': status.toStringValue()},
-      );
+      final response = await _apiService.patch('/pedidos/$id/status', data: {'status': status.toStringValue()});
 
       final data = response.data['data'] as Map<String, dynamic>;
       return PedidoModel.fromJson(data);
@@ -70,11 +64,7 @@ class PedidoService {
   }
 
   /// Busca pedidos de um cliente
-  Future<PaginatedResponse<PedidoModel>> getPedidosByCliente(
-    int clienteId, {
-    int page = 1,
-    int limit = 20,
-  }) async {
+  Future<PaginatedResponse<PedidoModel>> getPedidosByCliente(int clienteId, {int page = 1, int limit = 20}) async {
     try {
       final response = await _apiService.get(
         '/clientes/$clienteId/pedidos',

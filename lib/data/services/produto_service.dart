@@ -24,12 +24,9 @@ class ProdutoService {
         'nome': ?nome,
       };
 
-      final response = await _apiService.get(
-        '/produtos',
-        queryParameters: queryParams,
-      );
+      final response = await _apiService.get('/produtos', queryParameters: queryParams);
 
-      final data = response.data['data'] as Map<String, dynamic>;
+      Map<String, dynamic> data = {for (var item in response.data) ...?item};
 
       return PaginatedResponse<ProdutoModel>.fromJson(
         data,

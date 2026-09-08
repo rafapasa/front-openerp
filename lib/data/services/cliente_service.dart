@@ -15,19 +15,11 @@ class ClienteService {
     String? telefone,
   }) async {
     try {
-      final queryParams = {
-        'page': page,
-        'limit': limit,
-        'nome': ?nome,
-        'telefone': ?telefone,
-      };
+      final queryParams = {'page': page, 'limit': limit, 'nome': ?nome, 'telefone': ?telefone};
 
-      final response = await _apiService.get(
-        '/clientes',
-        queryParameters: queryParams,
-      );
+      final response = await _apiService.get('/clientes', queryParameters: queryParams);
 
-      final data = response.data['data'] as Map<String, dynamic>;
+      Map<String, dynamic> data = {for (var item in response.data) ...?item};
 
       return PaginatedResponse<ClienteModel>.fromJson(
         data,
@@ -43,7 +35,7 @@ class ClienteService {
     try {
       final response = await _apiService.get('/clientes/$id');
 
-      final data = response.data['data'] as Map<String, dynamic>;
+      Map<String, dynamic> data = {for (var item in response.data) ...?item};
       return ClienteModel.fromJson(data);
     } catch (e) {
       rethrow;
@@ -56,9 +48,7 @@ class ClienteService {
       final response = await _apiService.get('/clientes/$clienteId/enderecos');
 
       final data = response.data['data'] as List;
-      return data
-          .map((e) => EnderecoModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      return data.map((e) => EnderecoModel.fromJson(e as Map<String, dynamic>)).toList();
     } catch (e) {
       rethrow;
     }

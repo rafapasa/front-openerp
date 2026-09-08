@@ -1,7 +1,7 @@
 // lib/presentation/pages/tenants/detalhe_tenant_page.dart
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/models/tenant_model.dart';
-import 'package:front_openerp/presentation/pages/tenants/form_tenant_page.dart'; // ← import adicionado
+import 'package:front_openerp/presentation/pages/tenants/form_tenant_page.dart';
 import 'package:front_openerp/presentation/providers/tenant_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -22,12 +22,15 @@ class DetalheTenantPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FormTenantPage(tenant: tenant), // ← agora reconhecido
+                  builder: (context) => FormTenantPage(tenant: tenant),
                 ),
               );
             },
           ),
-          IconButton(icon: const Icon(Icons.delete), onPressed: () => _confirmarExclusao(context)),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => _confirmarExclusao(context),
+          ),
         ],
       ),
       body: Padding(
@@ -40,8 +43,10 @@ class DetalheTenantPage extends StatelessWidget {
             _buildInfo('Telefone', tenant.telefone ?? 'Não informado'),
             _buildInfo('Endereço', tenant.endereco ?? 'Não informado'),
             _buildInfo('Status', tenant.ativo ? 'Ativo' : 'Inativo'),
-            if (tenant.createdAt != null) _buildInfo('Criado em', _formatDate(tenant.createdAt!)),
-            if (tenant.updatedAt != null) _buildInfo('Atualizado em', _formatDate(tenant.updatedAt!)),
+            if (tenant.createdAt != null)
+              _buildInfo('Criado em', _formatDate(tenant.createdAt!)),
+            if (tenant.updatedAt != null)
+              _buildInfo('Atualizado em', _formatDate(tenant.updatedAt!)),
           ],
         ),
       ),
@@ -56,7 +61,11 @@ class DetalheTenantPage extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: Colors.grey,
+            ),
           ),
           const SizedBox(height: 4),
           Text(value, style: const TextStyle(fontSize: 16)),
@@ -76,14 +85,16 @@ class DetalheTenantPage extends StatelessWidget {
         title: const Text('Confirmar exclusão'),
         content: Text('Deseja realmente excluir a empresa "${tenant.nome}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
               final provider = context.read<TenantProvider>();
               await provider.excluirTenant(tenant.id!);
               if (provider.error == null && context.mounted) {
-                // ← adicionado context.mounted
                 Navigator.pop(context, true);
               }
             },
