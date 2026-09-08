@@ -261,7 +261,7 @@ Widget _buildStatusChart(DashboardProvider provider) {
 
 Widget _buildRevenueCard(DashboardProvider provider) {
   final numberFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-
+  final pct = provider.faturamentoMes > 0 ? (provider.faturamentoHoje / provider.faturamentoMes) * 100 : 0;
   return Card(
     child: Padding(
       padding: const EdgeInsets.all(16),
@@ -298,7 +298,7 @@ Widget _buildRevenueCard(DashboardProvider provider) {
           ),
           const SizedBox(height: 4),
           Text(
-            '${((provider.faturamentoHoje / provider.faturamentoMes) * 100).toStringAsFixed(1)}% do faturamento mensal',
+            '${pct.toStringAsFixed(1)}% do faturamento mensal',
             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
         ],

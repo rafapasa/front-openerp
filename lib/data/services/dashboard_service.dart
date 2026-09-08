@@ -12,7 +12,9 @@ class DashboardService {
     try {
       final response = await _apiService.get('/dashboard');
 
-      final data = response.data['data'] as Map<String, dynamic>;
+      // final data = response.data['data'] as Map<String, dynamic>;
+      Map<String, dynamic> data = {for (var item in response.data) ...?item};
+
       return DashboardModel.fromJson(data);
     } catch (e) {
       rethrow;

@@ -262,12 +262,6 @@ release: build-web build-apk build-linux ## Gerar todas as builds de release
 	@echo "  Linux: build/linux/x64/release/bundle/"
 
 # ============================================================
-# 🎯 DEFAULT
-# ============================================================
-
-.DEFAULT_GOAL := help
-
-# ============================================================
 # PHONY (evita conflitos com arquivos de mesmo nome)
 # ============================================================
 .PHONY: help run run-web run-web-ssh run-linux run-android run-ios run-profile run-release \

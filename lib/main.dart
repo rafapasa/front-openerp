@@ -1,9 +1,12 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/repositories/repositories.dart';
+import 'package:front_openerp/data/repositories/tenant_repository.dart';
 import 'package:front_openerp/data/services/services.dart';
+import 'package:front_openerp/data/services/tenant_service.dart';
 import 'package:front_openerp/presentation/pages/pages.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
+import 'package:front_openerp/presentation/providers/tenant_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -26,6 +29,7 @@ Widget buildApp() {
       Provider<PedidoService>(create: (context) => PedidoService(context.read<ApiService>())),
       Provider<ClienteService>(create: (context) => ClienteService(context.read<ApiService>())),
       Provider<ProdutoService>(create: (context) => ProdutoService(context.read<ApiService>())),
+      Provider<TenantService>(create: (context) => TenantService(context.read<ApiService>())),
 
       // Repositories
       Provider<AuthRepository>(create: (context) => AuthRepository(context.read<AuthService>())),
@@ -33,6 +37,7 @@ Widget buildApp() {
       Provider<PedidoRepository>(create: (context) => PedidoRepository(context.read<PedidoService>())),
       Provider<ClienteRepository>(create: (context) => ClienteRepository(context.read<ClienteService>())),
       Provider<ProdutoRepository>(create: (context) => ProdutoRepository(context.read<ProdutoService>())),
+      Provider<TenantRepository>(create: (context) => TenantRepository(context.read<TenantService>())),
 
       // Providers
       ChangeNotifierProvider<AuthProvider>(create: (context) => AuthProvider(context.read<AuthRepository>())),
@@ -42,6 +47,7 @@ Widget buildApp() {
       ChangeNotifierProvider<PedidoProvider>(create: (context) => PedidoProvider(context.read<PedidoRepository>())),
       ChangeNotifierProvider<ClienteProvider>(create: (context) => ClienteProvider(context.read<ClienteRepository>())),
       ChangeNotifierProvider<ProdutoProvider>(create: (context) => ProdutoProvider(context.read<ProdutoRepository>())),
+      ChangeNotifierProvider<TenantProvider>(create: (context) => TenantProvider(context.read<TenantRepository>())),
     ],
     child: const MyApp(),
   );

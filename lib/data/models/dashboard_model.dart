@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class DashboardModel {
   final int totalPedidosHoje;
   final int totalPedidosSemana;
@@ -18,6 +20,9 @@ class DashboardModel {
   });
 
   factory DashboardModel.fromJson(Map<String, dynamic> json) {
+    if (kDebugMode) {
+      print('DashboardModel.fromJson: $json');
+    }
     return DashboardModel(
       totalPedidosHoje: json['total_pedidos_hoje'] ?? 0,
       totalPedidosSemana: json['total_pedidos_semana'] ?? 0,
