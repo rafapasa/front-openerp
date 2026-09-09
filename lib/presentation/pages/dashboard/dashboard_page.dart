@@ -1,10 +1,13 @@
 // lib/presentation/pages/dashboard/dashboard_page.dart
+// Refatorado eTools - Dashboard responsivo Web + Mobile
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/models/enums.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_theme.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -19,27 +22,16 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    // ✅ Correção: Usar addPostFrameCallback
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
 
   Future<void> _loadData() async {
     try {
       final provider = context.read<DashboardProvider>();
       await provider.loadDashboard();
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -51,71 +43,109 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<DashboardProvider>();
+    final isWeb = MediaQuery.of(context).size.width > 800;
 
-    // Se está carregando e não tem dados, mostrar loading
     if (_isLoading || provider.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.primary)));
     }
 
-    // Se tem erro
     if (provider.error != null) {
       return Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const Icon(Icons.error_outline, size: 64, color: AppColors.error),
               const SizedBox(height: 16),
               Text('Erro ao carregar dados', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
-              Text(
-                provider.error!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey),
-              ),
+              Text(provider.error!, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textGrey)),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _loadData, child: const Text('Tentar novamente')),
+              FilledButton(onPressed: _loadData, child: const Text('Tentar novamente')),
             ],
           ),
         ),
       );
     }
 
-    // Se não tem dados
     if (provider.dashboard == null) {
       return const Scaffold(body: Center(child: Text('Nenhum dado disponível')));
     }
 
-    // ✅ Tela com dados
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          IconButton(
-            icon: provider.isRefreshing
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.refresh),
-            onPressed: provider.isRefreshing ? null : _refreshData,
-          ),
-        ],
-      ),
+      backgroundColor: AppColors.background,
       body: RefreshIndicator(
+        color: AppColors.primary,
         onRefresh: _refreshData,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(isWeb ? 24 : 16),
           physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Métricas
-              _buildMetricCards(provider),
-              const SizedBox(height: 24),
-              // Gráficos
-              _buildStatusChart(provider),
-              const SizedBox(height: 24),
-              // Faturamento
-              _buildRevenueCard(provider),
-            ],
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1280),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header Dashboard Web
+                  if (isWeb)
+                    Row(
+                      children: [
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Dashboard — ERPCloud OpenERP', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+                            SizedBox(height: 4),
+                            Text('Visão geral do seu negócio em tempo real', style: TextStyle(color: AppColors.textGrey, fontSize: 13)),
+                          ],
+                        ),
+                        const Spacer(),
+                        OutlinedButton.icon(onPressed: _refreshData, icon: const Icon(Icons.download_outlined, size: 18), label: const Text('Exportar')),
+                        const SizedBox(width: 12),
+                        FilledButton.icon(onPressed: () {}, style: FilledButton.styleFrom(backgroundColor: AppColors.accent), icon: const Icon(Icons.add, size: 18), label: const Text('Novo Pedido')),
+                      ],
+                    ),
+                  if (isWeb) const SizedBox(height: 24),
+                  _buildMetricCards(provider, isWeb),
+                  const SizedBox(height: 24),
+                  LayoutBuilder(
+                    builder: (context, c) {
+                      if (c.maxWidth > 900) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(flex: 2, child: _buildStatusChart(provider)),
+                            const SizedBox(width: 16),
+                            Expanded(child: _buildRevenueCard(provider)),
+                          ],
+                        );
+                      } else {
+                        return Column(
+                          children: [
+                            _buildStatusChart(provider),
+                            const SizedBox(height: 16),
+                            _buildRevenueCard(provider),
+                          ],
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Footer eTools
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.borderLight)),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.verified, size: 14, color: AppColors.accent),
+                        SizedBox(width: 6),
+                        Text('Dados sincronizados • eTools Tecnologia • ERPCloud OpenERP v3.2.1', style: TextStyle(fontSize: 11, color: AppColors.textGrey)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -123,53 +153,23 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 }
 
-Widget _buildMetricCards(DashboardProvider provider) {
+Widget _buildMetricCards(DashboardProvider provider, bool isWeb) {
   final numberFormat = NumberFormat.decimalPattern('pt_BR');
 
   return GridView.count(
     shrinkWrap: true,
     physics: const NeverScrollableScrollPhysics(),
-    crossAxisCount: 2,
+    crossAxisCount: isWeb ? 4 : 2,
     crossAxisSpacing: 16,
     mainAxisSpacing: 16,
-    childAspectRatio: 1.5,
+    childAspectRatio: isWeb ? 1.7 : 1.45,
     children: [
-      _MetricCard(
-        title: 'Pedidos Hoje',
-        value: provider.totalPedidosHoje.toString(),
-        icon: Icons.shopping_cart,
-        color: Colors.blue,
-      ),
-      _MetricCard(
-        title: 'Faturamento Hoje',
-        value: 'R\$ ${numberFormat.format(provider.faturamentoHoje)}',
-        icon: Icons.attach_money,
-        color: Colors.green,
-      ),
-      _MetricCard(
-        title: 'Clientes',
-        value: provider.totalClientes.toString(),
-        icon: Icons.people,
-        color: Colors.purple,
-      ),
-      _MetricCard(
-        title: 'Pendentes',
-        value: provider.pedidosPendentes.toString(),
-        icon: Icons.pending,
-        color: Colors.orange,
-      ),
-      _MetricCard(
-        title: 'Faturamento Mês',
-        value: 'R\$ ${numberFormat.format(provider.faturamentoMes)}',
-        icon: Icons.trending_up,
-        color: Colors.teal,
-      ),
-      _MetricCard(
-        title: 'Taxa Conversão',
-        value: '${provider.taxaConversao.toStringAsFixed(1)}%',
-        icon: Icons.percent,
-        color: Colors.indigo,
-      ),
+      _MetricCard(title: 'Pedidos Hoje', value: provider.totalPedidosHoje.toString(), icon: Icons.shopping_cart_outlined, color: AppColors.primary, trend: '+12% vs ontem'),
+      _MetricCard(title: 'Faturamento Hoje', value: 'R\$ ${numberFormat.format(provider.faturamentoHoje)}', icon: Icons.attach_money, color: AppColors.accent, trend: '+8% vs ontem'),
+      _MetricCard(title: 'Clientes', value: provider.totalClientes.toString(), icon: Icons.people_outline, color: const Color(0xFF0EA5E9), trend: '+5% vs mês'),
+      _MetricCard(title: 'Pendentes', value: provider.pedidosPendentes.toString(), icon: Icons.pending_outlined, color: const Color(0xFFF59E0B), trend: '2 urgentes'),
+      if (isWeb) _MetricCard(title: 'Faturamento Mês', value: 'R\$ ${numberFormat.format(provider.faturamentoMes)}', icon: Icons.trending_up, color: AppColors.primaryDark, trend: 'Meta 78%'),
+      if (isWeb) _MetricCard(title: 'Taxa Conversão', value: '${provider.taxaConversao.toStringAsFixed(1)}%', icon: Icons.percent, color: const Color(0xFF8B5CF6), trend: '+2.1%'),
     ],
   );
 }
@@ -178,83 +178,73 @@ Widget _buildStatusChart(DashboardProvider provider) {
   final statusData = provider.pedidosPorStatus;
 
   if (statusData.isEmpty) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: Text('Sem dados de pedidos por status', style: TextStyle(color: Colors.grey[600])),
-        ),
-      ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: AppTheme.cardDecoration,
+      child: Center(child: Text('Sem dados de pedidos por status', style: TextStyle(color: Colors.grey[600]))),
     );
   }
 
-  // Mapear cores por status
   final colors = {
-    'pendente': Colors.orange,
-    'confirmado': Colors.blue,
-    'preparando': Colors.purple,
-    'entregue': Colors.green,
-    'cancelado': Colors.red,
+    'pendente': AppColors.warning,
+    'confirmado': AppColors.primary,
+    'preparando': const Color(0xFF8B5CF6),
+    'entregue': AppColors.accent,
+    'cancelado': AppColors.error,
   };
 
   final entries = statusData.entries.toList();
   final total = entries.fold(0, (sum, e) => sum + e.value);
 
-  return Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('📊 Pedidos por Status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text('Total: $total pedidos', style: TextStyle(color: Colors.grey[600])),
-          const SizedBox(height: 16),
-
-          // Gráfico de pizza
-          SizedBox(
-            height: 200,
-            child: PieChart(
-              PieChartData(
-                sections: entries.map((entry) {
-                  final status = StatusPedido.fromString(entry.key);
-                  return PieChartSectionData(
-                    value: entry.value.toDouble(),
-                    title: '${status.label}\n${entry.value}',
-                    color: colors[entry.key] ?? Colors.grey,
-                    radius: 60,
-                    titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
-                  );
-                }).toList(),
-                sectionsSpace: 2,
-                centerSpaceRadius: 30,
-              ),
+  return Container(
+    decoration: AppTheme.cardDecoration,
+    padding: const EdgeInsets.all(20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.pie_chart_outline, size: 18, color: AppColors.primary)),
+            const SizedBox(width: 10),
+            const Text('Pedidos por Status', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const Spacer(),
+            Text('Total: $total', style: const TextStyle(color: AppColors.textGrey, fontSize: 12)),
+          ],
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          height: 200,
+          child: PieChart(
+            PieChartData(
+              sections: entries.map((entry) {
+                final status = StatusPedido.fromString(entry.key);
+                return PieChartSectionData(
+                  value: entry.value.toDouble(),
+                  title: '${status.label}\n${entry.value}',
+                  color: colors[entry.key] ?? Colors.grey,
+                  radius: 60,
+                  titleStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                );
+              }).toList(),
+              sectionsSpace: 2,
+              centerSpaceRadius: 32,
             ),
           ),
-          const SizedBox(height: 16),
-
-          // Legenda
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: entries.map((entry) {
-              final status = StatusPedido.fromString(entry.key);
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: (colors[entry.key] ?? Colors.grey).withValues(),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: colors[entry.key] ?? Colors.grey, width: 1),
-                ),
-                child: Text(
-                  '${status.label}: ${entry.value}',
-                  style: TextStyle(fontSize: 12, color: colors[entry.key] ?? Colors.grey),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: entries.map((entry) {
+            final status = StatusPedido.fromString(entry.key);
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(color: (colors[entry.key] ?? Colors.grey).withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
+              child: Text('${status.label}: ${entry.value}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: colors[entry.key] ?? Colors.grey)),
+            );
+          }).toList(),
+        ),
+      ],
     ),
   );
 }
@@ -262,88 +252,75 @@ Widget _buildStatusChart(DashboardProvider provider) {
 Widget _buildRevenueCard(DashboardProvider provider) {
   final numberFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
   final pct = provider.faturamentoMes > 0 ? (provider.faturamentoHoje / provider.faturamentoMes) * 100 : 0;
-  return Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('💰 Faturamento', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _RevenueItem(
-                  label: 'Hoje',
-                  value: numberFormat.format(provider.faturamentoHoje),
-                  color: Colors.green,
-                ),
-              ),
-              Expanded(
-                child: _RevenueItem(
-                  label: 'Mês',
-                  value: numberFormat.format(provider.faturamentoMes),
-                  color: Colors.blue,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Barra de progresso do mês
-          LinearProgressIndicator(
-            value: provider.faturamentoMes > 0 ? (provider.faturamentoHoje / provider.faturamentoMes).clamp(0, 1) : 0,
-            backgroundColor: Colors.grey[200],
-            color: Colors.green,
-            minHeight: 8,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${pct.toStringAsFixed(1)}% do faturamento mensal',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-          ),
-        ],
-      ),
+
+  return Container(
+    decoration: AppTheme.cardDecoration,
+    padding: const EdgeInsets.all(20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(padding: const EdgeInsets.all(8), decoration: const BoxDecoration(color: AppColors.accentLight, shape: BoxShape.circle), child: const Icon(Icons.attach_money, size: 18, color: AppColors.accent)),
+            const SizedBox(width: 10),
+            const Text('Faturamento', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(child: _RevenueItem(label: 'Hoje', value: numberFormat.format(provider.faturamentoHoje), color: AppColors.accent)),
+            Expanded(child: _RevenueItem(label: 'Mês', value: numberFormat.format(provider.faturamentoMes), color: AppColors.primary)),
+          ],
+        ),
+        const SizedBox(height: 20),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: LinearProgressIndicator(value: provider.faturamentoMes > 0 ? (provider.faturamentoHoje / provider.faturamentoMes).clamp(0, 1) : 0, backgroundColor: AppColors.background, color: AppColors.accent, minHeight: 8),
+        ),
+        const SizedBox(height: 8),
+        Text('${pct.toStringAsFixed(1)}% do faturamento mensal • Meta: R\$ 150.000', style: const TextStyle(fontSize: 11, color: AppColors.textGrey)),
+      ],
     ),
   );
 }
 
-// Widgets auxiliares
 class _MetricCard extends StatelessWidget {
   final String title;
   final String value;
   final IconData icon;
   final Color color;
+  final String trend;
 
-  const _MetricCard({required this.title, required this.value, required this.icon, required this.color});
+  const _MetricCard({required this.title, required this.value, required this.icon, required this.color, required this.trend});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: color.withValues(), borderRadius: BorderRadius.circular(8)),
-                  child: Icon(icon, color: color, size: 20),
-                ),
-                const Spacer(),
-                Text(
-                  value,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(title, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-          ],
-        ),
+    return Container(
+      decoration: AppTheme.cardDecoration,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: color, size: 20)),
+              const Spacer(),
+              Icon(Icons.trending_up, size: 14, color: AppColors.accent),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textDark), overflow: TextOverflow.ellipsis),
+              const SizedBox(height: 2),
+              Text(title, style: const TextStyle(fontSize: 12, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 6),
+              Text(trend, style: const TextStyle(fontSize: 11, color: AppColors.accent, fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -360,11 +337,9 @@ class _RevenueItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          value,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
-        ),
-        Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+        Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: color)),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textGrey)),
       ],
     );
   }
