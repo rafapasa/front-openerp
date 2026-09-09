@@ -5,7 +5,6 @@ import 'package:front_openerp/data/models/tenant_model.dart';
 import 'package:front_openerp/presentation/pages/tenants/form_tenant_page.dart';
 import 'package:front_openerp/presentation/providers/tenant_provider.dart';
 import 'package:provider/provider.dart';
-
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 
@@ -58,20 +57,8 @@ class DetalheTenantPage extends StatelessWidget {
               }
             },
             itemBuilder: (_) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: Row(children: [Icon(Icons.edit_outlined, size: 18), SizedBox(width: 8), Text('Editar')]),
-              ),
-              const PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Excluir', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
+              const PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit_outlined, size: 18), SizedBox(width: 8), Text('Editar')])),
+              const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete_outline, size: 18, color: Colors.red), SizedBox(width: 8), Text('Excluir', style: TextStyle(color: Colors.red))])),
             ],
           ),
         ],
@@ -93,12 +80,7 @@ class DetalheTenantPage extends StatelessWidget {
                         width: 72,
                         height: 72,
                         decoration: AppTheme.avatarDecoration(_getAvatarColor(tenant.nome)),
-                        child: Center(
-                          child: Text(
-                            _getInitials(tenant.nome),
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 26),
-                          ),
-                        ),
+                        child: Center(child: Text(_getInitials(tenant.nome), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 26))),
                       ),
                       const SizedBox(width: 20),
                       Expanded(
@@ -107,54 +89,27 @@ class DetalheTenantPage extends StatelessWidget {
                           children: [
                             Text(tenant.nome, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
                             const SizedBox(height: 4),
-                            Text(
-                              'CNPJ: ${_formatCnpj(tenant.cnpj)}',
-                              style: const TextStyle(color: AppColors.textGrey, fontSize: 13),
-                            ),
+                            Text('CNPJ: ${_formatCnpj(tenant.cnpj)}', style: const TextStyle(color: AppColors.textGrey, fontSize: 13)),
                             const SizedBox(height: 10),
                             Row(
                               children: [
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color: tenant.ativo ? AppColors.successBg : Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
+                                  decoration: BoxDecoration(color: tenant.ativo ? AppColors.successBg : Colors.grey[200], borderRadius: BorderRadius.circular(20)),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        tenant.ativo ? Icons.verified : Icons.block,
-                                        size: 14,
-                                        color: tenant.ativo ? AppColors.success : Colors.grey,
-                                      ),
+                                      Icon(tenant.ativo ? Icons.verified : Icons.block, size: 14, color: tenant.ativo ? AppColors.success : Colors.grey),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        tenant.ativo ? 'Ativo' : 'Inativo',
-                                        style: TextStyle(
-                                          color: tenant.ativo ? AppColors.success : Colors.grey[700],
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 12,
-                                        ),
-                                      ),
+                                      Text(tenant.ativo ? 'Ativo' : 'Inativo', style: TextStyle(color: tenant.ativo ? AppColors.success : Colors.grey[700], fontWeight: FontWeight.w700, fontSize: 12)),
                                     ],
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryLight,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: const Text(
-                                    'Premium',
-                                    style: TextStyle(
-                                      color: AppColors.primary,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
+                                  decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(20)),
+                                  child: const Text('Premium', style: TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700)),
                                 ),
                               ],
                             ),
@@ -176,97 +131,45 @@ class DetalheTenantPage extends StatelessWidget {
                           Expanded(
                             child: Column(
                               children: [
-                                _buildSection(
-                                  title: 'Contato',
-                                  icon: Icons.call_outlined,
-                                  iconColor: AppColors.primary,
-                                  children: [
-                                    _buildRowInfo(Icons.phone_outlined, 'Telefone', _formatTelefone(tenant.telefone)),
-                                    _buildRowInfo(
-                                      Icons.email_outlined,
-                                      'E-mail',
-                                      tenant.email ?? 'Não informado',
-                                      isEmail: true,
-                                    ),
-                                  ],
-                                ),
+                                _buildSection(title: 'Contato', icon: Icons.call_outlined, iconColor: AppColors.primary, children: [
+                                  _buildRowInfo(Icons.phone_outlined, 'Telefone', _formatTelefone(tenant.telefone)),
+                                  _buildRowInfo(Icons.email_outlined, 'E-mail', tenant.email ?? 'Não informado', isEmail: true),
+                                ]),
                                 const SizedBox(height: 16),
-                                _buildSection(
-                                  title: 'Endereço',
-                                  icon: Icons.location_on_outlined,
-                                  iconColor: const Color(0xFFFF8A5B),
-                                  children: [
-                                    _buildRowInfo(Icons.home_outlined, 'Endereço', tenant.endereco ?? 'Não informado'),
-                                  ],
-                                ),
+                                _buildSection(title: 'Endereço', icon: Icons.location_on_outlined, iconColor: const Color(0xFFFF8A5B), children: [
+                                  _buildRowInfo(Icons.home_outlined, 'Endereço', tenant.endereco ?? 'Não informado'),
+                                ]),
                               ],
                             ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
-                            child: _buildSection(
-                              title: 'Informações Gerais',
-                              icon: Icons.info_outline,
-                              iconColor: AppColors.accent,
-                              children: [
-                                if (tenant.createdAt != null)
-                                  _buildRowInfo(
-                                    Icons.calendar_today_outlined,
-                                    'Criado em',
-                                    _formatDate(tenant.createdAt!),
-                                  ),
-                                if (tenant.updatedAt != null)
-                                  _buildRowInfo(Icons.update, 'Atualizado em', _formatDate(tenant.updatedAt!)),
-                                _buildRowInfo(Icons.tag, 'ID', tenant.id?.toString() ?? '-'),
-                                _buildRowInfo(Icons.business, 'Plano', 'Premium - ERPCloud'),
-                              ],
-                            ),
+                            child: _buildSection(title: 'Informações Gerais', icon: Icons.info_outline, iconColor: AppColors.accent, children: [
+                              if (tenant.createdAt != null) _buildRowInfo(Icons.calendar_today_outlined, 'Criado em', _formatDate(tenant.createdAt!)),
+                              if (tenant.updatedAt != null) _buildRowInfo(Icons.update, 'Atualizado em', _formatDate(tenant.updatedAt!)),
+                              _buildRowInfo(Icons.tag, 'ID', tenant.id?.toString() ?? '-'),
+                              _buildRowInfo(Icons.business, 'Plano', 'Premium - ERPCloud'),
+                            ]),
                           ),
                         ],
                       );
                     } else {
                       return Column(
                         children: [
-                          _buildSection(
-                            title: 'Contato',
-                            icon: Icons.call_outlined,
-                            iconColor: AppColors.primary,
-                            children: [
-                              _buildRowInfo(Icons.phone_outlined, 'Telefone', _formatTelefone(tenant.telefone)),
-                              _buildRowInfo(
-                                Icons.email_outlined,
-                                'E-mail',
-                                tenant.email ?? 'Não informado',
-                                isEmail: true,
-                              ),
-                            ],
-                          ),
+                          _buildSection(title: 'Contato', icon: Icons.call_outlined, iconColor: AppColors.primary, children: [
+                            _buildRowInfo(Icons.phone_outlined, 'Telefone', _formatTelefone(tenant.telefone)),
+                            _buildRowInfo(Icons.email_outlined, 'E-mail', tenant.email ?? 'Não informado', isEmail: true),
+                          ]),
                           const SizedBox(height: 16),
-                          _buildSection(
-                            title: 'Endereço',
-                            icon: Icons.location_on_outlined,
-                            iconColor: const Color(0xFFFF8A5B),
-                            children: [
-                              _buildRowInfo(Icons.home_outlined, 'Endereço', tenant.endereco ?? 'Não informado'),
-                            ],
-                          ),
+                          _buildSection(title: 'Endereço', icon: Icons.location_on_outlined, iconColor: const Color(0xFFFF8A5B), children: [
+                            _buildRowInfo(Icons.home_outlined, 'Endereço', tenant.endereco ?? 'Não informado'),
+                          ]),
                           const SizedBox(height: 16),
-                          _buildSection(
-                            title: 'Informações Gerais',
-                            icon: Icons.info_outline,
-                            iconColor: AppColors.accent,
-                            children: [
-                              if (tenant.createdAt != null)
-                                _buildRowInfo(
-                                  Icons.calendar_today_outlined,
-                                  'Criado em',
-                                  _formatDate(tenant.createdAt!),
-                                ),
-                              if (tenant.updatedAt != null)
-                                _buildRowInfo(Icons.update, 'Atualizado em', _formatDate(tenant.updatedAt!)),
-                              _buildRowInfo(Icons.tag, 'ID', tenant.id?.toString() ?? '-'),
-                            ],
-                          ),
+                          _buildSection(title: 'Informações Gerais', icon: Icons.info_outline, iconColor: AppColors.accent, children: [
+                            if (tenant.createdAt != null) _buildRowInfo(Icons.calendar_today_outlined, 'Criado em', _formatDate(tenant.createdAt!)),
+                            if (tenant.updatedAt != null) _buildRowInfo(Icons.update, 'Atualizado em', _formatDate(tenant.updatedAt!)),
+                            _buildRowInfo(Icons.tag, 'ID', tenant.id?.toString() ?? '-'),
+                          ]),
                         ],
                       );
                     }
@@ -276,25 +179,13 @@ class DetalheTenantPage extends StatelessWidget {
                 // Rodapé eTools
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.borderLight),
-                  ),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.borderLight)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset(
-                        'images/Icone_azul_500x500.png',
-                        width: 18,
-                        height: 18,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.bolt, size: 16, color: AppColors.primary),
-                      ),
+                      Image.asset('assets/Icone_azul_500x500.png', width: 18, height: 18, errorBuilder: (_, __, ___) => const Icon(Icons.bolt, size: 16, color: AppColors.primary)),
                       const SizedBox(width: 6),
-                      const Text(
-                        'Gerenciado por eTools Tecnologia • ERPCloud OpenERP',
-                        style: TextStyle(fontSize: 11, color: AppColors.textGrey),
-                      ),
+                      const Text('Gerenciado por eTools Tecnologia • ERPCloud OpenERP', style: TextStyle(fontSize: 11, color: AppColors.textGrey)),
                     ],
                   ),
                 ),
@@ -308,13 +199,8 @@ class DetalheTenantPage extends StatelessWidget {
           : Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: FilledButton.icon(
-                onPressed: () =>
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => FormTenantPage(tenant: tenant))),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FormTenantPage(tenant: tenant))),
+                style: FilledButton.styleFrom(backgroundColor: AppColors.primary, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                 icon: const Icon(Icons.edit),
                 label: const Text('Editar Empresa', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
               ),
@@ -322,12 +208,7 @@ class DetalheTenantPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSection({
-    required String title,
-    required IconData icon,
-    required Color iconColor,
-    required List<Widget> children,
-  }) {
+  Widget _buildSection({required String title, required IconData icon, required Color iconColor, required List<Widget> children}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -337,11 +218,7 @@ class DetalheTenantPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: iconColor.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
-                child: Icon(icon, size: 20, color: iconColor),
-              ),
+              Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: iconColor.withOpacity(0.12), borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: iconColor)),
               const SizedBox(width: 10),
               Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
             ],
@@ -361,30 +238,14 @@ class DetalheTenantPage extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: AppColors.textGrey),
           const SizedBox(width: 10),
-          SizedBox(
-            width: 110,
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black54),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: isEmail ? AppColors.primary : Colors.black87,
-              ),
-            ),
-          ),
+          SizedBox(width: 110, child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black54))),
+          Expanded(child: Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: isEmail ? AppColors.primary : Colors.black87))),
         ],
       ),
     );
   }
 
-  String _formatDate(DateTime date) =>
-      '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  String _formatDate(DateTime date) => '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 
   void _confirmarExclusao(BuildContext context) {
     showDialog(
