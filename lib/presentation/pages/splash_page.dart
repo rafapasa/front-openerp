@@ -74,7 +74,7 @@ class _SplashPageState extends State<SplashPage> {
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -83,7 +83,7 @@ class _SplashPageState extends State<SplashPage> {
                 padding: const EdgeInsets.all(16),
                 child: Image.asset(
                   'assets/Icone_azul_500x500.png',
-                  errorBuilder: (_, __, ___) => const Icon(Icons.bolt, size: 60, color: AppColors.primary),
+                  errorBuilder: (_, _, _) => const Icon(Icons.bolt, size: 60, color: AppColors.primary),
                 ),
               ),
               const SizedBox(height: 28),
@@ -111,7 +111,7 @@ class _SplashPageState extends State<SplashPage> {
                 child: CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
               ),
               const SizedBox(height: 16),
-              Text('v3.2.1 • eTools Tecnologia', style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.5))),
+              Text('v3.2.1 • eTools Tecnologia', style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.5))),
             ],
           ),
         ),

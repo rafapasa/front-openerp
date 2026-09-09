@@ -10,6 +10,8 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  errors:
+    use_null_aware_elements: ignore
   exclude:
     - build/**
     - android/**

@@ -1,31 +1,30 @@
+import 'package:front_openerp/core/helpers/json_helper.dart';
+
 import 'cliente_model.dart';
 import 'endereco_model.dart';
-import 'enums.dart'; // Importar os enums
+import 'enums.dart';
 
-// Item do pedido (sub-modelo)
 class ItemPedidoModel {
+  final int? produtoId;
   final String nome;
   final int quantidade;
   final double preco;
   final String? observacao;
 
-  ItemPedidoModel({
-    required this.nome,
-    required this.quantidade,
-    required this.preco,
-    this.observacao,
-  });
+  ItemPedidoModel({this.produtoId, required this.nome, required this.quantidade, required this.preco, this.observacao});
 
   factory ItemPedidoModel.fromJson(Map<String, dynamic> json) {
     return ItemPedidoModel(
-      nome: json['nome'] ?? '',
-      quantidade: json['quantidade'] ?? 0,
-      preco: (json['preco'] ?? 0).toDouble(),
-      observacao: json['observacao'],
+      produtoId: json['produto_id'] != null ? JsonHelper.toInt(json['produto_id']) : null,
+      nome: JsonHelper.toStr(json['nome']),
+      quantidade: JsonHelper.toInt(json['quantidade']),
+      preco: JsonHelper.toDouble(json['preco']),
+      observacao: json['observacao'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() => {
+    'produto_id': produtoId,
     'nome': nome,
     'quantidade': quantidade,
     'preco': preco,
@@ -35,7 +34,6 @@ class ItemPedidoModel {
   double get subtotal => quantidade * preco;
 }
 
-// Modelo principal do pedido
 class PedidoModel {
   final int id;
   final int? tenantId;
@@ -46,10 +44,10 @@ class PedidoModel {
   final EnderecoModel? enderecoEntrega;
   final List<ItemPedidoModel> itens;
   final double total;
-  final StatusPedido status; // AGORA DEFINIDO!
+  final StatusPedido status;
   final String? observacoes;
   final int? tempoEstimado;
-  final OrigemPedido origem; // TAMBÉM ADICIONEI
+  final OrigemPedido origem;
   final DateTime createdAt;
   final DateTime updatedAt;
   final ClienteModel? cliente;
@@ -75,28 +73,24 @@ class PedidoModel {
 
   factory PedidoModel.fromJson(Map<String, dynamic> json) {
     return PedidoModel(
-      id: json['id'],
-      tenantId: json['tenant_id'],
-      clienteId: json['cliente_id'],
-      clienteNome: json['cliente_nome'] ?? '',
-      clienteTelefone: json['cliente_telefone'] ?? '',
-      enderecoEntregaId: json['endereco_entrega_id'],
+      id: JsonHelper.toInt(json['id']),
+      tenantId: json['tenant_id'] != null ? JsonHelper.toInt(json['tenant_id']) : null,
+      clienteId: json['cliente_id'] != null ? JsonHelper.toInt(json['cliente_id']) : null,
+      clienteNome: JsonHelper.toStr(json['cliente_nome']),
+      clienteTelefone: JsonHelper.toStr(json['cliente_telefone']),
+      enderecoEntregaId: json['endereco_entrega_id'] != null ? JsonHelper.toInt(json['endereco_entrega_id']) : null,
       enderecoEntrega: json['endereco_entrega'] != null
-          ? EnderecoModel.fromJson(json['endereco_entrega'])
+          ? EnderecoModel.fromJson(json['endereco_entrega'] as Map<String, dynamic>)
           : null,
-      itens: (json['itens'] as List? ?? [])
-          .map((e) => ItemPedidoModel.fromJson(e))
-          .toList(),
-      total: (json['total'] ?? 0).toDouble(),
-      status: StatusPedido.fromString(json['status'] ?? 'pendente'),
-      observacoes: json['observacoes'],
-      tempoEstimado: json['tempo_estimado'],
-      origem: OrigemPedido.fromString(json['origem'] ?? 'whatsapp'),
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      cliente: json['cliente'] != null
-          ? ClienteModel.fromJson(json['cliente'])
-          : null,
+      itens: JsonHelper.toList(json['itens'], (e) => ItemPedidoModel.fromJson(e as Map<String, dynamic>)),
+      total: JsonHelper.toDouble(json['total']),
+      status: StatusPedido.fromString(JsonHelper.toStr(json['status'], fallback: 'pendente')),
+      observacoes: json['observacoes'] as String?,
+      tempoEstimado: json['tempo_estimado'] != null ? JsonHelper.toInt(json['tempo_estimado']) : null,
+      origem: OrigemPedido.fromString(JsonHelper.toStr(json['origem'], fallback: 'whatsapp')),
+      createdAt: JsonHelper.toDateTimeOrNow(json['created_at']),
+      updatedAt: JsonHelper.toDateTimeOrNow(json['updated_at']),
+      cliente: json['cliente'] != null ? ClienteModel.fromJson(json['cliente'] as Map<String, dynamic>) : null,
     );
   }
 
@@ -118,18 +112,11 @@ class PedidoModel {
     'updated_at': updatedAt.toIso8601String(),
   };
 
-  // Getters úteis
   String get statusLabel => status.label;
   String get statusColor => status.colorHex;
   String get statusIcon => status.iconName;
   String get origemLabel => origem.label;
   String get totalFormatado => 'R\$ ${total.toStringAsFixed(2)}';
-
-  // Verifica se o pedido pode ser cancelado
-  bool get podeCancelar =>
-      status == StatusPedido.pendente || status == StatusPedido.confirmado;
-
-  // Verifica se o pedido está ativo (não finalizado)
-  bool get isAtivo =>
-      status != StatusPedido.entregue && status != StatusPedido.cancelado;
+  bool get podeCancelar => status == StatusPedido.pendente || status == StatusPedido.confirmado;
+  bool get isAtivo => status != StatusPedido.entregue && status != StatusPedido.cancelado;
 }

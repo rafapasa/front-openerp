@@ -150,7 +150,7 @@ class _ContaCard extends StatelessWidget {
               Container(
                 width: 52,
                 height: 52,
-                decoration: BoxDecoration(color: _getColor(pessoa).withOpacity(0.12), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: _getColor(pessoa).withValues(alpha: 0.12), shape: BoxShape.circle),
                 child: Center(
                   child: pessoa.isNotEmpty
                       ? Text(pessoa[0].toUpperCase(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: _getColor(pessoa)))

@@ -45,8 +45,11 @@ class _ProdutosPageState extends State<ProdutosPage> {
   Future<void> _refreshData() async => await context.read<ProdutoProvider>().refreshProdutos();
   void _search(String query) {
     final provider = context.read<ProdutoProvider>();
-    if (query.isEmpty) provider.loadProdutos();
-    else provider.searchByNome(query);
+    if (query.isEmpty) {
+      provider.loadProdutos();
+    } else {
+      provider.searchByNome(query);
+    }
   }
 
   @override

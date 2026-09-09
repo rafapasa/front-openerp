@@ -239,7 +239,7 @@ Widget _buildStatusChart(DashboardProvider provider) {
             final status = StatusPedido.fromString(entry.key);
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(color: (colors[entry.key] ?? Colors.grey).withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
+              decoration: BoxDecoration(color: (colors[entry.key] ?? Colors.grey).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
               child: Text('${status.label}: ${entry.value}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: colors[entry.key] ?? Colors.grey)),
             );
           }).toList(),
@@ -305,7 +305,7 @@ class _MetricCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: color, size: 20)),
+              Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: color, size: 20)),
               const Spacer(),
               Icon(Icons.trending_up, size: 14, color: AppColors.accent),
             ],

@@ -98,7 +98,7 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.all(14),
-                                      decoration: BoxDecoration(color: Color(int.parse(_pedido!.statusColor.replaceFirst('#', '0xff'))).withOpacity(0.12), shape: BoxShape.circle),
+                                      decoration: BoxDecoration(color: Color(int.parse(_pedido!.statusColor.replaceFirst('#', '0xff'))).withValues(alpha: 0.12), shape: BoxShape.circle),
                                       child: Icon(_getStatusIcon(_pedido!.status), color: Color(int.parse(_pedido!.statusColor.replaceFirst('#', '0xff')))),
                                     ),
                                     const SizedBox(width: 16),

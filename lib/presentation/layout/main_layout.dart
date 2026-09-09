@@ -51,7 +51,7 @@ class MainLayout extends StatelessWidget {
                               padding: const EdgeInsets.all(4),
                               child: Image.asset(
                                 'assets/Icone_azul_500x500.png',
-                                errorBuilder: (_, __, ___) => const Icon(Icons.bolt, color: AppColors.primary),
+                                errorBuilder: (_, _, _) => const Icon(Icons.bolt, color: AppColors.primary),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -68,7 +68,7 @@ class MainLayout extends StatelessWidget {
                       const SizedBox(height: 8),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                        child: Text('ERPCloud', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2)),
+                        child: Text('ERPCloud', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1.2)),
                       ),
                       const SizedBox(height: 16),
                       // Menu
@@ -78,7 +78,7 @@ class MainLayout extends StatelessWidget {
                       _SideItem(icon: Icons.inventory_2_outlined, label: 'Produtos', selected: currentIndex == 3, onTap: () => onTap(3)),
                       _SideItem(icon: Icons.business_outlined, label: 'Empresas', selected: currentIndex == 4, onTap: () => onTap(4)),
                       const Spacer(),
-                      Container(height: 1, color: Colors.white.withOpacity(0.1), margin: const EdgeInsets.symmetric(horizontal: 16)),
+                      Container(height: 1, color: Colors.white.withValues(alpha: 0.1), margin: const EdgeInsets.symmetric(horizontal: 16)),
                       const SizedBox(height: 12),
                       // Rodapé sidebar
                       Padding(
@@ -86,9 +86,9 @@ class MainLayout extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.06),
+                            color: Colors.white.withValues(alpha: 0.06),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.white.withOpacity(0.08)),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                           ),
                           child: Row(
                             children: [
@@ -112,7 +112,7 @@ class MainLayout extends StatelessWidget {
                       const SizedBox(height: 12),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Text('© eTools Tecnologia v3.2.1', style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 10)),
+                        child: Text('© eTools Tecnologia v3.2.1', style: TextStyle(color: Colors.white.withValues(alpha: 0.35), fontSize: 10)),
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -184,7 +184,7 @@ class MainLayout extends StatelessWidget {
           bottomNavigationBar: Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10)],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 10)],
             ),
             child: BottomNavigationBar(
               currentIndex: currentIndex,
@@ -229,7 +229,7 @@ class _SideItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: selected ? AppColors.primary : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
-        border: selected ? Border.all(color: Colors.white.withOpacity(0.1)) : null,
+        border: selected ? Border.all(color: Colors.white.withValues(alpha: 0.1)) : null,
       ),
       child: ListTile(
         leading: Icon(icon, color: Colors.white, size: 20),

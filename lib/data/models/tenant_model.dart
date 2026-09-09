@@ -1,4 +1,5 @@
-// lib/data/models/tenant_model.dart
+import 'package:front_openerp/core/helpers/json_helper.dart';
+
 class TenantModel {
   final int? id;
   final String nome;
@@ -6,6 +7,10 @@ class TenantModel {
   final String? email;
   final String? telefone;
   final String? endereco;
+  final String? segmento;
+  final String? wabaId;
+  final String? whatsappPhoneId;
+  final String? whatsappDisplayNumber;
   final bool ativo;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -17,6 +22,10 @@ class TenantModel {
     this.email,
     this.telefone,
     this.endereco,
+    this.segmento,
+    this.wabaId,
+    this.whatsappPhoneId,
+    this.whatsappDisplayNumber,
     this.ativo = true,
     this.createdAt,
     this.updatedAt,
@@ -24,19 +33,19 @@ class TenantModel {
 
   factory TenantModel.fromJson(Map<String, dynamic> json) {
     return TenantModel(
-      id: json['id'],
-      nome: json['nome'] ?? '',
+      id: json['id'] != null ? JsonHelper.toInt(json['id']) : null,
+      nome: JsonHelper.toStr(json['nome']),
       cnpj: json['cnpj'] ?? json['documento'],
       email: json['email'],
       telefone: json['telefone'] ?? json['phone'],
       endereco: json['endereco'] ?? json['address'],
-      ativo: json['ativo'] ?? json['active'] ?? true,
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'])
-          : null,
+      segmento: json['segmento'],
+      wabaId: json['waba_id'],
+      whatsappPhoneId: json['whatsapp_phone_id'],
+      whatsappDisplayNumber: json['whatsapp_display_number'],
+      ativo: JsonHelper.toBool(json['ativo'] ?? json['active'], fallback: true),
+      createdAt: JsonHelper.toDateTime(json['created_at']),
+      updatedAt: JsonHelper.toDateTime(json['updated_at']),
     );
   }
 
@@ -48,6 +57,10 @@ class TenantModel {
       'email': email,
       'telefone': telefone,
       'endereco': endereco,
+      'segmento': segmento,
+      'waba_id': wabaId,
+      'whatsapp_phone_id': whatsappPhoneId,
+      'whatsapp_display_number': whatsappDisplayNumber,
       'ativo': ativo,
     };
   }
@@ -59,6 +72,10 @@ class TenantModel {
     String? email,
     String? telefone,
     String? endereco,
+    String? segmento,
+    String? wabaId,
+    String? whatsappPhoneId,
+    String? whatsappDisplayNumber,
     bool? ativo,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -70,6 +87,10 @@ class TenantModel {
       email: email ?? this.email,
       telefone: telefone ?? this.telefone,
       endereco: endereco ?? this.endereco,
+      segmento: segmento ?? this.segmento,
+      wabaId: wabaId ?? this.wabaId,
+      whatsappPhoneId: whatsappPhoneId ?? this.whatsappPhoneId,
+      whatsappDisplayNumber: whatsappDisplayNumber ?? this.whatsappDisplayNumber,
       ativo: ativo ?? this.ativo,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

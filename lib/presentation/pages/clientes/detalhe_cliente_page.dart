@@ -97,7 +97,7 @@ class _DetalheClientePageState extends State<DetalheClientePage> {
                                     Container(
                                       width: 72,
                                       height: 72,
-                                      decoration: BoxDecoration(color: _getAvatarColor(_cliente!.nome).withOpacity(0.12), shape: BoxShape.circle),
+                                      decoration: BoxDecoration(color: _getAvatarColor(_cliente!.nome).withValues(alpha: 0.12), shape: BoxShape.circle),
                                       child: Center(child: Text(_cliente!.nome.isNotEmpty ? _cliente!.nome[0].toUpperCase() : '?', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: _getAvatarColor(_cliente!.nome)))),
                                     ),
                                     const SizedBox(width: 20),

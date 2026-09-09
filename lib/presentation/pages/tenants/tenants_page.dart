@@ -194,7 +194,7 @@ class _TenantsPageState extends State<TenantsPage> {
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         itemCount: filtered.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final tenant = filtered[index];
           return Container(
@@ -269,7 +269,7 @@ class _TenantsPageState extends State<TenantsPage> {
           Expanded(
             child: ListView.separated(
               itemCount: filtered.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.borderLight),
+              separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.borderLight),
               itemBuilder: (context, index) {
                 final tenant = filtered[index];
                 return InkWell(

@@ -1,3 +1,5 @@
+import 'package:front_openerp/core/helpers/json_helper.dart';
+
 class EnderecoModel {
   final int id;
   final int? clienteId;
@@ -39,8 +41,8 @@ class EnderecoModel {
 
   factory EnderecoModel.fromJson(Map<String, dynamic> json) {
     return EnderecoModel(
-      id: json['id'],
-      clienteId: json['cliente_id'],
+      id: JsonHelper.toInt(json['id']),
+      clienteId: json['cliente_id'] != null ? JsonHelper.toInt(json['cliente_id']) : null,
       cep: json['cep'] ?? '',
       logradouro: json['logradouro'] ?? '',
       numero: json['numero'] ?? '',
@@ -50,12 +52,12 @@ class EnderecoModel {
       estado: json['estado'] ?? '',
       pais: json['pais'] ?? 'Brasil',
       referencia: json['referencia'],
-      latitude: json['latitude']?.toDouble(),
-      longitude: json['longitude']?.toDouble(),
+      latitude: json['latitude'] != null ? JsonHelper.toDouble(json['latitude']) : null,
+      longitude: json['longitude'] != null ? JsonHelper.toDouble(json['longitude']) : null,
       tipo: json['tipo'] ?? 'residencial',
       principal: json['principal'] ?? false,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: JsonHelper.toDateTimeOrNow(json['created_at']),
+      updatedAt: JsonHelper.toDateTimeOrNow(json['updated_at']),
     );
   }
 

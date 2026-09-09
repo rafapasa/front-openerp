@@ -1,3 +1,5 @@
+import 'package:front_openerp/core/helpers/json_helper.dart';
+
 import 'endereco_model.dart';
 
 class ClienteModel {
@@ -39,15 +41,11 @@ class ClienteModel {
       email: json['email'],
       inscricaoFederal: json['inscricao_federal'],
       status: json['status'] ?? 'ativo',
-      ultimoPedidoAt: json['ultimo_pedido_at'] != null
-          ? DateTime.parse(json['ultimo_pedido_at'])
-          : null,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      ultimoPedidoAt: json['ultimo_pedido_at'] != null ? JsonHelper.toDateTime(json['ultimo_pedido_at']) : null,
+      createdAt: JsonHelper.toDateTimeOrNow(json['created_at']),
+      updatedAt: JsonHelper.toDateTimeOrNow(json['updated_at']),
       enderecos: json['enderecos'] != null
-          ? (json['enderecos'] as List)
-                .map((e) => EnderecoModel.fromJson(e))
-                .toList()
+          ? (json['enderecos'] as List).map((e) => EnderecoModel.fromJson(e)).toList()
           : null,
     );
   }

@@ -183,7 +183,7 @@ class DetalheTenantPage extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset('assets/Icone_azul_500x500.png', width: 18, height: 18, errorBuilder: (_, __, ___) => const Icon(Icons.bolt, size: 16, color: AppColors.primary)),
+                      Image.asset('assets/Icone_azul_500x500.png', width: 18, height: 18, errorBuilder: (_, _, _) => const Icon(Icons.bolt, size: 16, color: AppColors.primary)),
                       const SizedBox(width: 6),
                       const Text('Gerenciado por eTools Tecnologia • ERPCloud OpenERP', style: TextStyle(fontSize: 11, color: AppColors.textGrey)),
                     ],
@@ -218,7 +218,7 @@ class DetalheTenantPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: iconColor.withOpacity(0.12), borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: iconColor)),
+              Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: iconColor)),
               const SizedBox(width: 10),
               Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
             ],

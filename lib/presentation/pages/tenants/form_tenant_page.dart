@@ -73,7 +73,7 @@ class _FormTenantPageState extends State<FormTenantPage> {
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
+                            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
                             child: const Icon(Icons.business, color: Colors.white, size: 24),
                           ),
                           const SizedBox(width: 16),
@@ -129,7 +129,7 @@ class _FormTenantPageState extends State<FormTenantPage> {
                                         title: const Text('Ativo', style: TextStyle(fontWeight: FontWeight.w600)),
                                         subtitle: Text(_ativo ? 'Empresa ativa' : 'Inativa', style: const TextStyle(fontSize: 12, color: AppColors.textGrey)),
                                         value: _ativo,
-                                        activeColor: AppColors.accent,
+                                        activeThumbColor: AppColors.accent,
                                         contentPadding: EdgeInsets.zero,
                                         onChanged: (value) => setState(() => _ativo = value),
                                       ),
@@ -142,7 +142,7 @@ class _FormTenantPageState extends State<FormTenantPage> {
                                 children: [
                                   TextFormField(controller: _cnpjController, decoration: const InputDecoration(labelText: 'CNPJ', prefixIcon: Icon(Icons.badge_outlined, size: 20))),
                                   const SizedBox(height: 16),
-                                  SwitchListTile(title: const Text('Ativo'), value: _ativo, activeColor: AppColors.accent, onChanged: (v) => setState(() => _ativo = v)),
+                                  SwitchListTile(title: const Text('Ativo'), value: _ativo, activeThumbColor: AppColors.accent, onChanged: (v) => setState(() => _ativo = v)),
                                 ],
                               );
                             }
@@ -190,7 +190,7 @@ class _FormTenantPageState extends State<FormTenantPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset('assets/Icone_azul_500x500.png', width: 14, height: 14, errorBuilder: (_, __, ___) => const Icon(Icons.bolt, size: 12, color: AppColors.primary)),
+                      Image.asset('assets/Icone_azul_500x500.png', width: 14, height: 14, errorBuilder: (_, _, _) => const Icon(Icons.bolt, size: 12, color: AppColors.primary)),
                       const SizedBox(width: 6),
                       const Text('Protegido por eTools Tecnologia', style: TextStyle(fontSize: 11, color: AppColors.textGrey)),
                     ],

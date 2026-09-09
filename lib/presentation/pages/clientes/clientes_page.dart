@@ -50,8 +50,11 @@ class _ClientesPageState extends State<ClientesPage> {
 
   void _search(String query) {
     final provider = context.read<ClienteProvider>();
-    if (query.isEmpty) provider.loadClientes();
-    else provider.searchByNome(query);
+    if (query.isEmpty) {
+      provider.loadClientes();
+    } else {
+      provider.searchByNome(query);
+    }
   }
 
   @override
@@ -164,7 +167,7 @@ class _ClientesPageState extends State<ClientesPage> {
             child: ListView.separated(
               controller: _scrollController,
               itemCount: provider.clientes.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.borderLight),
+              separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.borderLight),
               itemBuilder: (context, index) {
                 final cliente = provider.clientes[index];
                 final dateFormat = DateFormat('dd/MM/yyyy');
@@ -177,7 +180,7 @@ class _ClientesPageState extends State<ClientesPage> {
                         Expanded(
                           flex: 3,
                           child: Row(children: [
-                            CircleAvatar(radius: 18, backgroundColor: AppColors.primary.withOpacity(0.12), child: Text(cliente.nome.isNotEmpty ? cliente.nome[0].toUpperCase() : '?', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary, fontSize: 14))),
+                            CircleAvatar(radius: 18, backgroundColor: AppColors.primary.withValues(alpha: 0.12), child: Text(cliente.nome.isNotEmpty ? cliente.nome[0].toUpperCase() : '?', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary, fontSize: 14))),
                             const SizedBox(width: 12),
                             Expanded(child: Text(cliente.nome, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14))),
                           ]),
@@ -231,7 +234,7 @@ class _ClienteCard extends StatelessWidget {
               Container(
                 width: 52,
                 height: 52,
-                decoration: BoxDecoration(color: _getAvatarColor(cliente.nome).withOpacity(0.12), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: _getAvatarColor(cliente.nome).withValues(alpha: 0.12), shape: BoxShape.circle),
                 child: Center(child: Text(cliente.nome.isNotEmpty ? cliente.nome[0].toUpperCase() : '?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _getAvatarColor(cliente.nome)))),
               ),
               const SizedBox(width: 14),

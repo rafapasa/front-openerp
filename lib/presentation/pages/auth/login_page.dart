@@ -6,7 +6,6 @@ import 'package:front_openerp/presentation/pages/home_page.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/app_theme.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -78,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
                                 height: 80,
                                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
                                 padding: const EdgeInsets.all(12),
-                                child: Image.asset('assets/Icone_azul_500x500.png', errorBuilder: (_, __, ___) => const Icon(Icons.bolt, size: 40, color: AppColors.primary)),
+                                child: Image.asset('assets/Icone_azul_500x500.png', errorBuilder: (_, _, _) => const Icon(Icons.bolt, size: 40, color: AppColors.primary)),
                               ),
                               const SizedBox(height: 24),
                               const Text('OpenERP', style: TextStyle(fontSize: 42, fontWeight: FontWeight.w900, color: Colors.white)),
@@ -99,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
                               const SizedBox(height: 40),
                               Container(
                                 padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(color: Colors.white.withOpacity(0.08), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white.withOpacity(0.12))),
+                                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white.withValues(alpha: 0.12))),
                                 child: const Row(
                                   children: [
                                     Icon(Icons.verified_user_outlined, color: Colors.white70, size: 20),
@@ -130,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           constraints: BoxConstraints(maxWidth: isWeb ? 420 : double.infinity),
           padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 30, offset: const Offset(0, 10))]),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 30, offset: const Offset(0, 10))]),
           child: Form(
             key: _formKey,
             child: Column(
@@ -202,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset('assets/Icone_azul_500x500.png', width: 14, height: 14, errorBuilder: (_, __, ___) => const Icon(Icons.bolt, size: 12, color: AppColors.primary)),
+                    Image.asset('assets/Icone_azul_500x500.png', width: 14, height: 14, errorBuilder: (_, _, _) => const Icon(Icons.bolt, size: 12, color: AppColors.primary)),
                     const SizedBox(width: 6),
                     const Text('eTools Tecnologia • v3.2.1', style: TextStyle(color: AppColors.textGrey, fontSize: 11)),
                   ],

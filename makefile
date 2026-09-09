@@ -9,6 +9,7 @@ FLUTTER = flutter
 DART = dart
 PUB = flutter pub
 GIT = git
+MSG ?= "Atualização do projeto $(PROJECT_NAME)"
 
 # Cores para output
 GREEN = \033[0;32m
@@ -281,7 +282,7 @@ git-up: ## Add commit e push das alterações no git
 	@echo "$(YELLOW)🧹 git add...$(NC)"
 	$(GIT) add .
 	@echo "$(YELLOW)🧹 git commit...$(NC)"
-	$(GIT) commit -m "${MSG}"
+	$(GIT) commit -m ${MSG}
 	@echo "$(YELLOW)🧹 git push...$(NC)"
 	$(GIT) push origin main
 	@echo "$(GREEN)✅ Alterações adicionadas ao git!$(NC)"

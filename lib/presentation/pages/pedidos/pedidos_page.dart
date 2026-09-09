@@ -71,8 +71,11 @@ class _PedidosPageState extends State<PedidosPage> {
                       child: const Row(children: [Icon(Icons.filter_list, size: 16), SizedBox(width: 6), Text('Filtrar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))]),
                     ),
                     onSelected: (status) {
-                      if (status == 'todos') provider.clearFilters();
-                      else provider.loadPedidos(status: status);
+                      if (status == 'todos') {
+                        provider.clearFilters();
+                      } else {
+                        provider.loadPedidos(status: status);
+                      }
                     },
                     itemBuilder: (context) => [
                       const PopupMenuItem(value: 'todos', child: Text('Todos')),
@@ -159,7 +162,7 @@ class _PedidosPageState extends State<PedidosPage> {
             child: ListView.separated(
               controller: _scrollController,
               itemCount: provider.pedidos.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.borderLight),
+              separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.borderLight),
               itemBuilder: (context, index) {
                 final pedido = provider.pedidos[index];
                 return InkWell(
@@ -176,7 +179,7 @@ class _PedidosPageState extends State<PedidosPage> {
                           width: 100,
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: Color(int.parse(pedido.statusColor.replaceFirst('#', '0xff'))).withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
+                            decoration: BoxDecoration(color: Color(int.parse(pedido.statusColor.replaceFirst('#', '0xff'))).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
                             child: Text(pedido.statusLabel, style: TextStyle(color: Color(int.parse(pedido.statusColor.replaceFirst('#', '0xff'))), fontSize: 11, fontWeight: FontWeight.w700), textAlign: TextAlign.center),
                           ),
                         ),
@@ -222,7 +225,7 @@ class _PedidoCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(color: Color(int.parse(pedido.statusColor.replaceFirst('#', '0xff'))).withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
+                    decoration: BoxDecoration(color: Color(int.parse(pedido.statusColor.replaceFirst('#', '0xff'))).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
                     child: Text(pedido.statusLabel, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(int.parse(pedido.statusColor.replaceFirst('#', '0xff'))))),
                   ),
                   const Spacer(),
