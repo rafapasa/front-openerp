@@ -1,27 +1,30 @@
+
+import '../core/helpers/json_helper.dart';
+
 class ApiResponse<T> {
-  final bool success;
+  final T data;
   final String? message;
-  final String? error;
-  final T? data;
+  ApiResponse({required this.data, this.message});
+  factory ApiResponse.fromJson(Map<String, dynamic> json, T Function(dynamic) fromJsonT) {
+    return ApiResponse<T>(data: fromJsonT(json['data']), message: json['message'] as String?);
+  }
+}
 
-  ApiResponse({required this.success, this.message, this.error, this.data});
-
-  factory ApiResponse.fromJson(
-    Map<String, dynamic> json,
-    T Function(dynamic) fromJsonT,
-  ) {
-    return ApiResponse<T>(
-      success: json['success'] ?? false,
-      message: json['message'],
-      error: json['error'],
-      data: json['data'] != null ? fromJsonT(json['data']) : null,
+class PaginatedResponse<T> {
+  final List<T> data;
+  final int total;
+  final int page;
+  final int limit;
+  final int pages;
+  PaginatedResponse({required this.data, required this.total, required this.page, required this.limit, required this.pages});
+  factory PaginatedResponse.fromJson(Map<String, dynamic> json, T Function(dynamic) fromJsonT) {
+    final list = json['data'] is List ? json['data'] as List : [];
+    return PaginatedResponse<T>(
+      data: list.map((e) => fromJsonT(e)).toList(),
+      total: JsonHelper.toInt(json['total'], fallback: list.length),
+      page: JsonHelper.toInt(json['page'], fallback: 1),
+      limit: JsonHelper.toInt(json['limit'], fallback: 20),
+      pages: JsonHelper.toInt(json['total_pages'] ?? json['pages'], fallback: 1),
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'success': success,
-    'message': message,
-    'error': error,
-    'data': data,
-  };
 }

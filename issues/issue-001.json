@@ -1,5 +1,5 @@
 {
-    "demanda": "Criar uma tela de listagem de produtos com filtro por nome e categoria, usando Provider para estado e Dio para API",
+    "demanda": "Cria a func FindByTenantPaginated nos services e Repositories.",
     "estrutura": [
         {
             "type": "directory",
@@ -310,15 +310,13 @@
             ]
         }
     ],
-    "raiz": "/home/opc/prj/front-openerp",
+    "raiz": "/home/opc/prj/mcp-server-openerp",
     "rules": [
-        "modifique a apresentação da listagem de empresas(tenants), para que fiquem mais apresentavel e profissional",
-        "apos as melhorias dessa tela, crie um texto que define as regras de apresentação, fontes cores layout e tudo mais para que toda as telas sigam o mesmo",
-        "Use Provider para gerenciamento de estado",
-        "Use Dio para chamadas HTTP",
-        "Mantenha consistência com o código existente (ex: tenants)",
-        "Use PaginatedResponse para listagens",
-        "Siga o padrão de nomenclatura: getX, criarX, atualizarX, excluirX",
-        "Use constantes para endpoints"
+        "Adicionar a função FindByTenantPaginated nos services e Repositories.",
+        "Atualize a interface dos services e dos repositories.",
+        "Adiciobe en todos os seevices que não possuem a função FindByTenantPaginated, exceyo no servic de tenant.",
+        "Atualize os testes unitários dos services e dos repositories.",
+        "Siga o padrão de desenvolvimento do projeto, o repositorio usa models o service dto",
+        "Seja Cuidados e não altere a assinatura das funções existentes, apenas adicione a nova função."
     ]
 }
