@@ -7,6 +7,7 @@ import 'package:front_openerp/data/services/tenant_service.dart';
 import 'package:front_openerp/presentation/pages/pages.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:front_openerp/presentation/providers/tenant_provider.dart';
+import 'package:front_openerp/presentation/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -60,8 +61,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Front-OpenERP',
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true, fontFamily: 'Roboto'),
-      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      debugShowCheckedModeBanner: true,
       home: const SplashPage(),
     );
   }

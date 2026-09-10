@@ -1,3 +1,5 @@
+import 'package:front_openerp/core/helpers/json_helper.dart';
+
 class ProdutoModel {
   final int id;
   final int? tenantId;
@@ -25,16 +27,16 @@ class ProdutoModel {
 
   factory ProdutoModel.fromJson(Map<String, dynamic> json) {
     return ProdutoModel(
-      id: json['id'],
-      tenantId: json['tenant_id'],
-      categoriaId: json['categoria_id'],
+      id: JsonHelper.toInt(json['id']),
+      tenantId: json['tenant_id'] != null ? JsonHelper.toInt(json['tenant_id']) : null,
+      categoriaId: json['categoria_id'] != null ? JsonHelper.toInt(json['categoria_id']) : null,
       categoriaNome: json['categoria_nome'],
-      nome: json['nome'] ?? '',
+      nome: JsonHelper.toStr(json['nome']),
       descricao: json['descricao'],
-      preco: (json['preco'] ?? 0).toDouble(),
-      disponivel: json['disponivel'] ?? true,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      preco: JsonHelper.toDouble(json['preco']),
+      disponivel: JsonHelper.toBool(json['disponivel'], fallback: true),
+      createdAt: JsonHelper.toDateTimeOrNow(json['created_at']),
+      updatedAt: JsonHelper.toDateTimeOrNow(json['updated_at']),
     );
   }
 

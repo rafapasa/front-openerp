@@ -75,6 +75,8 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/Icone_azul_500x500.png
+    - assets/images/Logo_fundo_branco.jpg
     - assets/fonts/
     - assets/animations/
     - assets/icons/

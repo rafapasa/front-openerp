@@ -286,6 +286,7 @@ git-up: ## Add commit e push das alterações no git
 	$(GIT) push origin main
 	@echo "$(GREEN)✅ Alterações adicionadas ao git!$(NC)"
 
+
 # ============================================================
 # PHONY (evita conflitos com arquivos de mesmo nome)
 # ============================================================

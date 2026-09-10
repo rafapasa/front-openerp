@@ -4,7 +4,7 @@ export 'dashboard_model.dart';
 export 'endereco_model.dart';
 export 'enums.dart';
 export 'login_model.dart';
-export 'pagination_model.dart';
+// export 'pagination_model.dart';
 export 'pedido_model.dart';
 export 'produto_model.dart';
 export 'usuario_model.dart';

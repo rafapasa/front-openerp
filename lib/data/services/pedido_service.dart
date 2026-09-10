@@ -4,10 +4,8 @@ import 'services.dart';
 
 class PedidoService {
   final ApiService _apiService;
-
   PedidoService(this._apiService);
 
-  /// Lista pedidos com filtros
   Future<PaginatedResponse<PedidoModel>> getPedidos({
     int page = 1,
     int limit = 20,
@@ -16,69 +14,45 @@ class PedidoService {
     String? dataInicio,
     String? dataFim,
   }) async {
-    try {
-      final queryParams = {
-        'page': page,
-        'limit': limit,
-        'status': ?status,
-        'cliente_id': ?clienteId,
-        'data_inicio': ?dataInicio,
-        'data_fim': ?dataFim,
-      };
-
-      final response = await _apiService.get('/pedidos', queryParameters: queryParams);
-
-      Map<String, dynamic> data = {for (var item in response.data) ...?item};
-
-      return PaginatedResponse<PedidoModel>.fromJson(
-        data,
-        (json) => PedidoModel.fromJson(json as Map<String, dynamic>),
-      );
-    } catch (e) {
-      rethrow;
-    }
+    final queryParams = <String, dynamic>{
+      'page': page,
+      'limit': limit,
+      if (status != null) 'status': status,
+      if (clienteId != null) 'cliente_id': clienteId,
+      if (dataInicio != null) 'data_inicio': dataInicio,
+      if (dataFim != null) 'data_fim': dataFim,
+    };
+    final response = await _apiService.get('/pedidos', queryParameters: queryParams);
+    // Novo padrão: response.data = {data: [], total, page, limit, total_pages}
+    return PaginatedResponse<PedidoModel>.fromJson(
+      response.data as Map<String, dynamic>,
+      (json) => PedidoModel.fromJson(json as Map<String, dynamic>),
+    );
   }
 
-  /// Busca pedido por ID
   Future<PedidoModel> getPedidoById(int id) async {
-    try {
-      final response = await _apiService.get('/pedidos/$id');
-
-      final data = response.data['data'] as Map<String, dynamic>;
-      return PedidoModel.fromJson(data);
-    } catch (e) {
-      rethrow;
-    }
+    final response = await _apiService.get('/pedidos/$id');
+    // Novo padrão: {data: {pedido}}
+    final map = response.data as Map<String, dynamic>;
+    final data = map['data'] as Map<String, dynamic>;
+    return PedidoModel.fromJson(data);
   }
 
-  /// Atualiza status do pedido
   Future<PedidoModel> updateStatusPedido(int id, StatusPedido status) async {
-    try {
-      final response = await _apiService.patch('/pedidos/$id/status', data: {'status': status.toStringValue()});
-
-      final data = response.data['data'] as Map<String, dynamic>;
-      return PedidoModel.fromJson(data);
-    } catch (e) {
-      rethrow;
-    }
+    final response = await _apiService.patch('/pedidos/$id/status', data: {'status': status.toStringValue()});
+    final map = response.data as Map<String, dynamic>;
+    final data = map['data'] as Map<String, dynamic>;
+    return PedidoModel.fromJson(data);
   }
 
-  /// Busca pedidos de um cliente
   Future<PaginatedResponse<PedidoModel>> getPedidosByCliente(int clienteId, {int page = 1, int limit = 20}) async {
-    try {
-      final response = await _apiService.get(
-        '/clientes/$clienteId/pedidos',
-        queryParameters: {'page': page, 'limit': limit},
-      );
-
-      final data = response.data['data'] as Map<String, dynamic>;
-
-      return PaginatedResponse<PedidoModel>.fromJson(
-        data,
-        (json) => PedidoModel.fromJson(json as Map<String, dynamic>),
-      );
-    } catch (e) {
-      rethrow;
-    }
+    final response = await _apiService.get(
+      '/clientes/$clienteId/pedidos',
+      queryParameters: {'page': page, 'limit': limit},
+    );
+    return PaginatedResponse<PedidoModel>.fromJson(
+      response.data as Map<String, dynamic>,
+      (json) => PedidoModel.fromJson(json as Map<String, dynamic>),
+    );
   }
 }
