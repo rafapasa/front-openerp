@@ -58,16 +58,10 @@ class LoginConta {
   }
 
   Map<String, dynamic> toJson() => {
-        'token': token,
-        'expires_at': expiresAt,
-        'user': {
-          'id': id,
-          'tenant_id': tenantId,
-          'nome': nome,
-          'email': email,
-          'role': role,
-        },
-      };
+    'token': token,
+    'expires_at': expiresAt,
+    'user': {'id': id, 'tenant_id': tenantId, 'nome': nome, 'email': email, 'role': role},
+  };
 
   /// Rótulo amigável do perfil (role) exibido na tela de seleção de empresa.
   String get roleLabel {
@@ -93,14 +87,8 @@ class LoginResultado {
 
   factory LoginResultado.fromJson(Map<String, dynamic> json) {
     final users = json['users'] as List? ?? const [];
-    final contas = users
-        .whereType<Map<String, dynamic>>()
-        .map(LoginConta.fromJson)
-        .toList();
-    return LoginResultado(
-      count: (json['count'] as num?)?.toInt() ?? contas.length,
-      contas: contas,
-    );
+    final contas = users.whereType<Map<String, dynamic>>().map(LoginConta.fromJson).toList();
+    return LoginResultado(count: (json['count'] as num?)?.toInt() ?? contas.length, contas: contas);
   }
 
   bool get possuiMultiplasContas => contas.length > 1;

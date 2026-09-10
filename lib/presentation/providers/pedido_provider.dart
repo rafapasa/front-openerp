@@ -43,21 +43,14 @@ class PedidoProvider extends ChangeNotifier {
   // ============================================================
   Map<StatusPedido, List<PedidoModel>> get pedidosAgrupadosPorStatus {
     return {
-      StatusPedido.pendente: _pedidos
-          .where((p) => p.status == StatusPedido.pendente)
-          .toList(),
-      StatusPedido.confirmado: _pedidos
-          .where((p) => p.status == StatusPedido.confirmado)
-          .toList(),
-      StatusPedido.preparando: _pedidos
-          .where((p) => p.status == StatusPedido.preparando)
-          .toList(),
-      StatusPedido.entregue: _pedidos
-          .where((p) => p.status == StatusPedido.entregue)
-          .toList(),
-      StatusPedido.cancelado: _pedidos
-          .where((p) => p.status == StatusPedido.cancelado)
-          .toList(),
+      StatusPedido.pendente: _pedidos.where((p) => p.status == StatusPedido.pendente).toList(),
+      StatusPedido.confirmado: _pedidos.where((p) => p.status == StatusPedido.confirmado).toList(),
+      StatusPedido.preparando: _pedidos.where((p) => p.status == StatusPedido.preparando).toList(),
+      StatusPedido.emPreparo: _pedidos.where((p) => p.status == StatusPedido.emPreparo).toList(),
+      StatusPedido.pronto: _pedidos.where((p) => p.status == StatusPedido.pronto).toList(),
+      StatusPedido.saiuEntrega: _pedidos.where((p) => p.status == StatusPedido.saiuEntrega).toList(),
+      StatusPedido.entregue: _pedidos.where((p) => p.status == StatusPedido.entregue).toList(),
+      StatusPedido.cancelado: _pedidos.where((p) => p.status == StatusPedido.cancelado).toList(),
     };
   }
 
@@ -173,12 +166,9 @@ class PedidoProvider extends ChangeNotifier {
   // ============================================================
   // 📝 Atualizar Status
   // ============================================================
-  Future<bool> updateStatus(int id, StatusPedido novoStatus) async {
+  Future<bool> updateStatus(int id, StatusPedido novoStatus, {String? motivo}) async {
     try {
-      final pedidoAtualizado = await _pedidoRepository.updateStatus(
-        id,
-        novoStatus,
-      );
+      final pedidoAtualizado = await _pedidoRepository.updateStatus(id, novoStatus, motivo: motivo);
 
       // Atualizar na lista
       final index = _pedidos.indexWhere((p) => p.id == id);

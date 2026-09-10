@@ -3,6 +3,9 @@ enum StatusPedido {
   pendente,
   confirmado,
   preparando,
+  emPreparo,
+  pronto,
+  saiuEntrega,
   entregue,
   cancelado;
 
@@ -15,6 +18,15 @@ enum StatusPedido {
         return StatusPedido.confirmado;
       case 'preparando':
         return StatusPedido.preparando;
+      case 'em_preparo':
+      case 'em-preparo':
+        return StatusPedido.emPreparo;
+      case 'pronto':
+        return StatusPedido.pronto;
+      case 'saiu_entrega':
+      case 'saiu-entrega':
+      case 'saiu_para_entrega':
+        return StatusPedido.saiuEntrega;
       case 'entregue':
         return StatusPedido.entregue;
       case 'cancelado':
@@ -33,6 +45,12 @@ enum StatusPedido {
         return 'confirmado';
       case StatusPedido.preparando:
         return 'preparando';
+      case StatusPedido.emPreparo:
+        return 'em_preparo';
+      case StatusPedido.pronto:
+        return 'pronto';
+      case StatusPedido.saiuEntrega:
+        return 'saiu_entrega';
       case StatusPedido.entregue:
         return 'entregue';
       case StatusPedido.cancelado:
@@ -40,7 +58,6 @@ enum StatusPedido {
     }
   }
 
-  /// Label amigável para exibição
   String get label {
     switch (this) {
       case StatusPedido.pendente:
@@ -49,6 +66,12 @@ enum StatusPedido {
         return 'Confirmado';
       case StatusPedido.preparando:
         return 'Preparando';
+      case StatusPedido.emPreparo:
+        return 'Em preparo';
+      case StatusPedido.pronto:
+        return 'Pronto';
+      case StatusPedido.saiuEntrega:
+        return 'Saiu p/ entrega';
       case StatusPedido.entregue:
         return 'Entregue';
       case StatusPedido.cancelado:
@@ -56,23 +79,26 @@ enum StatusPedido {
     }
   }
 
-  /// Cor associada ao status (para UI)
   String get colorHex {
     switch (this) {
       case StatusPedido.pendente:
-        return '#FF9800'; // Laranja
+        return '#FF9800';
       case StatusPedido.confirmado:
-        return '#2196F3'; // Azul
+        return '#2196F3';
       case StatusPedido.preparando:
-        return '#9C27B0'; // Roxo
+      case StatusPedido.emPreparo:
+        return '#9C27B0';
+      case StatusPedido.pronto:
+        return '#00897B';
+      case StatusPedido.saiuEntrega:
+        return '#1565C0';
       case StatusPedido.entregue:
-        return '#4CAF50'; // Verde
+        return '#4CAF50';
       case StatusPedido.cancelado:
-        return '#F44336'; // Vermelho
+        return '#F44336';
     }
   }
 
-  /// Ícone associado ao status (para UI)
   String get iconName {
     switch (this) {
       case StatusPedido.pendente:
@@ -80,13 +106,20 @@ enum StatusPedido {
       case StatusPedido.confirmado:
         return 'check_circle';
       case StatusPedido.preparando:
+      case StatusPedido.emPreparo:
         return 'build';
+      case StatusPedido.pronto:
+        return 'done';
+      case StatusPedido.saiuEntrega:
+        return 'local_shipping';
       case StatusPedido.entregue:
         return 'delivery';
       case StatusPedido.cancelado:
         return 'cancel';
     }
   }
+
+  bool get isCozinha => this == StatusPedido.preparando || this == StatusPedido.emPreparo;
 }
 
 /// Enum para origem do pedido
@@ -145,7 +178,6 @@ enum OrigemPedido {
   }
 }
 
-// lib/data/models/enums.dart - Adicionar:
 enum TenantStatus {
   ativo,
   inativo,

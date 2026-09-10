@@ -5,6 +5,7 @@ export 'clientes/detalhe_cliente_page.dart';
 export 'dashboard/dashboard_page.dart';
 export 'home_page.dart';
 export 'pedidos/detalhe_pedido_page.dart';
+export 'pedidos/pedido_detalhe_modal.dart';
 export 'pedidos/pedidos_page.dart';
 export 'produtos/detalhe_produto_page.dart';
 export 'produtos/produtos_page.dart';

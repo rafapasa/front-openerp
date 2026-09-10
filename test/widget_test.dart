@@ -15,7 +15,6 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
-    // Simula o path_provider para permitir a inicialização do Hive em testes.
     final tempDir = await Directory.systemTemp.createTemp('hive_test');
     const pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -42,15 +41,13 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(buildApp());
 
-    // A SplashPage exibe o nome do app e o indicador de carregamento.
-    expect(find.text('Front-OpenERP'), findsOneWidget);
+    // Splash atual (eTools): título OpenERP + loading — não existe mais "Front-OpenERP".
+    expect(find.text('OpenERP'), findsWidgets);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-    // Avança o tempo do timer de 2s do splash e completa a navegação.
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
 
-    // Sem token salvo, o app deve ir para a tela de login.
     expect(find.text('Bem-vindo!'), findsOneWidget);
   });
 }

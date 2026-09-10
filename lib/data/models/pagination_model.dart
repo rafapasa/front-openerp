@@ -6,7 +6,7 @@ class PaginatedResponse<T> {
   final int page;
   final int limit;
   final int pages;
-  
+
   PaginatedResponse({
     required this.data,
     required this.total,
