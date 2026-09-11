@@ -98,17 +98,6 @@ class _SplashPageState extends State<SplashPage> {
                   'OpenERP',
                   style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('ERPCloud', style: TextStyle(fontSize: 14, color: Colors.white70, fontWeight: FontWeight.w600, letterSpacing: 1.5)),
-                    const SizedBox(width: 8),
-                    Container(width: 4, height: 4, decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle)),
-                    const SizedBox(width: 8),
-                    const Text('by eTools', style: TextStyle(fontSize: 14, color: AppColors.accent, fontWeight: FontWeight.w700)),
-                  ],
-                ),
                 const SizedBox(height: 12),
                 const Text('Soluções inteligentes para sua empresa.', style: TextStyle(fontSize: 13, color: Colors.white60)),
                 const SizedBox(height: 56),

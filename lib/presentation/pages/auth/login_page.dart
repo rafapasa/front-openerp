@@ -73,7 +73,8 @@ class _LoginPageState extends State<LoginPage> {
     Widget img(String path, {required Widget Function() orElse}) {
       return Image.asset(
         path,
-        fit: BoxFit.contain,
+        width: double.infinity,
+        fit: BoxFit.fitWidth,
         alignment: Alignment.centerLeft,
         filterQuality: FilterQuality.high,
         errorBuilder: (_, _, _) => orElse(),
@@ -135,8 +136,8 @@ class _LoginPageState extends State<LoginPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 96),
+        SizedBox(
+          width: double.infinity,
           child: _logo(),
         ),
         const SizedBox(height: 36),
@@ -176,7 +177,7 @@ class _LoginPageState extends State<LoginPage> {
               padding: EdgeInsets.symmetric(horizontal: isWeb ? 40 : 20, vertical: 32),
               child: isWeb
                   ? Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(flex: 6, child: _brandColumn()),
                         const SizedBox(width: 40),
@@ -202,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
     final error = auth.error;
 
     return Align(
-      alignment: Alignment.topCenter,
+      alignment: Alignment.center,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 460),
         padding: const EdgeInsets.fromLTRB(36, 36, 36, 28),
