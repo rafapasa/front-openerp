@@ -5,9 +5,9 @@
 
 # Variáveis
 PROJECT_NAME = front_openerp
-FLUTTER = flutter
-DART = dart
-PUB = flutter pub
+FLUTTER ?= flutter
+DART ?= dart
+PUB = $(FLUTTER) pub
 GIT = git
 MSG ?= "Atualização do projeto $(PROJECT_NAME)"
 
