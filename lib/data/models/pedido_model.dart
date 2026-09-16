@@ -13,13 +13,34 @@ class ItemPedidoModel {
 
   ItemPedidoModel({this.produtoId, required this.nome, required this.quantidade, required this.preco, this.observacao});
 
+  static String _firstNonEmpty(List<dynamic> values) {
+    for (final value in values) {
+      final text = JsonHelper.toStr(value).trim();
+      if (text.isNotEmpty) return text;
+    }
+    return '';
+  }
+
   factory ItemPedidoModel.fromJson(Map<String, dynamic> json) {
+    final produtoItem = json['produto_item'] is Map
+        ? Map<String, dynamic>.from(json['produto_item'] as Map)
+        : const <String, dynamic>{};
+
     return ItemPedidoModel(
-      produtoId: json['produto_id'] != null ? JsonHelper.toInt(json['produto_id']) : null,
-      nome: JsonHelper.toStr(json['nome']),
-      quantidade: JsonHelper.toInt(json['quantidade']),
-      preco: JsonHelper.toDouble(json['preco']),
-      observacao: json['observacao'] as String?,
+      produtoId: (json['produto_id'] ?? produtoItem['id']) != null
+          ? JsonHelper.toInt(json['produto_id'] ?? produtoItem['id'])
+          : null,
+      nome: _firstNonEmpty([
+        json['nome'],
+        produtoItem['nome'],
+        json['produto_nome'],
+        produtoItem['descricao'],
+      ]),
+      quantidade: JsonHelper.toInt(json['quantidade'] ?? json['qtd']),
+      preco: JsonHelper.toDouble(
+        json['preco'] ?? json['preco_unitario'] ?? produtoItem['preco'],
+      ),
+      observacao: (json['observacao'] ?? json['obs']) as String?,
     );
   }
 
