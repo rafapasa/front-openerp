@@ -124,6 +124,22 @@ class PedidoRepository {
   // ============================================================
   // 🗑️ Limpar cache
   // ============================================================
+  Future<PedidoModel> createPedido({
+    required int clienteId,
+    required String clienteNome,
+    String clienteTelefone = '',
+    required List<Map<String, dynamic>> itens,
+    String? observacoes,
+  }) {
+    return _pedidoService.createPedido(
+      clienteId: clienteId,
+      clienteNome: clienteNome,
+      clienteTelefone: clienteTelefone,
+      itens: itens,
+      observacoes: observacoes,
+    );
+  }
+
   Future<void> clearCache() async {
     await LocalStorage.clearCache(LocalStorage.pedidosKey);
   }

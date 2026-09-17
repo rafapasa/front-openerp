@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import '../pedidos/novo_pedido_modal.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -113,7 +114,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         const SizedBox(width: 12),
                         OutlinedButton.icon(onPressed: _refreshData, icon: const Icon(Icons.download_outlined, size: 18), label: const Text('Exportar')),
                         const SizedBox(width: 12),
-                        FilledButton.icon(onPressed: () {}, style: FilledButton.styleFrom(backgroundColor: AppColors.accent), icon: const Icon(Icons.add, size: 18), label: const Text('Novo Pedido')),
+                        FilledButton.icon(onPressed: () => showNovoPedidoModal(context), style: FilledButton.styleFrom(backgroundColor: AppColors.accent), icon: const Icon(Icons.add, size: 18), label: const Text('Novo Pedido')),
                       ],
                     ),
                   if (!isWeb) ...[

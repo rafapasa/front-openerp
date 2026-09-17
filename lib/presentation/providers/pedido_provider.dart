@@ -188,6 +188,31 @@ class PedidoProvider extends ChangeNotifier {
   // ============================================================
   // 🔄 Refresh
   // ============================================================
+  Future<PedidoModel?> createPedido({
+    required int clienteId,
+    required String clienteNome,
+    String clienteTelefone = '',
+    required List<Map<String, dynamic>> itens,
+    String? observacoes,
+  }) async {
+    try {
+      final criado = await _pedidoRepository.createPedido(
+        clienteId: clienteId,
+        clienteNome: clienteNome,
+        clienteTelefone: clienteTelefone,
+        itens: itens,
+        observacoes: observacoes,
+      );
+      _pedidos = [criado, ..._pedidos];
+      notifyListeners();
+      return criado;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
   Future<void> refreshPedidos() async {
     await loadPedidos(
       forceRefresh: true,

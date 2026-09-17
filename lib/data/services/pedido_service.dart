@@ -78,3 +78,25 @@ class PedidoService {
     );
   }
 }
+
+  Future<PedidoModel> createPedido({
+    required int clienteId,
+    required String clienteNome,
+    String clienteTelefone = '',
+    required List<Map<String, dynamic>> itens,
+    String? observacoes,
+    String origem = 'dashboard',
+  }) async {
+    final response = await _apiService.post('/pedidos', data: {
+      'cliente_id': clienteId,
+      'cliente_nome': clienteNome,
+      'cliente_telefone': clienteTelefone,
+      'itens': itens,
+      if (observacoes != null && observacoes.trim().isNotEmpty) 'observacoes': observacoes.trim(),
+      'origem': origem,
+    });
+    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    return PedidoModel.fromJson(data);
+  }
+}

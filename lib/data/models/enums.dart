@@ -136,6 +136,8 @@ enum OrigemPedido {
         return OrigemPedido.whatsapp;
       case 'web':
         return OrigemPedido.web;
+      case 'dashboard':
+        return OrigemPedido.web;
       case 'app':
         return OrigemPedido.app;
       case 'presencial':
