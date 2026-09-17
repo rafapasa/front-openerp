@@ -315,7 +315,7 @@ Widget _buildRevenueCard(DashboardProvider provider) {
           child: LinearProgressIndicator(value: provider.faturamentoMes > 0 ? (provider.faturamentoHoje / provider.faturamentoMes).clamp(0, 1) : 0, backgroundColor: AppColors.background, color: AppColors.accent, minHeight: 8),
         ),
         const SizedBox(height: 8),
-        Text('${pct.toStringAsFixed(1)}% do faturamento mensal • Meta: R\$ 150.000', style: const TextStyle(fontSize: 11, color: AppColors.textGrey)),
+        Text('Valores do intervalo selecionado', style: const TextStyle(fontSize: 11, color: AppColors.textGrey)),
       ],
     ),
   );
