@@ -47,7 +47,6 @@ class PedidoService {
     return PedidoModel.fromJson(data);
   }
 
-  /// Endpoint ainda não existe no back. Quando existir, ligar em issue #14.
   Future<PedidoModel> marcarPago(int id, {int? formaPagamentoId, double? valor, String? observacao}) async {
     try {
       final response = await _apiService.patch(
@@ -77,7 +76,6 @@ class PedidoService {
       (json) => PedidoModel.fromJson(json as Map<String, dynamic>),
     );
   }
-}
 
   Future<PedidoModel> createPedido({
     required int clienteId,

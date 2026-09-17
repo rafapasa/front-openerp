@@ -93,28 +93,6 @@ void main() {
     });
 
     test('item no formato WhatsApp (produto_item + preco_unitario)', () {
-<<<<<<< HEAD
-      final pedido = PedidoModel.fromJson({
-        'id': 12,
-        'cliente_nome': 'Rafael',
-        'cliente_telefone': '49999999999',
-        'itens': [
-          {
-            'produto_item': {'id': 1, 'nome': 'X-Salada', 'preco': 25.9},
-            'quantidade': 1,
-            'preco_unitario': 25.9,
-          },
-        ],
-        'total': 25.9,
-        'status': 'confirmado',
-        'origem': 'whatsapp',
-        'created_at': '2026-09-15T18:33:00Z',
-        'updated_at': '2026-09-15T18:33:00Z',
-      });
-      expect(pedido.itens.first.nome, 'X-Salada');
-      expect(pedido.itens.first.quantidade, 1);
-      expect(pedido.itens.first.preco, closeTo(25.9, 0.001));
-=======
       final pedido = PedidoModel.fromJson(pedidoWhatsAppJson());
       expect(pedido.itens, hasLength(2));
       expect(pedido.itens[0].nome, 'X-Salada');
@@ -125,7 +103,6 @@ void main() {
       expect(pedido.itens[1].quantidade, 2);
       expect(pedido.itens[1].preco, closeTo(6.0, 0.001));
       expect(pedido.itens[1].subtotal, closeTo(12.0, 0.001));
->>>>>>> 8b3c73a58df6adc38cdac74b9750bdb9856a1e38
     });
 
     test('pedido com pagamentos, historico e motivo_cancelamento', () {
