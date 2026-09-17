@@ -41,4 +41,15 @@ class ClienteService {
     final list = JsonHelper.extractList(response.data);
     return list.map((e) => EnderecoModel.fromJson(e as Map<String, dynamic>)).toList();
   }
+
+  Future<ClienteModel> createCliente({required String nome, required String telefone}) async {
+    final response = await _apiService.post('/clientes', data: {
+      'nome': nome,
+      'telefone': telefone,
+      'nome_perfil': nome,
+    });
+    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    return ClienteModel.fromJson(data);
+  }
 }

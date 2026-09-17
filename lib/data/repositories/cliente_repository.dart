@@ -128,6 +128,10 @@ class ClienteRepository {
   // ============================================================
   // 🗑️ Limpar cache
   // ============================================================
+  Future<ClienteModel> createCliente({required String nome, required String telefone}) {
+    return _clienteService.createCliente(nome: nome, telefone: telefone);
+  }
+
   Future<void> clearCache() async {
     await LocalStorage.clearCache(LocalStorage.clientesKey);
   }

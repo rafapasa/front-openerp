@@ -184,6 +184,19 @@ class ClienteProvider extends ChangeNotifier {
   // ============================================================
   // 🛠️ Métodos Privados
   // ============================================================
+  Future<ClienteModel?> createCliente({required String nome, required String telefone}) async {
+    try {
+      final criado = await _clienteRepository.createCliente(nome: nome, telefone: telefone);
+      _clientes = [criado, ..._clientes];
+      notifyListeners();
+      return criado;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
