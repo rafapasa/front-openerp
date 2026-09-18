@@ -45,9 +45,8 @@ class PedidoProvider extends ChangeNotifier {
     return {
       StatusPedido.pendente: _pedidos.where((p) => p.status == StatusPedido.pendente).toList(),
       StatusPedido.confirmado: _pedidos.where((p) => p.status == StatusPedido.confirmado).toList(),
-      StatusPedido.preparando: _pedidos.where((p) => p.status == StatusPedido.preparando).toList(),
       StatusPedido.emPreparo: _pedidos.where((p) => p.status == StatusPedido.emPreparo).toList(),
-      StatusPedido.pronto: _pedidos.where((p) => p.status == StatusPedido.pronto).toList(),
+      StatusPedido.prontoRetirada: _pedidos.where((p) => p.status == StatusPedido.prontoRetirada).toList(),
       StatusPedido.saiuEntrega: _pedidos.where((p) => p.status == StatusPedido.saiuEntrega).toList(),
       StatusPedido.entregue: _pedidos.where((p) => p.status == StatusPedido.entregue).toList(),
       StatusPedido.cancelado: _pedidos.where((p) => p.status == StatusPedido.cancelado).toList(),

@@ -272,7 +272,6 @@ class PedidoModel {
   bool get podeCancelar =>
       status == StatusPedido.pendente ||
       status == StatusPedido.confirmado ||
-      status == StatusPedido.preparando ||
       status == StatusPedido.emPreparo;
   bool get isAtivo => status != StatusPedido.entregue && status != StatusPedido.cancelado;
   bool get isPago => pago == true || pagamentos.any((p) => p.isPago);
