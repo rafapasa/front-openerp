@@ -5,6 +5,7 @@ import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/app_section_card.dart';
 
 Future<ClienteModel?> showNovoClienteDialog(BuildContext context, {String nomeInicial = ''}) {
   return showDialog<ClienteModel>(
@@ -163,16 +164,20 @@ class _NovoClienteDialogState extends State<NovoClienteDialog> {
               Expanded(
                 child: ListView(
                   children: [
-                    const Text('Dados', style: TextStyle(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 8),
+                    AppSectionCard(
+                      titulo: 'Dados',
+                      child: Column(children: [
                     Row(children: [_field(_nome, 'Nome *', flex: 3), const SizedBox(width: 8), _field(_telefone, 'Telefone *', kb: TextInputType.phone, flex: 2)]),
                     const SizedBox(height: 8),
                     Row(children: [_field(_nomePerfil, 'Nome do perfil'), const SizedBox(width: 8), _field(_email, 'E-mail', kb: TextInputType.emailAddress)]),
                     const SizedBox(height: 8),
                     Row(children: [_field(_doc, 'CPF / CNPJ')]),
-                    const SizedBox(height: 16),
-                    const Text('Endereço', style: TextStyle(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 8),
+                      ]),
+                    ),
+                    const SizedBox(height: 12),
+                    AppSectionCard(
+                      titulo: 'Endereço',
+                      child: Column(children: [
                     Row(
                       children: [
                         _field(_cep, 'CEP', kb: TextInputType.number, fmt: [FilteringTextInputFormatter.digitsOnly]),
@@ -205,6 +210,8 @@ class _NovoClienteDialogState extends State<NovoClienteDialog> {
                         DropdownMenuItem(value: 'entrega', child: Text('Entrega')),
                       ],
                       onChanged: _saving ? null : (v) => setState(() => _tipo = v ?? 'residencial'),
+                    ),
+                      ]),
                     ),
                   ],
                 ),

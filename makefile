@@ -345,3 +345,17 @@ deploy: ## Sobe openerp-web na mcp-network (IMAGE_TAG opcional, default latest)
 
 logs-web: ## Logs do container openerp-web
 	docker logs -f openerp-web --tail=100
+
+.PHONY: git-status git-add git-commit git-push
+git-status:
+	git status -sb && git diff --stat
+git-add:
+	git add -A && git status -sb
+git-commit:
+ifndef MSG
+	$(error Use: make git-commit MSG='tipo: mensagem')
+endif
+	git add -A
+	git commit -m "$(MSG)"
+git-push:
+	git push -u origin HEAD
