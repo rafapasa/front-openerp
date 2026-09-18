@@ -128,8 +128,28 @@ class ClienteRepository {
   // ============================================================
   // 🗑️ Limpar cache
   // ============================================================
-  Future<ClienteModel> createCliente({required String nome, required String telefone}) {
-    return _clienteService.createCliente(nome: nome, telefone: telefone);
+  Future<List<EnderecoModel>> getEnderecosByCliente(int clienteId) {
+    return _clienteService.getEnderecosByCliente(clienteId);
+  }
+
+  Future<ClienteModel> createCliente({
+    required String nome,
+    required String telefone,
+    String? nomePerfil,
+    String? email,
+    String? inscricaoFederal,
+  }) {
+    return _clienteService.createCliente(
+      nome: nome,
+      telefone: telefone,
+      nomePerfil: nomePerfil,
+      email: email,
+      inscricaoFederal: inscricaoFederal,
+    );
+  }
+
+  Future<EnderecoModel> createEndereco(int clienteId, Map<String, dynamic> body) {
+    return _clienteService.createEndereco(clienteId, body);
   }
 
   Future<void> clearCache() async {

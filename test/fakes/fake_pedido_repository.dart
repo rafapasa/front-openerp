@@ -54,6 +54,7 @@ class FakePedidoRepository implements PedidoRepository {
     String clienteTelefone = '',
     required List<Map<String, dynamic>> itens,
     String? observacoes,
+    int? enderecoEntregaId,
   }) async {
     final pedido = PedidoModel(
       id: store.isEmpty ? 1 : store.first.id + 100,

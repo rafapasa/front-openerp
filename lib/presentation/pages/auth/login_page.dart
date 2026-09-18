@@ -4,6 +4,7 @@ import 'package:front_openerp/presentation/pages/auth/selecionar_tenant_page.dar
 import 'package:front_openerp/presentation/pages/home_page.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:provider/provider.dart';
+
 import '../../theme/app_colors.dart';
 
 class LoginPage extends StatefulWidget {
@@ -24,9 +25,9 @@ class _LoginPageState extends State<LoginPage> {
   static const _fieldFill = Color(0xFFF3F5F8);
 
   static const _logoAssets = [
-    'assets/images/Logo_openerp_flat.png',
     'assets/images/Logo_openerp.png',
     'assets/images/Logo_fundo_transparente.png',
+    'assets/images/OpenERP_transparente_v2.png',
   ];
 
   @override
@@ -48,11 +49,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  InputDecoration _fieldDeco({
-    required String hint,
-    required IconData prefix,
-    Widget? suffix,
-  }) {
+  InputDecoration _fieldDeco({required String hint, required IconData prefix, Widget? suffix}) {
     return InputDecoration(
       hintText: hint,
       filled: true,
@@ -136,10 +133,7 @@ class _LoginPageState extends State<LoginPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          width: double.infinity,
-          child: _logo(),
-        ),
+        SizedBox(width: double.infinity, child: _logo()),
         const SizedBox(height: 36),
         const Text(
           'Soluções inteligentes\npara sua empresa.',
@@ -184,13 +178,7 @@ class _LoginPageState extends State<LoginPage> {
                         Expanded(flex: 5, child: _buildFormCard(auth)),
                       ],
                     )
-                  : ListView(
-                      children: [
-                        _brandColumn(),
-                        const SizedBox(height: 28),
-                        _buildFormCard(auth),
-                      ],
-                    ),
+                  : ListView(children: [_brandColumn(), const SizedBox(height: 28), _buildFormCard(auth)]),
             ),
           ),
         ),
@@ -210,7 +198,9 @@ class _LoginPageState extends State<LoginPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(28),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.18), blurRadius: 32, offset: const Offset(0, 16))],
+          boxShadow: [
+            BoxShadow(color: Colors.black.withValues(alpha: 0.18), blurRadius: 32, offset: const Offset(0, 16)),
+          ],
         ),
         child: Form(
           key: _formKey,
@@ -230,7 +220,10 @@ class _LoginPageState extends State<LoginPage> {
                 style: TextStyle(fontSize: 15, color: AppColors.textGrey),
               ),
               const SizedBox(height: 28),
-              const Text('E-mail', style: TextStyle(fontWeight: FontWeight.w700, color: _navy, fontSize: 14)),
+              const Text(
+                'E-mail',
+                style: TextStyle(fontWeight: FontWeight.w700, color: _navy, fontSize: 14),
+              ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _emailController,
@@ -243,7 +236,10 @@ class _LoginPageState extends State<LoginPage> {
                 },
               ),
               const SizedBox(height: 18),
-              const Text('Senha', style: TextStyle(fontWeight: FontWeight.w700, color: _navy, fontSize: 14)),
+              const Text(
+                'Senha',
+                style: TextStyle(fontWeight: FontWeight.w700, color: _navy, fontSize: 14),
+              ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _passwordController,
@@ -280,12 +276,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(child: Text('Lembrar-me', style: TextStyle(fontSize: 13, color: _navy))),
+                  const Expanded(
+                    child: Text('Lembrar-me', style: TextStyle(fontSize: 13, color: _navy)),
+                  ),
                   TextButton(
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Recuperação de senha em breve.')),
-                      );
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(const SnackBar(content: Text('Recuperação de senha em breve.')));
                     },
                     child: const Text('Esqueceu a senha?'),
                   ),
@@ -305,7 +302,11 @@ class _LoginPageState extends State<LoginPage> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                   child: isLoading
-                      ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
                       : const Text('Entrar', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                 ),
               ),
@@ -317,11 +318,13 @@ class _LoginPageState extends State<LoginPage> {
               ),
               TextButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Cadastro público ainda não está liberado.')),
-                  );
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(const SnackBar(content: Text('Cadastro público ainda não está liberado.')));
                 },
-                child: const Text('Criar conta', style: TextStyle(fontWeight: FontWeight.w700, decoration: TextDecoration.underline)),
+                child: const Text(
+                  'Criar conta',
+                  style: TextStyle(fontWeight: FontWeight.w700, decoration: TextDecoration.underline),
+                ),
               ),
             ],
           ),

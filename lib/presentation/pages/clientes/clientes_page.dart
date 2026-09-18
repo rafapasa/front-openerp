@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../../data/models/models.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import 'package:front_openerp/presentation/pages/clientes/novo_cliente_dialog.dart';
 
 class ClientesPage extends StatefulWidget {
   const ClientesPage({super.key});
@@ -89,7 +90,7 @@ class _ClientesPageState extends State<ClientesPage> {
                   ),
                   if (isWeb) ...[
                     const SizedBox(width: 12),
-                    FilledButton.icon(onPressed: () {}, icon: const Icon(Icons.person_add_alt_1_outlined, size: 18), label: const Text('Novo Cliente'), style: FilledButton.styleFrom(backgroundColor: AppColors.primary)),
+                    FilledButton.icon(onPressed: () => showNovoClienteDialog(context), icon: const Icon(Icons.person_add_alt_1_outlined, size: 18), label: const Text('Novo Cliente'), style: FilledButton.styleFrom(backgroundColor: AppColors.primary)),
                   ],
                 ],
               ),
@@ -110,7 +111,7 @@ class _ClientesPageState extends State<ClientesPage> {
           ],
         ),
       ),
-      floatingActionButton: isWeb ? null : FloatingActionButton.extended(onPressed: () {}, backgroundColor: AppColors.primary, foregroundColor: Colors.white, icon: const Icon(Icons.add), label: const Text('Novo', style: TextStyle(fontWeight: FontWeight.w700))),
+      floatingActionButton: isWeb ? null : FloatingActionButton.extended(onPressed: () => showNovoClienteDialog(context), backgroundColor: AppColors.primary, foregroundColor: Colors.white, icon: const Icon(Icons.add), label: const Text('Novo', style: TextStyle(fontWeight: FontWeight.w700))),
     );
   }
 

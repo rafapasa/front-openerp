@@ -130,6 +130,7 @@ class PedidoRepository {
     String clienteTelefone = '',
     required List<Map<String, dynamic>> itens,
     String? observacoes,
+    int? enderecoEntregaId,
   }) {
     return _pedidoService.createPedido(
       clienteId: clienteId,
@@ -137,6 +138,7 @@ class PedidoRepository {
       clienteTelefone: clienteTelefone,
       itens: itens,
       observacoes: observacoes,
+      enderecoEntregaId: enderecoEntregaId,
     );
   }
 

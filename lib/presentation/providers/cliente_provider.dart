@@ -44,11 +44,7 @@ class ClienteProvider extends ChangeNotifier {
   // ============================================================
   // 📋 Carregar Clientes
   // ============================================================
-  Future<void> loadClientes({
-    bool forceRefresh = false,
-    String? nome,
-    String? telefone,
-  }) async {
+  Future<void> loadClientes({bool forceRefresh = false, String? nome, String? telefone}) async {
     // Atualizar filtros
     _nomeFilter = nome;
     _telefoneFilter = telefone;
@@ -141,11 +137,7 @@ class ClienteProvider extends ChangeNotifier {
   // 🔄 Refresh
   // ============================================================
   Future<void> refreshClientes() async {
-    await loadClientes(
-      forceRefresh: true,
-      nome: _nomeFilter,
-      telefone: _telefoneFilter,
-    );
+    await loadClientes(forceRefresh: true, nome: _nomeFilter, telefone: _telefoneFilter);
   }
 
   // ============================================================
@@ -184,9 +176,35 @@ class ClienteProvider extends ChangeNotifier {
   // ============================================================
   // 🛠️ Métodos Privados
   // ============================================================
-  Future<ClienteModel?> createCliente({required String nome, required String telefone}) async {
+  Future<List<EnderecoModel>> listarEnderecos(int clienteId) async {
     try {
-      final criado = await _clienteRepository.createCliente(nome: nome, telefone: telefone);
+      return await _clienteRepository.getEnderecosByCliente(clienteId);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<ClienteModel?> createCliente({
+    required String nome,
+    required String telefone,
+    String? nomePerfil,
+    String? email,
+    String? inscricaoFederal,
+    Map<String, dynamic>? endereco,
+  }) async {
+    try {
+      final criado = await _clienteRepository.createCliente(
+        nome: nome,
+        telefone: telefone,
+        nomePerfil: nomePerfil,
+        email: email,
+        inscricaoFederal: inscricaoFederal,
+      );
+      if (endereco != null && criado.id > 0) {
+        try {
+          await _clienteRepository.createEndereco(criado.id, endereco);
+        } catch (_) {}
+      }
       _clientes = [criado, ..._clientes];
       notifyListeners();
       return criado;

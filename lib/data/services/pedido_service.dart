@@ -83,6 +83,7 @@ class PedidoService {
     String clienteTelefone = '',
     required List<Map<String, dynamic>> itens,
     String? observacoes,
+    int? enderecoEntregaId,
     String origem = 'dashboard',
   }) async {
     final response = await _apiService.post('/pedidos', data: {
@@ -91,6 +92,7 @@ class PedidoService {
       'cliente_telefone': clienteTelefone,
       'itens': itens,
       if (observacoes != null && observacoes.trim().isNotEmpty) 'observacoes': observacoes.trim(),
+      if (enderecoEntregaId != null) 'endereco_entrega_id': enderecoEntregaId,
       'origem': origem,
     });
     final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};

@@ -194,6 +194,7 @@ class PedidoProvider extends ChangeNotifier {
     String clienteTelefone = '',
     required List<Map<String, dynamic>> itens,
     String? observacoes,
+    int? enderecoEntregaId,
   }) async {
     try {
       final criado = await _pedidoRepository.createPedido(
@@ -202,6 +203,7 @@ class PedidoProvider extends ChangeNotifier {
         clienteTelefone: clienteTelefone,
         itens: itens,
         observacoes: observacoes,
+        enderecoEntregaId: enderecoEntregaId,
       );
       _pedidos = [criado, ..._pedidos];
       notifyListeners();
