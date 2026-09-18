@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pedido_detalhe_modal.dart';
+import 'package:front_openerp/presentation/pages/pedidos/pedidos_kanban.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +20,7 @@ class PedidosPage extends StatefulWidget {
 
 class _PedidosPageState extends State<PedidosPage> {
   final ScrollController _scrollController = ScrollController();
+  bool _quadro = true;
 
   @override
   void initState() {
@@ -68,6 +70,11 @@ class _PedidosPageState extends State<PedidosPage> {
                     style: const TextStyle(color: AppColors.textGrey, fontSize: 13, fontWeight: FontWeight.w500),
                   ),
                   const Spacer(),
+                  IconButton(
+                    tooltip: _quadro ? 'Lista' : 'Quadro',
+                    onPressed: () => setState(() => _quadro = !_quadro),
+                    icon: Icon(_quadro ? Icons.view_list_outlined : Icons.view_kanban_outlined),
+                  ),
                   PopupMenuButton<String>(
                     icon: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -114,7 +121,9 @@ class _PedidosPageState extends State<PedidosPage> {
                   : RefreshIndicator(
                       color: AppColors.primary,
                       onRefresh: _refreshData,
-                      child: isWeb ? _buildWebTable(provider) : _buildMobileList(provider),
+                      child: _quadro
+                          ? const PedidosKanban()
+                          : (isWeb ? _buildWebTable(provider) : _buildMobileList(provider)),
                     ),
             ),
           ],

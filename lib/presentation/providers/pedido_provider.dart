@@ -188,6 +188,20 @@ class PedidoProvider extends ChangeNotifier {
   // ============================================================
   // 🔄 Refresh
   // ============================================================
+  Future<bool> marcarPago(int id, {int? formaPagamentoId, double? valor}) async {
+    try {
+      final atualizado = await _pedidoRepository.marcarPago(id, formaPagamentoId: formaPagamentoId, valor: valor);
+      final index = _pedidos.indexWhere((p) => p.id == id);
+      if (index != -1) _pedidos[index] = atualizado;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<PedidoModel?> createPedido({
     required int clienteId,
     required String clienteNome,
@@ -195,6 +209,8 @@ class PedidoProvider extends ChangeNotifier {
     required List<Map<String, dynamic>> itens,
     String? observacoes,
     int? enderecoEntregaId,
+    String origem = 'dashboard',
+    String? etiqueta,
   }) async {
     try {
       final criado = await _pedidoRepository.createPedido(
@@ -204,6 +220,8 @@ class PedidoProvider extends ChangeNotifier {
         itens: itens,
         observacoes: observacoes,
         enderecoEntregaId: enderecoEntregaId,
+        origem: origem,
+        etiqueta: etiqueta,
       );
       _pedidos = [criado, ..._pedidos];
       notifyListeners();

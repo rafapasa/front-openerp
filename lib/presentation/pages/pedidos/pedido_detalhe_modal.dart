@@ -6,6 +6,7 @@ import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:front_openerp/presentation/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:front_openerp/presentation/pages/pedidos/pagamento_pedido_dialog.dart';
 
 Future<void> showPedidoDetalheModal(BuildContext context, int pedidoId) {
   final isWide = MediaQuery.of(context).size.width >= 720;
@@ -128,10 +129,14 @@ class _PedidoDetalheModalState extends State<PedidoDetalheModal> {
 
   Future<void> _marcarPago() async {
     if (_pedido == null || _busy) return;
-    setState(() {
-      _pedido = _pedido!.copyWith(pago: true, pagoEm: DateTime.now());
-    });
-    showSavedSnack(context, message: 'Marcado como pago (local — API em seguida)');
+    setState(() => _busy = true);
+    final ok = await showPagamentoPedidoDialog(context, _pedido!);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (ok) {
+      final atual = context.read<PedidoProvider>().pedidos.where((x) => x.id == _pedido!.id);
+      if (atual.isNotEmpty) setState(() => _pedido = atual.first);
+    }
   }
 
   void _ligar() {
@@ -305,17 +310,9 @@ hr { border: none; border-top: 1px dashed #000; }
           spacing: 8,
           runSpacing: 8,
           children: [
-            if (p.status == StatusPedido.pendente)
-              _actionBtn('Confirmar', () => _changeStatus(StatusPedido.confirmado)),
-            if (p.status == StatusPedido.confirmado || p.status == StatusPedido.pendente)
-              _actionBtn('Em preparo', () => _changeStatus(StatusPedido.emPreparo)),
-            if (p.status == StatusPedido.emPreparo || p.status == StatusPedido.preparando)
-              _actionBtn('Pronto', () => _changeStatus(StatusPedido.pronto)),
-            if (p.status == StatusPedido.pronto ||
-                p.status == StatusPedido.emPreparo ||
-                p.status == StatusPedido.preparando)
-              _actionBtn('Saiu p/ entrega', () => _changeStatus(StatusPedido.saiuEntrega)),
-            if (p.isAtivo) _actionBtn('Entregue', () => _changeStatus(StatusPedido.entregue)),
+            if (p.proximoOperacional != null)
+              _actionBtn(p.proximoLabel, () => _changeStatus(p.proximoOperacional!)),
+            if (p.isAtivo) _actionBtn('Cancelar', _recusar),
             if (p.podeCancelar)
               OutlinedButton(
                 onPressed: _busy ? null : _recusar,

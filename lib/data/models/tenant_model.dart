@@ -12,6 +12,7 @@ class TenantModel {
   final String? whatsappPhoneId;
   final String? whatsappDisplayNumber;
   final bool ativo;
+  final int? clienteBalcaoId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -27,6 +28,7 @@ class TenantModel {
     this.whatsappPhoneId,
     this.whatsappDisplayNumber,
     this.ativo = true,
+    this.clienteBalcaoId,
     this.createdAt,
     this.updatedAt,
   });

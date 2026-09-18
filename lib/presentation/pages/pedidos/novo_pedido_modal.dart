@@ -59,6 +59,7 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
   bool _buscandoCliente = false;
   bool _buscandoProduto = false;
   String _tipoEntrega = 'entrega';
+  final _etiqueta = TextEditingController();
   List<EnderecoModel> _enderecos = [];
   EnderecoModel? _endereco;
   bool _carregandoEnderecos = false;
@@ -70,6 +71,7 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
     _clienteBusca.dispose();
     _clienteFocus.dispose();
     _obs.dispose();
+    _etiqueta.dispose();
     _addItemFocus.dispose();
     _criarFocus.dispose();
     for (final l in _linhas) {
@@ -226,9 +228,15 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
   }
 
   Future<void> _criar() async {
-    if (_cliente == null) {
+    final auth = context.read<AuthProvider>();
+    final balcaoId = auth.tenantAtivo?.clienteBalcaoId;
+    if (_tipoEntrega != 'presencial' && _cliente == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecione ou crie um cliente')));
       _clienteFocus.requestFocus();
+      return;
+    }
+    if (_tipoEntrega == 'presencial' && _cliente == null && (balcaoId == null || balcaoId == 0)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tenant sem cliente Balcão. Rode o migrate da API.')));
       return;
     }
     if (_tipoEntrega == 'entrega' && _endereco == null) {
@@ -246,13 +254,21 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
       return;
     }
     setState(() => _saving = true);
+    final clienteId = _cliente?.id ?? balcaoId!;
+    final nome = _cliente?.nome ?? 'Balcão';
+    final fone = _cliente?.telefone ?? '';
+    final etiqueta = _etiqueta.text.trim().isNotEmpty
+        ? _etiqueta.text.trim()
+        : (_tipoEntrega == 'presencial' ? nome : '');
     final criado = await context.read<PedidoProvider>().createPedido(
-          clienteId: _cliente!.id,
-          clienteNome: _cliente!.nome,
-          clienteTelefone: _cliente!.telefone,
+          clienteId: clienteId,
+          clienteNome: nome,
+          clienteTelefone: fone,
           itens: itens,
           observacoes: _obs.text,
           enderecoEntregaId: _tipoEntrega == 'entrega' ? _endereco?.id : null,
+          origem: _tipoEntrega == 'presencial' ? 'presencial' : 'dashboard',
+          etiqueta: etiqueta,
         );
     if (!mounted) return;
     setState(() => _saving = false);
@@ -369,8 +385,22 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
                     selected: _tipoEntrega == 'retirada',
                     onSelected: _saving ? null : (_) => setState(() => _tipoEntrega = 'retirada'),
                   ),
+                  ChoiceChip(
+                    label: const Text('Balcão'),
+                    selected: _tipoEntrega == 'presencial',
+                    onSelected: _saving ? null : (_) => setState(() => _tipoEntrega = 'presencial'),
+                  ),
                 ],
               ),
+              if (_tipoEntrega == 'presencial' || _tipoEntrega == 'retirada' || _cliente != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: TextField(
+                    controller: _etiqueta,
+                    enabled: !_saving,
+                    decoration: const InputDecoration(hintText: 'Etiqueta (Mesa 3, João…)'),
+                  ),
+                ),
               if (_tipoEntrega == 'entrega') ...[
                 const SizedBox(height: 8),
                 if (_cliente == null)

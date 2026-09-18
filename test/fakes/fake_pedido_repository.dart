@@ -48,6 +48,13 @@ class FakePedidoRepository implements PedidoRepository {
   }
 
   @override
+  Future<PedidoModel> marcarPago(int id, {int? formaPagamentoId, double? valor, String? observacao}) async {
+    final i = store.indexWhere((p) => p.id == id);
+    store[i] = store[i].copyWith(pago: true, pagoEm: DateTime.now());
+    return store[i];
+  }
+
+  @override
   Future<PedidoModel> createPedido({
     required int clienteId,
     required String clienteNome,
@@ -55,6 +62,8 @@ class FakePedidoRepository implements PedidoRepository {
     required List<Map<String, dynamic>> itens,
     String? observacoes,
     int? enderecoEntregaId,
+    String origem = 'dashboard',
+    String? etiqueta,
   }) async {
     final pedido = PedidoModel(
       id: store.isEmpty ? 1 : store.first.id + 100,

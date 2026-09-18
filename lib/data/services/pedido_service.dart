@@ -85,6 +85,7 @@ class PedidoService {
     String? observacoes,
     int? enderecoEntregaId,
     String origem = 'dashboard',
+    String? etiqueta,
   }) async {
     final response = await _apiService.post('/pedidos', data: {
       'cliente_id': clienteId,
@@ -94,6 +95,7 @@ class PedidoService {
       if (observacoes != null && observacoes.trim().isNotEmpty) 'observacoes': observacoes.trim(),
       if (enderecoEntregaId != null) 'endereco_entrega_id': enderecoEntregaId,
       'origem': origem,
+      if (etiqueta != null && etiqueta.trim().isNotEmpty) 'etiqueta': etiqueta.trim(),
     });
     final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
     final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;

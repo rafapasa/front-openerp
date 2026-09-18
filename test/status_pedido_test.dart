@@ -7,14 +7,15 @@ void main() {
       expect(StatusPedido.fromString('pendente'), StatusPedido.pendente);
       expect(StatusPedido.fromString('confirmado'), StatusPedido.confirmado);
       expect(StatusPedido.fromString('em_preparo'), StatusPedido.emPreparo);
-      expect(StatusPedido.fromString('pronto'), StatusPedido.pronto);
-      expect(StatusPedido.fromString('saiu_entrega'), StatusPedido.saiuEntrega);
+      expect(StatusPedido.fromString('pronto'), StatusPedido.prontoRetirada);
+      expect(StatusPedido.fromString('pronto_retirada'), StatusPedido.prontoRetirada);
+      expect(StatusPedido.fromString('saiu_para_entrega'), StatusPedido.saiuEntrega);
       expect(StatusPedido.fromString('entregue'), StatusPedido.entregue);
       expect(StatusPedido.fromString('cancelado'), StatusPedido.cancelado);
     });
 
     test('aceita enum legado preparando', () {
-      expect(StatusPedido.fromString('preparando'), StatusPedido.preparando);
+      expect(StatusPedido.fromString('preparando'), StatusPedido.emPreparo);
     });
 
     test('é case-insensitive e aceita aliases de entrega/preparo', () {
@@ -33,9 +34,8 @@ void main() {
   group('StatusPedido.toStringValue', () {
     test('emite o contrato da API (snake_case, não camelCase)', () {
       expect(StatusPedido.emPreparo.toStringValue(), 'em_preparo');
-      expect(StatusPedido.saiuEntrega.toStringValue(), 'saiu_entrega');
-      expect(StatusPedido.pronto.toStringValue(), 'pronto');
-      expect(StatusPedido.preparando.toStringValue(), 'preparando');
+      expect(StatusPedido.saiuEntrega.toStringValue(), 'saiu_para_entrega');
+      expect(StatusPedido.prontoRetirada.toStringValue(), 'pronto_retirada');
       expect(StatusPedido.pendente.toStringValue(), 'pendente');
     });
 

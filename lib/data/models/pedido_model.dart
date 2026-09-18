@@ -141,6 +141,7 @@ class PedidoModel {
   final String? observacoes;
   final int? tempoEstimado;
   final OrigemPedido origem;
+  final String? etiqueta;
   final DateTime createdAt;
   final DateTime updatedAt;
   final ClienteModel? cliente;
@@ -164,6 +165,7 @@ class PedidoModel {
     this.observacoes,
     this.tempoEstimado,
     this.origem = OrigemPedido.whatsapp,
+    this.etiqueta,
     required this.createdAt,
     required this.updatedAt,
     this.cliente,
@@ -191,6 +193,7 @@ class PedidoModel {
       observacoes: json['observacoes'] as String?,
       tempoEstimado: json['tempo_estimado'] != null ? JsonHelper.toInt(json['tempo_estimado']) : null,
       origem: OrigemPedido.fromString(JsonHelper.toStr(json['origem'], fallback: 'whatsapp')),
+      etiqueta: JsonHelper.toStr(json['etiqueta']),
       createdAt: JsonHelper.toDateTimeOrNow(json['created_at']),
       updatedAt: JsonHelper.toDateTimeOrNow(json['updated_at']),
       cliente: json['cliente'] != null ? ClienteModel.fromJson(json['cliente'] as Map<String, dynamic>) : null,
@@ -273,6 +276,40 @@ class PedidoModel {
       status == StatusPedido.emPreparo;
   bool get isAtivo => status != StatusPedido.entregue && status != StatusPedido.cancelado;
   bool get isPago => pago == true || pagamentos.any((p) => p.isPago);
+  bool get isEntrega => enderecoEntregaId != null || enderecoEntrega != null;
+
+  StatusPedido? get proximoOperacional {
+    switch (status) {
+      case StatusPedido.pendente:
+        return StatusPedido.confirmado;
+      case StatusPedido.confirmado:
+        return StatusPedido.emPreparo;
+      case StatusPedido.emPreparo:
+        return isEntrega ? StatusPedido.saiuEntrega : StatusPedido.prontoRetirada;
+      case StatusPedido.prontoRetirada:
+      case StatusPedido.saiuEntrega:
+        return StatusPedido.entregue;
+      default:
+        return null;
+    }
+  }
+
+  String get proximoLabel {
+    switch (proximoOperacional) {
+      case StatusPedido.confirmado:
+        return 'Confirmar';
+      case StatusPedido.emPreparo:
+        return 'Preparar';
+      case StatusPedido.saiuEntrega:
+        return 'Saiu p/ entrega';
+      case StatusPedido.prontoRetirada:
+        return 'Pronto p/ retirar';
+      case StatusPedido.entregue:
+        return isEntrega ? 'Entregar' : 'Retirado';
+      default:
+        return '';
+    }
+  }
   String get formaPagamentoResumo {
     if (pagamentos.isEmpty) return '—';
     return pagamentos.map((p) => p.forma).join(', ');
