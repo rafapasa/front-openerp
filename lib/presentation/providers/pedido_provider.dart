@@ -37,6 +37,8 @@ class PedidoProvider extends ChangeNotifier {
 
   String? get statusFilter => _statusFilter;
   int? get clienteFilter => _clienteFilter;
+  String? get dataInicioFilter => _dataInicioFilter;
+  String? get dataFimFilter => _dataFimFilter;
 
   // ============================================================
   // 📊 Pedidos por Status (para gráficos)
