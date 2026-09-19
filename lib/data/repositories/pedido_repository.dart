@@ -124,6 +124,32 @@ class PedidoRepository {
   // ============================================================
   // 🗑️ Limpar cache
   // ============================================================
+  Future<PedidoModel> marcarPago(int id, {int? formaPagamentoId, double? valor, String? observacao}) {
+    return _pedidoService.marcarPago(id, formaPagamentoId: formaPagamentoId, valor: valor, observacao: observacao);
+  }
+
+  Future<PedidoModel> createPedido({
+    required int clienteId,
+    required String clienteNome,
+    String clienteTelefone = '',
+    required List<Map<String, dynamic>> itens,
+    String? observacoes,
+    int? enderecoEntregaId,
+    String origem = 'dashboard',
+    String? etiqueta,
+  }) {
+    return _pedidoService.createPedido(
+      clienteId: clienteId,
+      clienteNome: clienteNome,
+      clienteTelefone: clienteTelefone,
+      itens: itens,
+      observacoes: observacoes,
+      enderecoEntregaId: enderecoEntregaId,
+      origem: origem,
+      etiqueta: etiqueta,
+    );
+  }
+
   Future<void> clearCache() async {
     await LocalStorage.clearCache(LocalStorage.pedidosKey);
   }

@@ -77,7 +77,6 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
         return Icons.pending_outlined;
       case StatusPedido.confirmado:
         return Icons.check_circle_outline;
-      case StatusPedido.preparando:
         return Icons.soup_kitchen_outlined;
       case StatusPedido.entregue:
         return Icons.delivery_dining_outlined;
@@ -85,7 +84,7 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
         return Icons.cancel_outlined;
       case StatusPedido.emPreparo:
         return Icons.production_quantity_limits_outlined;
-      case StatusPedido.pronto:
+      case StatusPedido.prontoRetirada:
         return Icons.assignment_turned_in_outlined;
       case StatusPedido.saiuEntrega:
         return Icons.delivery_dining;

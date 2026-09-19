@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import '../pedidos/novo_pedido_modal.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -93,17 +94,50 @@ class _DashboardPageState extends State<DashboardPage> {
                         const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Dashboard — ERPCloud OpenERP', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+                            Text('Dashboard', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.textDark)),
                             SizedBox(height: 4),
                             Text('Visão geral do seu negócio em tempo real', style: TextStyle(color: AppColors.textGrey, fontSize: 13)),
                           ],
                         ),
                         const Spacer(),
+                        _DateChip(
+                          label: 'De',
+                          value: provider.dataInicio,
+                          onPick: (d) => provider.setPeriodo(d, provider.dataFim.isBefore(d) ? d : provider.dataFim),
+                        ),
+                        const SizedBox(width: 8),
+                        _DateChip(
+                          label: 'Até',
+                          value: provider.dataFim,
+                          onPick: (d) => provider.setPeriodo(provider.dataInicio.isAfter(d) ? d : provider.dataInicio, d),
+                        ),
+                        const SizedBox(width: 12),
                         OutlinedButton.icon(onPressed: _refreshData, icon: const Icon(Icons.download_outlined, size: 18), label: const Text('Exportar')),
                         const SizedBox(width: 12),
-                        FilledButton.icon(onPressed: () {}, style: FilledButton.styleFrom(backgroundColor: AppColors.accent), icon: const Icon(Icons.add, size: 18), label: const Text('Novo Pedido')),
+                        FilledButton.icon(onPressed: () => showNovoPedidoModal(context), style: FilledButton.styleFrom(backgroundColor: AppColors.accent), icon: const Icon(Icons.add, size: 18), label: const Text('Novo Pedido')),
                       ],
                     ),
+                  if (!isWeb) ...[
+                    const Text('Dashboard', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _DateChip(
+                          label: 'De',
+                          value: provider.dataInicio,
+                          onPick: (d) => provider.setPeriodo(d, provider.dataFim.isBefore(d) ? d : provider.dataFim),
+                        ),
+                        _DateChip(
+                          label: 'Até',
+                          value: provider.dataFim,
+                          onPick: (d) => provider.setPeriodo(provider.dataInicio.isAfter(d) ? d : provider.dataInicio, d),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   if (isWeb) const SizedBox(height: 24),
                   _buildMetricCards(provider, isWeb),
                   const SizedBox(height: 24),
@@ -139,7 +173,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       children: [
                         Icon(Icons.verified, size: 14, color: AppColors.accent),
                         SizedBox(width: 6),
-                        Text('Dados sincronizados • eTools Tecnologia • ERPCloud OpenERP v3.2.1', style: TextStyle(fontSize: 11, color: AppColors.textGrey)),
+                        Text('Dados sincronizados com o backend', style: TextStyle(fontSize: 11, color: AppColors.textGrey)),
                       ],
                     ),
                   ),
@@ -164,12 +198,12 @@ Widget _buildMetricCards(DashboardProvider provider, bool isWeb) {
     mainAxisSpacing: 16,
     childAspectRatio: isWeb ? 1.7 : 1.45,
     children: [
-      _MetricCard(title: 'Pedidos Hoje', value: provider.totalPedidosHoje.toString(), icon: Icons.shopping_cart_outlined, color: AppColors.primary, trend: '+12% vs ontem'),
-      _MetricCard(title: 'Faturamento Hoje', value: 'R\$ ${numberFormat.format(provider.faturamentoHoje)}', icon: Icons.attach_money, color: AppColors.accent, trend: '+8% vs ontem'),
-      _MetricCard(title: 'Clientes', value: provider.totalClientes.toString(), icon: Icons.people_outline, color: const Color(0xFF0EA5E9), trend: '+5% vs mês'),
-      _MetricCard(title: 'Pendentes', value: provider.pedidosPendentes.toString(), icon: Icons.pending_outlined, color: const Color(0xFFF59E0B), trend: '2 urgentes'),
-      if (isWeb) _MetricCard(title: 'Faturamento Mês', value: 'R\$ ${numberFormat.format(provider.faturamentoMes)}', icon: Icons.trending_up, color: AppColors.primaryDark, trend: 'Meta 78%'),
-      if (isWeb) _MetricCard(title: 'Taxa Conversão', value: '${provider.taxaConversao.toStringAsFixed(1)}%', icon: Icons.percent, color: const Color(0xFF8B5CF6), trend: '+2.1%'),
+      _MetricCard(title: 'Pedidos', value: provider.totalPedidosHoje.toString(), icon: Icons.shopping_cart_outlined, color: AppColors.primary),
+      _MetricCard(title: 'Faturamento', value: 'R\$ ${numberFormat.format(provider.faturamentoHoje)}', icon: Icons.attach_money, color: AppColors.accent),
+      _MetricCard(title: 'Clientes', value: provider.totalClientes.toString(), icon: Icons.people_outline, color: const Color(0xFF0EA5E9)),
+      _MetricCard(title: 'Pendentes', value: provider.pedidosPendentes.toString(), icon: Icons.pending_outlined, color: const Color(0xFFF59E0B)),
+      if (isWeb) _MetricCard(title: 'Faturamento Mês', value: 'R\$ ${numberFormat.format(provider.faturamentoMes)}', icon: Icons.trending_up, color: AppColors.primaryDark),
+      if (isWeb) _MetricCard(title: 'Taxa Conversão', value: '${provider.taxaConversao.toStringAsFixed(1)}%', icon: Icons.percent, color: const Color(0xFF8B5CF6)),
     ],
   );
 }
@@ -189,6 +223,9 @@ Widget _buildStatusChart(DashboardProvider provider) {
     'pendente': AppColors.warning,
     'confirmado': AppColors.primary,
     'preparando': const Color(0xFF8B5CF6),
+    'em_preparo': const Color(0xFF8B5CF6),
+    'saiu_para_entrega': const Color(0xFF0EA5E9),
+    'saiu_entrega': const Color(0xFF0EA5E9),
     'entregue': AppColors.accent,
     'cancelado': AppColors.error,
   };
@@ -279,7 +316,7 @@ Widget _buildRevenueCard(DashboardProvider provider) {
           child: LinearProgressIndicator(value: provider.faturamentoMes > 0 ? (provider.faturamentoHoje / provider.faturamentoMes).clamp(0, 1) : 0, backgroundColor: AppColors.background, color: AppColors.accent, minHeight: 8),
         ),
         const SizedBox(height: 8),
-        Text('${pct.toStringAsFixed(1)}% do faturamento mensal • Meta: R\$ 150.000', style: const TextStyle(fontSize: 11, color: AppColors.textGrey)),
+        Text('Valores do intervalo selecionado', style: const TextStyle(fontSize: 11, color: AppColors.textGrey)),
       ],
     ),
   );
@@ -290,9 +327,9 @@ class _MetricCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
-  final String trend;
+  final String? trend;
 
-  const _MetricCard({required this.title, required this.value, required this.icon, required this.color, required this.trend});
+  const _MetricCard({required this.title, required this.value, required this.icon, required this.color, this.trend});
 
   @override
   Widget build(BuildContext context) {
@@ -307,7 +344,7 @@ class _MetricCard extends StatelessWidget {
             children: [
               Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: color, size: 20)),
               const Spacer(),
-              Icon(Icons.trending_up, size: 14, color: AppColors.accent),
+              if (trend != null) Icon(Icons.trending_up, size: 14, color: AppColors.accent),
             ],
           ),
           Column(
@@ -317,7 +354,7 @@ class _MetricCard extends StatelessWidget {
               const SizedBox(height: 2),
               Text(title, style: const TextStyle(fontSize: 12, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
               const SizedBox(height: 6),
-              Text(trend, style: const TextStyle(fontSize: 11, color: AppColors.accent, fontWeight: FontWeight.w600)),
+              if (trend != null) Text(trend!, style: const TextStyle(fontSize: 11, color: AppColors.accent, fontWeight: FontWeight.w600)),
             ],
           ),
         ],
@@ -341,6 +378,32 @@ class _RevenueItem extends StatelessWidget {
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textGrey)),
       ],
+    );
+  }
+}
+
+
+class _DateChip extends StatelessWidget {
+  final String label;
+  final DateTime value;
+  final ValueChanged<DateTime> onPick;
+
+  const _DateChip({required this.label, required this.value, required this.onPick});
+
+  @override
+  Widget build(BuildContext context) {
+    final text = DateFormat('dd/MM/yyyy').format(value);
+    return OutlinedButton(
+      onPressed: () async {
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: value,
+          firstDate: DateTime(2024),
+          lastDate: DateTime.now().add(const Duration(days: 1)),
+        );
+        if (picked != null) onPick(picked);
+      },
+      child: Text('$label $text'),
     );
   }
 }

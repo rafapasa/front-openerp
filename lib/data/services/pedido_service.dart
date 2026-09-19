@@ -47,7 +47,6 @@ class PedidoService {
     return PedidoModel.fromJson(data);
   }
 
-  /// Endpoint ainda não existe no back. Quando existir, ligar em issue #14.
   Future<PedidoModel> marcarPago(int id, {int? formaPagamentoId, double? valor, String? observacao}) async {
     try {
       final response = await _apiService.patch(
@@ -76,5 +75,30 @@ class PedidoService {
       response.data as Map<String, dynamic>,
       (json) => PedidoModel.fromJson(json as Map<String, dynamic>),
     );
+  }
+
+  Future<PedidoModel> createPedido({
+    required int clienteId,
+    required String clienteNome,
+    String clienteTelefone = '',
+    required List<Map<String, dynamic>> itens,
+    String? observacoes,
+    int? enderecoEntregaId,
+    String origem = 'dashboard',
+    String? etiqueta,
+  }) async {
+    final response = await _apiService.post('/pedidos', data: {
+      'cliente_id': clienteId,
+      'cliente_nome': clienteNome,
+      'cliente_telefone': clienteTelefone,
+      'itens': itens,
+      if (observacoes != null && observacoes.trim().isNotEmpty) 'observacoes': observacoes.trim(),
+      if (enderecoEntregaId != null) 'endereco_entrega_id': enderecoEntregaId,
+      'origem': origem,
+      if (etiqueta != null && etiqueta.trim().isNotEmpty) 'etiqueta': etiqueta.trim(),
+    });
+    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    return PedidoModel.fromJson(data);
   }
 }

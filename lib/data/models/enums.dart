@@ -2,9 +2,8 @@
 enum StatusPedido {
   pendente,
   confirmado,
-  preparando,
   emPreparo,
-  pronto,
+  prontoRetirada,
   saiuEntrega,
   entregue,
   cancelado;
@@ -17,12 +16,13 @@ enum StatusPedido {
       case 'confirmado':
         return StatusPedido.confirmado;
       case 'preparando':
-        return StatusPedido.preparando;
       case 'em_preparo':
       case 'em-preparo':
         return StatusPedido.emPreparo;
       case 'pronto':
-        return StatusPedido.pronto;
+      case 'pronto_retirada':
+      case 'pronto-retirada':
+        return StatusPedido.prontoRetirada;
       case 'saiu_entrega':
       case 'saiu-entrega':
       case 'saiu_para_entrega':
@@ -43,18 +43,48 @@ enum StatusPedido {
         return 'pendente';
       case StatusPedido.confirmado:
         return 'confirmado';
-      case StatusPedido.preparando:
-        return 'preparando';
       case StatusPedido.emPreparo:
         return 'em_preparo';
-      case StatusPedido.pronto:
-        return 'pronto';
+      case StatusPedido.prontoRetirada:
+        return 'pronto_retirada';
       case StatusPedido.saiuEntrega:
-        return 'saiu_entrega';
+        return 'saiu_para_entrega';
       case StatusPedido.entregue:
         return 'entregue';
       case StatusPedido.cancelado:
         return 'cancelado';
+    }
+  }
+
+  StatusPedido? get proximoOperacional {
+    switch (this) {
+      case StatusPedido.pendente:
+        return StatusPedido.confirmado;
+      case StatusPedido.confirmado:
+        return StatusPedido.emPreparo;
+      case StatusPedido.emPreparo:
+        return null; // decide no PedidoModel (entrega vs retirada)
+      case StatusPedido.prontoRetirada:
+        return StatusPedido.entregue;
+      case StatusPedido.saiuEntrega:
+        return StatusPedido.entregue;
+      default:
+        return null;
+    }
+  }
+
+  String get proximoLabel {
+    switch (proximoOperacional) {
+      case StatusPedido.confirmado:
+        return 'Confirmar';
+      case StatusPedido.emPreparo:
+        return 'Preparar';
+      case StatusPedido.saiuEntrega:
+        return 'Saiu p/ entrega';
+      case StatusPedido.entregue:
+        return 'Entregar';
+      default:
+        return '';
     }
   }
 
@@ -64,12 +94,10 @@ enum StatusPedido {
         return 'Pendente';
       case StatusPedido.confirmado:
         return 'Confirmado';
-      case StatusPedido.preparando:
-        return 'Preparando';
       case StatusPedido.emPreparo:
         return 'Em preparo';
-      case StatusPedido.pronto:
-        return 'Pronto';
+      case StatusPedido.prontoRetirada:
+        return 'Pronto p/ retirar';
       case StatusPedido.saiuEntrega:
         return 'Saiu p/ entrega';
       case StatusPedido.entregue:
@@ -85,10 +113,9 @@ enum StatusPedido {
         return '#FF9800';
       case StatusPedido.confirmado:
         return '#2196F3';
-      case StatusPedido.preparando:
       case StatusPedido.emPreparo:
         return '#9C27B0';
-      case StatusPedido.pronto:
+      case StatusPedido.prontoRetirada:
         return '#00897B';
       case StatusPedido.saiuEntrega:
         return '#1565C0';
@@ -105,11 +132,10 @@ enum StatusPedido {
         return 'pending';
       case StatusPedido.confirmado:
         return 'check_circle';
-      case StatusPedido.preparando:
       case StatusPedido.emPreparo:
         return 'build';
-      case StatusPedido.pronto:
-        return 'done';
+      case StatusPedido.prontoRetirada:
+        return 'storefront';
       case StatusPedido.saiuEntrega:
         return 'local_shipping';
       case StatusPedido.entregue:
@@ -119,7 +145,7 @@ enum StatusPedido {
     }
   }
 
-  bool get isCozinha => this == StatusPedido.preparando || this == StatusPedido.emPreparo;
+  bool get isCozinha => this == StatusPedido.emPreparo;
 }
 
 /// Enum para origem do pedido
@@ -135,6 +161,8 @@ enum OrigemPedido {
       case 'whatsapp':
         return OrigemPedido.whatsapp;
       case 'web':
+        return OrigemPedido.web;
+      case 'dashboard':
         return OrigemPedido.web;
       case 'app':
         return OrigemPedido.app;
@@ -152,13 +180,45 @@ enum OrigemPedido {
       case OrigemPedido.whatsapp:
         return 'whatsapp';
       case OrigemPedido.web:
-        return 'web';
+        return 'dashboard';
       case OrigemPedido.app:
         return 'app';
       case OrigemPedido.presencial:
         return 'presencial';
       case OrigemPedido.telefone:
         return 'telefone';
+    }
+  }
+
+  StatusPedido? get proximoOperacional {
+    switch (this) {
+      case StatusPedido.pendente:
+        return StatusPedido.confirmado;
+      case StatusPedido.confirmado:
+        return StatusPedido.emPreparo;
+      case StatusPedido.emPreparo:
+        return null; // decide no PedidoModel (entrega vs retirada)
+      case StatusPedido.prontoRetirada:
+        return StatusPedido.entregue;
+      case StatusPedido.saiuEntrega:
+        return StatusPedido.entregue;
+      default:
+        return null;
+    }
+  }
+
+  String get proximoLabel {
+    switch (proximoOperacional) {
+      case StatusPedido.confirmado:
+        return 'Confirmar';
+      case StatusPedido.emPreparo:
+        return 'Preparar';
+      case StatusPedido.saiuEntrega:
+        return 'Saiu p/ entrega';
+      case StatusPedido.entregue:
+        return 'Entregar';
+      default:
+        return '';
     }
   }
 
@@ -209,6 +269,38 @@ enum TenantStatus {
         return 'bloqueado';
       case TenantStatus.suspenso:
         return 'suspenso';
+    }
+  }
+
+  StatusPedido? get proximoOperacional {
+    switch (this) {
+      case StatusPedido.pendente:
+        return StatusPedido.confirmado;
+      case StatusPedido.confirmado:
+        return StatusPedido.emPreparo;
+      case StatusPedido.emPreparo:
+        return null; // decide no PedidoModel (entrega vs retirada)
+      case StatusPedido.prontoRetirada:
+        return StatusPedido.entregue;
+      case StatusPedido.saiuEntrega:
+        return StatusPedido.entregue;
+      default:
+        return null;
+    }
+  }
+
+  String get proximoLabel {
+    switch (proximoOperacional) {
+      case StatusPedido.confirmado:
+        return 'Confirmar';
+      case StatusPedido.emPreparo:
+        return 'Preparar';
+      case StatusPedido.saiuEntrega:
+        return 'Saiu p/ entrega';
+      case StatusPedido.entregue:
+        return 'Entregar';
+      default:
+        return '';
     }
   }
 

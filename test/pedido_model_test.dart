@@ -15,6 +15,30 @@ Map<String, dynamic> pedidoMinimoJson() => {
       'updated_at': '2026-09-10T00:50:00Z',
     };
 
+Map<String, dynamic> pedidoWhatsAppJson() => {
+      'id': 12,
+      'cliente_nome': 'Rafael Pada',
+      'cliente_telefone': '49999999999',
+      'itens': [
+        {
+          'produto_item': {'id': 1, 'nome': 'X-Salada', 'preco': 25.9},
+          'quantidade': 1,
+          'preco_unitario': 25.9,
+          'observacao': 'sem cebola',
+        },
+        {
+          'produto_item': {'id': 2, 'nome': 'Coca 350ml'},
+          'qtd': 2,
+          'preco_unitario': 6.0,
+        },
+      ],
+      'total': 37.9,
+      'status': 'confirmado',
+      'origem': 'whatsapp',
+      'created_at': '2026-09-15T18:33:00Z',
+      'updated_at': '2026-09-15T18:33:00Z',
+    };
+
 Map<String, dynamic> pedidoCompletoJson() => {
       ...pedidoMinimoJson(),
       'status': 'cancelado',
@@ -66,6 +90,19 @@ void main() {
       expect(pedido.pago, isNull);
       expect(pedido.pagoEm, isNull);
       expect(pedido.motivoCancelamento, isNull);
+    });
+
+    test('item no formato WhatsApp (produto_item + preco_unitario)', () {
+      final pedido = PedidoModel.fromJson(pedidoWhatsAppJson());
+      expect(pedido.itens, hasLength(2));
+      expect(pedido.itens[0].nome, 'X-Salada');
+      expect(pedido.itens[0].quantidade, 1);
+      expect(pedido.itens[0].preco, closeTo(25.9, 0.001));
+      expect(pedido.itens[0].observacao, 'sem cebola');
+      expect(pedido.itens[1].nome, 'Coca 350ml');
+      expect(pedido.itens[1].quantidade, 2);
+      expect(pedido.itens[1].preco, closeTo(6.0, 0.001));
+      expect(pedido.itens[1].subtotal, closeTo(12.0, 0.001));
     });
 
     test('pedido com pagamentos, historico e motivo_cancelamento', () {

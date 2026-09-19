@@ -70,12 +70,15 @@ class _SplashPageState extends State<SplashPage> {
             ),
           ),
           Center(
-            child: Column(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Column(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 140,
-                  height: 140,
+                  width: 120,
+                  height: 120,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(28),
@@ -89,7 +92,7 @@ class _SplashPageState extends State<SplashPage> {
                   ),
                   padding: const EdgeInsets.all(16),
                   child: Image.asset(
-                    'assets/Icone_azul_500x500.png',
+                    'assets/images/Icone_azul_500x500.png',
                     errorBuilder: (_, _, _) => const Icon(Icons.bolt, size: 60, color: AppColors.primary),
                   ),
                 ),
@@ -98,20 +101,9 @@ class _SplashPageState extends State<SplashPage> {
                   'OpenERP',
                   style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('ERPCloud', style: TextStyle(fontSize: 14, color: Colors.white70, fontWeight: FontWeight.w600, letterSpacing: 1.5)),
-                    const SizedBox(width: 8),
-                    Container(width: 4, height: 4, decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle)),
-                    const SizedBox(width: 8),
-                    const Text('by eTools', style: TextStyle(fontSize: 14, color: AppColors.accent, fontWeight: FontWeight.w700)),
-                  ],
-                ),
                 const SizedBox(height: 12),
                 const Text('Soluções inteligentes para sua empresa.', style: TextStyle(fontSize: 13, color: Colors.white60)),
-                const SizedBox(height: 56),
+                const SizedBox(height: 24),
                 const SizedBox(
                   width: 32,
                   height: 32,
@@ -120,6 +112,7 @@ class _SplashPageState extends State<SplashPage> {
                 const SizedBox(height: 16),
                 Text('v3.2.1 • eTools Tecnologia', style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.5))),
               ],
+            ),
             ),
           ),
         ],

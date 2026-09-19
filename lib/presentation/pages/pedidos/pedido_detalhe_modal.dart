@@ -6,6 +6,7 @@ import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:front_openerp/presentation/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:front_openerp/presentation/pages/pedidos/pagamento_pedido_dialog.dart';
 
 Future<void> showPedidoDetalheModal(BuildContext context, int pedidoId) {
   final isWide = MediaQuery.of(context).size.width >= 720;
@@ -128,10 +129,14 @@ class _PedidoDetalheModalState extends State<PedidoDetalheModal> {
 
   Future<void> _marcarPago() async {
     if (_pedido == null || _busy) return;
-    setState(() {
-      _pedido = _pedido!.copyWith(pago: true, pagoEm: DateTime.now());
-    });
-    showSavedSnack(context, message: 'Marcado como pago (local — API em seguida)');
+    setState(() => _busy = true);
+    final ok = await showPagamentoPedidoDialog(context, _pedido!);
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (ok) {
+      final atual = context.read<PedidoProvider>().pedidos.where((x) => x.id == _pedido!.id);
+      if (atual.isNotEmpty) setState(() => _pedido = atual.first);
+    }
   }
 
   void _ligar() {
@@ -197,6 +202,7 @@ hr { border: none; border-top: 1px dashed #000; }
                 ? Center(child: Text(_error!))
                 : _body(),
           ),
+          if (!_loading && _error == null && _pedido != null) _footerAcoes(_pedido!),
         ],
       ),
     );
@@ -242,113 +248,230 @@ hr { border: none; border-top: 1px dashed #000; }
     );
   }
 
+
+  Widget _card({required String titulo, required Widget child}) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              border: Border(bottom: BorderSide(color: AppColors.border)),
+            ),
+            child: Text(
+              titulo.toUpperCase(),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textGrey, letterSpacing: 0.6),
+            ),
+          ),
+          Padding(padding: const EdgeInsets.all(12), child: child),
+        ],
+      ),
+    );
+  }
+
+  Widget _sideBtn(IconData icon, String label, Color color, VoidCallback onTap) {
+    return SizedBox(
+      width: 108,
+      child: OutlinedButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon, size: 16, color: color),
+        label: Text(label, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w700)),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          side: BorderSide(color: color.withValues(alpha: 0.35)),
+          visualDensity: VisualDensity.compact,
+        ),
+      ),
+    );
+  }
+
   Widget _body() {
     final p = _pedido!;
     final money = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     final date = DateFormat('dd/MM HH:mm');
+    final e = p.enderecoEntrega;
+    final linhaEndereco = e == null
+        ? (p.isEntrega ? 'Endereço não informado' : 'Retirada no local')
+        : '${e.logradouro}, ${e.numero}${e.complemento != null && e.complemento!.isNotEmpty ? ' — ${e.complemento}' : ''}';
+    final linhaCidade = e == null ? '' : '${e.cidade} / ${e.estado}';
+
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       children: [
-        _sectionTitle('Cliente'),
-        Text(p.clienteNome, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-        Text(p.clienteTelefone, style: const TextStyle(color: AppColors.textGrey)),
-        if (p.enderecoEntrega != null) ...[
-          const SizedBox(height: 4),
-          Text(p.enderecoEntrega!.enderecoCompleto, style: const TextStyle(fontSize: 13)),
-        ],
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _chipAction(Icons.call, 'Ligar', _ligar),
-            _chipAction(Icons.chat, 'WhatsApp', _whatsapp),
-            _chipAction(Icons.map_outlined, 'Maps', _maps),
-          ],
+        _card(
+          titulo: 'Cliente',
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(p.clienteNome, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
+                    const SizedBox(height: 6),
+                    Text(linhaEndereco, style: const TextStyle(fontSize: 15)),
+                    if (linhaCidade.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(linhaCidade, style: const TextStyle(fontSize: 13, color: AppColors.textGrey)),
+                    ],
+                    if (p.etiqueta != null && p.etiqueta!.trim().isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(p.etiqueta!, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                children: [
+                  _sideBtn(Icons.call, 'Ligar', AppColors.primary, _ligar),
+                  const SizedBox(height: 6),
+                  _sideBtn(Icons.chat, 'WhatsApp', const Color(0xFF25D366), _whatsapp),
+                  const SizedBox(height: 6),
+                  _sideBtn(Icons.map_outlined, 'Maps', const Color(0xFFEA4335), _maps),
+                ],
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 16),
-        _sectionTitle('Itens'),
-        ...p.itens.map(
-          (i) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '${i.quantidade}× ${i.nome}${i.observacao != null && i.observacao!.isNotEmpty ? ' (${i.observacao})' : ''}',
+        const SizedBox(height: 10),
+        _card(
+          titulo: 'Itens',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...p.itens.map(
+                (i) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 36,
+                        child: Text(
+                          '${i.quantidade}',
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          '${i.nome}${i.observacao != null && i.observacao!.isNotEmpty ? ' (${i.observacao})' : ''}',
+                        ),
+                      ),
+                      Text(money.format(i.subtotal), style: const TextStyle(fontWeight: FontWeight.w700)),
+                    ],
                   ),
                 ),
-                Text(money.format(i.subtotal), style: const TextStyle(fontWeight: FontWeight.w600)),
-              ],
-            ),
-          ),
-        ),
-        if (p.observacoes != null && p.observacoes!.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Text('Obs.: ${p.observacoes}', style: const TextStyle(color: AppColors.textGrey)),
-        ],
-        const SizedBox(height: 16),
-        _sectionTitle('Pagamento'),
-        Text('${p.formaPagamentoResumo} · ${p.isPago ? 'Pago' : 'Pendente'}'),
-        if (!p.isPago)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: _busy ? null : _marcarPago,
-              icon: const Icon(Icons.check_circle_outline),
-              label: const Text('Marcar como pago'),
-            ),
-          ),
-        const SizedBox(height: 8),
-        _sectionTitle('Ações de status'),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            if (p.status == StatusPedido.pendente)
-              _actionBtn('Confirmar', () => _changeStatus(StatusPedido.confirmado)),
-            if (p.status == StatusPedido.confirmado || p.status == StatusPedido.pendente)
-              _actionBtn('Em preparo', () => _changeStatus(StatusPedido.emPreparo)),
-            if (p.status == StatusPedido.emPreparo || p.status == StatusPedido.preparando)
-              _actionBtn('Pronto', () => _changeStatus(StatusPedido.pronto)),
-            if (p.status == StatusPedido.pronto ||
-                p.status == StatusPedido.emPreparo ||
-                p.status == StatusPedido.preparando)
-              _actionBtn('Saiu p/ entrega', () => _changeStatus(StatusPedido.saiuEntrega)),
-            if (p.isAtivo) _actionBtn('Entregue', () => _changeStatus(StatusPedido.entregue)),
-            if (p.podeCancelar)
-              OutlinedButton(
-                onPressed: _busy ? null : _recusar,
-                style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
-                child: const Text('Recusar'),
               ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _sectionTitle('Timeline'),
-        if (p.historico.isEmpty) ...[
-          Text('Criado ${date.format(p.createdAt)}', style: const TextStyle(fontSize: 13)),
-          Text('Atualizado ${date.format(p.updatedAt)} · ${p.statusLabel}', style: const TextStyle(fontSize: 13)),
-          if (p.motivoCancelamento != null)
-            Text('Motivo: ${p.motivoCancelamento}', style: const TextStyle(fontSize: 13)),
-        ] else
-          ...p.historico.map(
-            (h) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Text(
-                '• ${date.format(h.createdAt)}  ${h.statusNovo}${h.usuarioNome != null ? ' (${h.usuarioNome})' : ''}${h.motivo != null ? ' — ${h.motivo}' : ''}',
-                style: const TextStyle(fontSize: 13),
+              if (p.observacoes != null && p.observacoes!.isNotEmpty)
+                Text('Obs.: ${p.observacoes}', style: const TextStyle(color: AppColors.textGrey, fontSize: 13)),
+              const Divider(),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(p.totalFormatado, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
               ),
-            ),
+            ],
           ),
-        const SizedBox(height: 16),
-        OutlinedButton.icon(
-          onPressed: _printCupom,
-          icon: const Icon(Icons.print_outlined),
-          label: const Text('Imprimir cupom 80mm'),
         ),
-        if (_busy) const Padding(padding: EdgeInsets.only(top: 12), child: LinearProgressIndicator()),
+        const SizedBox(height: 10),
+        _card(
+          titulo: 'Pagamento',
+          child: Row(
+            children: [
+              Icon(
+                p.isPago ? Icons.check_circle : Icons.schedule,
+                size: 36,
+                color: p.isPago ? Colors.green : const Color(0xFFF59E0B),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      p.isPago ? 'PAGO' : 'EM ABERTO',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: p.isPago ? Colors.green : const Color(0xFFF59E0B),
+                      ),
+                    ),
+                    Text(p.formaPagamentoResumo, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+              if (!p.isPago)
+                _sideBtn(Icons.payments_outlined, 'Receber', AppColors.accent, _marcarPago),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        _card(
+          titulo: 'Timeline',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (p.historico.isEmpty) ...[
+                Text('Criado ${date.format(p.createdAt)}', style: const TextStyle(fontSize: 13)),
+                Text('Atualizado ${date.format(p.updatedAt)} · ${p.statusLabel}', style: const TextStyle(fontSize: 13)),
+                if (p.motivoCancelamento != null) Text('Motivo: ${p.motivoCancelamento}', style: const TextStyle(fontSize: 13)),
+              ] else
+                ...p.historico.map(
+                  (h) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      '${date.format(h.createdAt)}  ${h.statusNovo}${h.usuarioNome != null ? ' (${h.usuarioNome})' : ''}${h.motivo != null ? ' — ${h.motivo}' : ''}',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: _sideBtn(Icons.receipt_long, 'Cupom', AppColors.primary, _printCupom),
+              ),
+            ],
+          ),
+        ),
+        if (_busy) const Padding(padding: EdgeInsets.only(top: 8), child: LinearProgressIndicator()),
       ],
+    );
+  }
+
+  Widget _footerAcoes(PedidoModel p) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 14),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (p.proximoOperacional != null) ...[
+            FilledButton(
+              onPressed: _busy ? null : () => _changeStatus(p.proximoOperacional!),
+              style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
+              child: Text(p.proximoLabel),
+            ),
+            const SizedBox(width: 8),
+          ],
+          if (p.isAtivo)
+            OutlinedButton(
+              onPressed: _busy ? null : _recusar,
+              style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
+              child: const Text('Cancelar'),
+            ),
+        ],
+      ),
     );
   }
 

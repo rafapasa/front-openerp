@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 
 class ApiService {
   static const String baseUrl = 'https://mcp-server.etoolstec.com.br/api/v1';
-  // static const String baseUrl = 'http://localhost:8080/api/v1';
+  //  static const String baseUrl = 'http://localhost:8082/api/v1';
   static const String defaultTenantId = '0';
 
   late final Dio _dio;
