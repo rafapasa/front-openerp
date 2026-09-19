@@ -94,7 +94,12 @@ class _PedidosPageState extends State<PedidosPage> {
                       if (status == 'todos') {
                         provider.clearFilters();
                       } else {
-                        provider.loadPedidos(status: status);
+                        provider.loadPedidos(
+                          status: status,
+                          clienteId: provider.clienteFilter,
+                          dataInicio: provider.dataInicioFilter,
+                          dataFim: provider.dataFimFilter,
+                        );
                       }
                     },
                     itemBuilder: (context) => [

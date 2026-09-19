@@ -245,12 +245,12 @@ class PedidoProvider extends ChangeNotifier {
   // ============================================================
   // 🗑️ Limpar Filtros
   // ============================================================
-  void clearFilters() {
+  Future<void> clearFilters() async {
     _statusFilter = null;
     _clienteFilter = null;
     _dataInicioFilter = null;
     _dataFimFilter = null;
-    notifyListeners();
+    await loadPedidos(forceRefresh: true);
   }
 
   // ============================================================
