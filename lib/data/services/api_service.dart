@@ -47,10 +47,12 @@ class ApiService {
           return handler.next(options);
         },
         onError: (error, handler) async {
-          // Se token expirou (401), tentar renovar
-          if (error.response?.statusCode == 401) {
-            // TODO: Implementar refresh token
-            // Por enquanto, apenas limpar token
+          final code = error.response?.statusCode;
+          final path = error.requestOptions.path;
+          if (path.contains('/login')) {
+            return handler.next(error);
+          }
+          if (code == 401 || code == 403) {
             await _clearToken();
           }
           return handler.next(error);
