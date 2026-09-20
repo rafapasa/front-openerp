@@ -4,6 +4,7 @@ import 'package:front_openerp/core/helpers/snack_helper.dart';
 import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:front_openerp/presentation/theme/app_colors.dart';
+import 'package:front_openerp/presentation/widgets/app_section_card.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pagamento_pedido_dialog.dart';
@@ -249,37 +250,7 @@ hr { border: none; border-top: 1px dashed #000; }
   }
 
   Widget _card({required String titulo, required Widget child}) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: const BoxDecoration(
-              color: Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-              border: Border(bottom: BorderSide(color: AppColors.border)),
-            ),
-            child: Text(
-              titulo.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textGrey,
-                letterSpacing: 0.6,
-              ),
-            ),
-          ),
-          Padding(padding: const EdgeInsets.all(12), child: child),
-        ],
-      ),
-    );
+    return AppSectionCard(titulo: titulo, child: child);
   }
 
   Widget _sideBtn(IconData icon, String label, Color color, VoidCallback onTap) {
