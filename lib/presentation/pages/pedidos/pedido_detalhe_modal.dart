@@ -248,7 +248,6 @@ hr { border: none; border-top: 1px dashed #000; }
     );
   }
 
-
   Widget _card({required String titulo, required Widget child}) {
     return Container(
       width: double.infinity,
@@ -269,7 +268,12 @@ hr { border: none; border-top: 1px dashed #000; }
             ),
             child: Text(
               titulo.toUpperCase(),
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textGrey, letterSpacing: 0.6),
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textGrey,
+                letterSpacing: 0.6,
+              ),
             ),
           ),
           Padding(padding: const EdgeInsets.all(12), child: child),
@@ -284,7 +288,10 @@ hr { border: none; border-top: 1px dashed #000; }
       child: OutlinedButton.icon(
         onPressed: onTap,
         icon: Icon(icon, size: 16, color: color),
-        label: Text(label, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w700)),
+        label: Text(
+          label,
+          style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w700),
+        ),
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           side: BorderSide(color: color.withValues(alpha: 0.35)),
@@ -408,8 +415,7 @@ hr { border: none; border-top: 1px dashed #000; }
                   ],
                 ),
               ),
-              if (!p.isPago)
-                _sideBtn(Icons.payments_outlined, 'Receber', AppColors.accent, _marcarPago),
+              if (!p.isPago) _sideBtn(Icons.payments_outlined, 'Receber', AppColors.accent, _marcarPago),
             ],
           ),
         ),
@@ -422,7 +428,8 @@ hr { border: none; border-top: 1px dashed #000; }
               if (p.historico.isEmpty) ...[
                 Text('Criado ${date.format(p.createdAt)}', style: const TextStyle(fontSize: 13)),
                 Text('Atualizado ${date.format(p.updatedAt)} · ${p.statusLabel}', style: const TextStyle(fontSize: 13)),
-                if (p.motivoCancelamento != null) Text('Motivo: ${p.motivoCancelamento}', style: const TextStyle(fontSize: 13)),
+                if (p.motivoCancelamento != null)
+                  Text('Motivo: ${p.motivoCancelamento}', style: const TextStyle(fontSize: 13)),
               ] else
                 ...p.historico.map(
                   (h) => Padding(
@@ -474,22 +481,4 @@ hr { border: none; border-top: 1px dashed #000; }
       ),
     );
   }
-
-  Widget _sectionTitle(String t) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Text(
-      t.toUpperCase(),
-      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textGrey, letterSpacing: 0.6),
-    ),
-  );
-
-  Widget _chipAction(IconData icon, String label, VoidCallback onTap) => ActionChip(
-    avatar: Icon(icon, size: 16, color: AppColors.primary),
-    label: Text(label),
-    onPressed: onTap,
-    backgroundColor: AppColors.primaryLight,
-  );
-
-  Widget _actionBtn(String label, VoidCallback onTap) =>
-      FilledButton(onPressed: _busy ? null : onTap, child: Text(label));
 }

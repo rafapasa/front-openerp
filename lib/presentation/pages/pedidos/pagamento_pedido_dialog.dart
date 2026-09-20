@@ -4,6 +4,7 @@ import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/data/services/api_service.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:provider/provider.dart';
+
 import '../../theme/app_colors.dart';
 
 class _Forma {
@@ -41,7 +42,7 @@ Future<bool> showPagamentoPedidoDialog(BuildContext context, PedidoModel pedido)
               const Text('Nenhuma forma cadastrada. O pagamento será só marcado como pago.')
             else
               DropdownButtonFormField<int>(
-                value: formaId,
+                initialValue: formaId,
                 decoration: const InputDecoration(hintText: 'Forma de pagamento'),
                 items: formas.map((f) => DropdownMenuItem(value: f.id, child: Text(f.nome))).toList(),
                 onChanged: (v) => formaId = v,
