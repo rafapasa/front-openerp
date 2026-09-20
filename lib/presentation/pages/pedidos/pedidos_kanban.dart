@@ -31,9 +31,7 @@ const _transicoes = <StatusPedido, Set<StatusPedido>>{
   StatusPedido.cancelado: {},
 };
 
-bool _naColuna(PedidoModel p, StatusPedido col) {
-  return p.status == col;
-}
+bool _naColuna(PedidoModel p, StatusPedido col) => p.status == col;
 
 bool _aceitaDrop(PedidoModel p, StatusPedido dest) {
   if (_naColuna(p, dest)) return false;
@@ -48,28 +46,22 @@ class PedidosKanban extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PedidoProvider>();
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (var i = 0; i < _colunas.length; i++) ...[
-                if (i > 0) const SizedBox(width: 8),
-                Expanded(
-                  child: _Coluna(
-                    status: _colunas[i],
-                    pedidos: provider.pedidos
-                        .where((p) => _naColuna(p, _colunas[i]))
-                        .toList(),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        );
-      },
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < _colunas.length; i++) ...[
+            if (i > 0) const SizedBox(width: 8),
+            Expanded(
+              child: _Coluna(
+                status: _colunas[i],
+                pedidos: provider.pedidos.where((p) => _naColuna(p, _colunas[i])).toList(),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -88,31 +80,20 @@ class _Coluna extends StatelessWidget {
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('Cancelar pedido'),
-          content: TextField(
-            controller: ctrl,
-            decoration: const InputDecoration(hintText: 'Motivo'),
-            autofocus: true,
-          ),
+          content: TextField(controller: ctrl, decoration: const InputDecoration(hintText: 'Motivo'), autofocus: true),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Voltar')),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-              child: const Text('Cancelar pedido'),
-            ),
+            FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('Cancelar pedido')),
           ],
         ),
       );
       if (motivo == null) return;
     }
-    final ok = await context.read<PedidoProvider>().updateStatus(
-          pedido.id,
-          status,
-          motivo: motivo,
-        );
+    final ok = await context.read<PedidoProvider>().updateStatus(pedido.id, status, motivo: motivo);
     if (!context.mounted) return;
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.read<PedidoProvider>().error ?? 'Não foi possível mover o pedido')),
+        SnackBar(content: Text(context.read<PedidoProvider>().error ?? 'Nao foi possivel mover o pedido')),
       );
     }
   }
@@ -124,8 +105,7 @@ class _Coluna extends StatelessWidget {
       onAcceptWithDetails: (d) => _receber(context, d.data),
       builder: (context, candidate, rejected) {
         final overOk = candidate.isNotEmpty;
-        final overBad = rejected.isNotEmpty;
-        final blocked = overBad && !overOk;
+        final blocked = rejected.isNotEmpty && !overOk;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           decoration: BoxDecoration(
@@ -136,62 +116,48 @@ class _Coluna extends StatelessWidget {
                     : const Color(0xFFF4F6F8),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: blocked
-                  ? AppColors.border
-                  : overOk
-                      ? AppColors.accent
-                      : AppColors.border,
+              color: overOk ? AppColors.accent : AppColors.border,
               width: overOk ? 2 : 1,
             ),
           ),
           child: Opacity(
             opacity: blocked ? 0.45 : 1,
-            child: IgnorePointer(
-              ignoring: blocked,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            status.label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                          ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          status.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                         ),
-                        Text(
-                          '${pedidos.length}',
-                          style: const TextStyle(color: AppColors.textGrey, fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
+                      ),
+                      Text('${pedidos.length}', style: const TextStyle(color: AppColors.textGrey, fontWeight: FontWeight.w600)),
+                    ],
                   ),
-                  Expanded(
-                    child: ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                      itemCount: pedidos.isEmpty ? 1 : pedidos.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 8),
-                      itemBuilder: (_, i) {
-                        if (pedidos.isEmpty) {
-                          return Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Text(
-                              blocked ? '' : 'Solte aqui',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: AppColors.textGrey, fontSize: 12),
-                            ),
-                          );
-                        }
-                        return _CardKanban(pedido: pedidos[i]);
-                      },
-                    ),
+                ),
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                    itemCount: pedidos.isEmpty ? 1 : pedidos.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    itemBuilder: (_, i) {
+                      if (pedidos.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: Text('Solte aqui', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textGrey, fontSize: 12)),
+                        );
+                      }
+                      return _CardKanban(pedido: pedidos[i]);
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
@@ -232,15 +198,11 @@ class _CardKanban extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                (pedido.etiqueta != null && pedido.etiqueta!.trim().isNotEmpty)
-                    ? pedido.etiqueta!
-                    : pedido.clienteNome,
+                (pedido.etiqueta != null && pedido.etiqueta!.trim().isNotEmpty) ? pedido.etiqueta! : pedido.clienteNome,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontWeight: (pedido.etiqueta != null && pedido.etiqueta!.trim().isNotEmpty)
-                      ? FontWeight.w800
-                      : FontWeight.w400,
+                  fontWeight: (pedido.etiqueta != null && pedido.etiqueta!.trim().isNotEmpty) ? FontWeight.w800 : FontWeight.w400,
                 ),
               ),
               const SizedBox(height: 4),
@@ -256,18 +218,12 @@ class _CardKanban extends StatelessWidget {
                 Row(
                   children: [
                     if (!pedido.isPago && pedido.status != StatusPedido.cancelado)
-                      TextButton(
-                        onPressed: () => showPagamentoPedidoDialog(context, pedido),
-                        child: const Text('Pago'),
-                      ),
+                      TextButton(onPressed: () => showPagamentoPedidoDialog(context, pedido), child: const Text('Pago')),
                     const Spacer(),
                     if (next != null)
                       FilledButton(
                         onPressed: () => context.read<PedidoProvider>().updateStatus(pedido.id, next),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.accent,
-                          visualDensity: VisualDensity.compact,
-                        ),
+                        style: FilledButton.styleFrom(backgroundColor: AppColors.accent, visualDensity: VisualDensity.compact),
                         child: Text(pedido.proximoLabel),
                       ),
                   ],
