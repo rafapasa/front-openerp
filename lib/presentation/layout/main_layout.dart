@@ -190,10 +190,7 @@ class MainLayout extends StatelessWidget {
                       Container(height: 1, color: AppColors.border),
                       // Conteúdo centralizado com maxWidth
                       Expanded(
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 1280), child: child),
-                        ),
+                        child: child,
                       ),
                     ],
                   ),

@@ -86,11 +86,11 @@ class _DashboardPageState extends State<DashboardPage> {
         color: AppColors.primary,
         onRefresh: _refreshData,
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(isWeb ? 24 : 16),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           physics: const AlwaysScrollableScrollPhysics(),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1280),
+              constraints: const BoxConstraints(maxWidth: double.infinity),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

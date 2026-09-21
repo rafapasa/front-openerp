@@ -5,6 +5,7 @@ import 'package:front_openerp/presentation/pages/pedidos/pagamento_pedido_dialog
 import 'package:front_openerp/presentation/providers/pedido_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../../theme/app_colors.dart';
 
 const _colunas = <StatusPedido>[
@@ -14,17 +15,12 @@ const _colunas = <StatusPedido>[
   StatusPedido.prontoRetirada,
   StatusPedido.saiuEntrega,
   StatusPedido.entregue,
-  StatusPedido.cancelado,
 ];
 
 const _transicoes = <StatusPedido, Set<StatusPedido>>{
   StatusPedido.pendente: {StatusPedido.confirmado, StatusPedido.cancelado},
   StatusPedido.confirmado: {StatusPedido.emPreparo, StatusPedido.cancelado},
-  StatusPedido.emPreparo: {
-    StatusPedido.saiuEntrega,
-    StatusPedido.prontoRetirada,
-    StatusPedido.cancelado,
-  },
+  StatusPedido.emPreparo: {StatusPedido.saiuEntrega, StatusPedido.prontoRetirada, StatusPedido.cancelado},
   StatusPedido.prontoRetirada: {StatusPedido.entregue, StatusPedido.cancelado},
   StatusPedido.saiuEntrega: {StatusPedido.entregue, StatusPedido.cancelado},
   StatusPedido.entregue: {},
@@ -46,22 +42,31 @@ class PedidosKanban extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PedidoProvider>();
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < _colunas.length; i++) ...[
-            if (i > 0) const SizedBox(width: 8),
-            Expanded(
-              child: _Coluna(
-                status: _colunas[i],
-                pedidos: provider.pedidos.where((p) => _naColuna(p, _colunas[i])).toList(),
-              ),
-            ),
-          ],
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final n = _colunas.length;
+        final gap = 8.0;
+        final colW = (constraints.maxWidth - gap * (n - 1)) / n;
+        return SizedBox(
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < n; i++) ...[
+                if (i > 0) SizedBox(width: gap),
+                Expanded(
+                  child: _Coluna(
+                    status: _colunas[i],
+                    colunaLargura: colW,
+                    pedidos: provider.pedidos.where((p) => _naColuna(p, _colunas[i])).toList(),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -69,7 +74,8 @@ class PedidosKanban extends StatelessWidget {
 class _Coluna extends StatelessWidget {
   final StatusPedido status;
   final List<PedidoModel> pedidos;
-  const _Coluna({required this.status, required this.pedidos});
+  final double colunaLargura;
+  const _Coluna({required this.status, required this.pedidos, required this.colunaLargura});
 
   Future<void> _receber(BuildContext context, PedidoModel pedido) async {
     if (!_aceitaDrop(pedido, status)) return;
@@ -80,7 +86,11 @@ class _Coluna extends StatelessWidget {
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('Cancelar pedido'),
-          content: TextField(controller: ctrl, decoration: const InputDecoration(hintText: 'Motivo'), autofocus: true),
+          content: TextField(
+            controller: ctrl,
+            decoration: const InputDecoration(hintText: 'Motivo'),
+            autofocus: true,
+          ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Voltar')),
             FilledButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('Cancelar pedido')),
@@ -112,13 +122,10 @@ class _Coluna extends StatelessWidget {
             color: blocked
                 ? const Color(0xFFE8EAED)
                 : overOk
-                    ? AppColors.accent.withValues(alpha: 0.08)
-                    : const Color(0xFFF4F6F8),
+                ? AppColors.accent.withValues(alpha: 0.08)
+                : const Color(0xFFF4F6F8),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: overOk ? AppColors.accent : AppColors.border,
-              width: overOk ? 2 : 1,
-            ),
+            border: Border.all(color: overOk ? AppColors.accent : AppColors.border, width: overOk ? 2 : 1),
           ),
           child: Opacity(
             opacity: blocked ? 0.45 : 1,
@@ -126,7 +133,7 @@ class _Coluna extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
                   child: Row(
                     children: [
                       Expanded(
@@ -134,26 +141,33 @@ class _Coluna extends StatelessWidget {
                           status.label,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
                         ),
                       ),
-                      Text('${pedidos.length}', style: const TextStyle(color: AppColors.textGrey, fontWeight: FontWeight.w600)),
+                      Text(
+                        '${pedidos.length}',
+                        style: const TextStyle(color: AppColors.textGrey, fontWeight: FontWeight.w600, fontSize: 12),
+                      ),
                     ],
                   ),
                 ),
                 Expanded(
                   child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                    padding: const EdgeInsets.fromLTRB(6, 0, 6, 8),
                     itemCount: pedidos.isEmpty ? 1 : pedidos.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    separatorBuilder: (_, _) => const SizedBox(height: 6),
                     itemBuilder: (_, i) {
                       if (pedidos.isEmpty) {
                         return const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Text('Solte aqui', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textGrey, fontSize: 12)),
+                          padding: EdgeInsets.all(8),
+                          child: Text(
+                            'Solte aqui',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: AppColors.textGrey, fontSize: 11),
+                          ),
                         );
                       }
-                      return _CardKanban(pedido: pedidos[i]);
+                      return _CardKanban(pedido: pedidos[i], colunaLargura: colunaLargura);
                     },
                   ),
                 ),
@@ -168,7 +182,8 @@ class _Coluna extends StatelessWidget {
 
 class _CardKanban extends StatelessWidget {
   final PedidoModel pedido;
-  const _CardKanban({required this.pedido});
+  final double colunaLargura;
+  const _CardKanban({required this.pedido, required this.colunaLargura});
 
   Widget _corpo(BuildContext context, {required bool dragging}) {
     final money = NumberFormat.simpleCurrency(locale: 'pt_BR');
@@ -178,22 +193,37 @@ class _CardKanban extends StatelessWidget {
       elevation: dragging ? 8 : 0,
       color: Colors.white,
       borderRadius: BorderRadius.circular(10),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
         onTap: dragging ? null : () => showPedidoDetalheModal(context, pedido.id),
         child: Padding(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(8),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
-                  const Icon(Icons.drag_indicator, size: 16, color: AppColors.textGrey),
+                  const Icon(Icons.drag_indicator, size: 14, color: AppColors.textGrey),
+                  const SizedBox(width: 2),
+                  Flexible(
+                    child: Text(
+                      '#${pedido.id}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+                    ),
+                  ),
                   const SizedBox(width: 4),
-                  Text('#${pedido.id}', style: const TextStyle(fontWeight: FontWeight.w800)),
-                  const Spacer(),
-                  Text(money.format(pedido.total), style: const TextStyle(fontWeight: FontWeight.w700)),
+                  Flexible(
+                    child: Text(
+                      money.format(pedido.total),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
@@ -202,29 +232,56 @@ class _CardKanban extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontWeight: (pedido.etiqueta != null && pedido.etiqueta!.trim().isNotEmpty) ? FontWeight.w800 : FontWeight.w400,
+                  fontSize: 12,
+                  fontWeight: (pedido.etiqueta != null && pedido.etiqueta!.trim().isNotEmpty)
+                      ? FontWeight.w800
+                      : FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 4),
               Wrap(
-                spacing: 6,
+                spacing: 4,
+                runSpacing: 4,
                 children: [
                   _chip(entrega ? 'Entrega' : 'Retirada', AppColors.primary),
                   _chip(pedido.isPago ? 'Pago' : 'Em aberto', pedido.isPago ? Colors.green : const Color(0xFFF59E0B)),
                 ],
               ),
               if (!dragging) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Row(
                   children: [
                     if (!pedido.isPago && pedido.status != StatusPedido.cancelado)
-                      TextButton(onPressed: () => showPagamentoPedidoDialog(context, pedido), child: const Text('Pago')),
-                    const Spacer(),
+                      Flexible(
+                        child: TextButton(
+                          onPressed: () => showPagamentoPedidoDialog(context, pedido),
+                          style: TextButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('Pago', overflow: TextOverflow.ellipsis),
+                        ),
+                      ),
                     if (next != null)
-                      FilledButton(
-                        onPressed: () => context.read<PedidoProvider>().updateStatus(pedido.id, next),
-                        style: FilledButton.styleFrom(backgroundColor: AppColors.accent, visualDensity: VisualDensity.compact),
-                        child: Text(pedido.proximoLabel),
+                      Expanded(
+                        flex: 2,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: FilledButton(
+                              onPressed: () => context.read<PedidoProvider>().updateStatus(pedido.id, next),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.accent,
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(pedido.proximoLabel, maxLines: 1),
+                            ),
+                          ),
+                        ),
                       ),
                   ],
                 ),
@@ -238,10 +295,11 @@ class _CardKanban extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final w = colunaLargura * 0.92;
     return Draggable<PedidoModel>(
       data: pedido,
       dragAnchorStrategy: pointerDragAnchorStrategy,
-      feedback: SizedBox(width: 220, child: _corpo(context, dragging: true)),
+      feedback: SizedBox(width: w, child: _corpo(context, dragging: true)),
       childWhenDragging: Opacity(opacity: 0.35, child: _corpo(context, dragging: false)),
       child: _corpo(context, dragging: false),
     );
@@ -249,9 +307,14 @@ class _CardKanban extends StatelessWidget {
 
   Widget _chip(String t, Color c) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
-      child: Text(t, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: c)),
+      child: Text(
+        t,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: c),
+      ),
     );
   }
 }
