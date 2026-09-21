@@ -93,7 +93,7 @@ class _TenantsPageState extends State<TenantsPage> {
           }).toList();
 
           return Padding(
-            padding: EdgeInsets.all(isWeb ? 24 : 0),
+            padding: EdgeInsets.zero,
             child: Column(
               children: [
                 // Toolbar

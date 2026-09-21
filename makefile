@@ -363,3 +363,6 @@ git-push:
 
 git-branch-6:
 	git checkout -B front-6
+
+git-restore-dash:
+	git checkout -- lib/presentation/pages/dashboard/dashboard_page.dart

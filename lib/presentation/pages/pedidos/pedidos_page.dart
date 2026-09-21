@@ -56,7 +56,7 @@ class _PedidosPageState extends State<PedidosPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Padding(
-        padding: EdgeInsets.all(isWeb ? 24 : 0),
+        padding: EdgeInsets.zero,
         child: Column(
           children: [
             // Toolbar

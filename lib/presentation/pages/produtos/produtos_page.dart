@@ -60,7 +60,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Padding(
-        padding: EdgeInsets.all(isWeb ? 24 : 0),
+        padding: EdgeInsets.zero,
         child: Column(
           children: [
             Container(

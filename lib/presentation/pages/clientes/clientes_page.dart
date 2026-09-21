@@ -66,7 +66,7 @@ class _ClientesPageState extends State<ClientesPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Padding(
-        padding: EdgeInsets.all(isWeb ? 24 : 0),
+        padding: EdgeInsets.zero,
         child: Column(
           children: [
             // Toolbar
