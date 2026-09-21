@@ -1,3 +1,4 @@
+import 'package:front_openerp/core/helpers/json_helper.dart';
 import 'package:front_openerp/data/models/models.dart';
 
 import 'services.dart';
@@ -31,9 +32,7 @@ class PedidoService {
 
   Future<PedidoModel> getPedidoById(int id) async {
     final response = await _apiService.get('/pedidos/$id');
-    final map = response.data as Map<String, dynamic>;
-    final data = map['data'] as Map<String, dynamic>;
-    return PedidoModel.fromJson(data);
+    return PedidoModel.fromJson(_mapPedido(response.data));
   }
 
   Future<PedidoModel> updateStatusPedido(int id, StatusPedido status, {String? motivo}) async {
@@ -42,9 +41,7 @@ class PedidoService {
       if (motivo != null && motivo.trim().isNotEmpty) 'motivo': motivo.trim(),
     };
     final response = await _apiService.patch('/pedidos/$id/status', data: body);
-    final map = response.data as Map<String, dynamic>;
-    final data = map['data'] as Map<String, dynamic>;
-    return PedidoModel.fromJson(data);
+    return PedidoModel.fromJson(_mapPedido(response.data));
   }
 
   Future<PedidoModel> marcarPago(int id, {int? formaPagamentoId, double? valor, String? observacao}) async {
@@ -101,4 +98,14 @@ class PedidoService {
     final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
     return PedidoModel.fromJson(data);
   }
+}
+
+
+Map<String, dynamic> _mapPedido(dynamic raw) {
+  final data = JsonHelper.extractData(raw);
+  if (data is Map<String, dynamic>) return data;
+  if (data is Map) return Map<String, dynamic>.from(data);
+  if (raw is Map<String, dynamic>) return raw;
+  if (raw is Map) return Map<String, dynamic>.from(raw);
+  throw Exception('Resposta de pedido invalida');
 }

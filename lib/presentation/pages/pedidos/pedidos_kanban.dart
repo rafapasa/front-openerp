@@ -29,12 +29,7 @@ const _transicoes = <StatusPedido, Set<StatusPedido>>{
 
 bool _naColuna(PedidoModel p, StatusPedido col) => p.status == col;
 
-bool _aceitaDrop(PedidoModel p, StatusPedido dest) {
-  if (_naColuna(p, dest)) return false;
-  if (dest == StatusPedido.saiuEntrega && !p.isEntrega) return false;
-  if (dest == StatusPedido.prontoRetirada && p.isEntrega) return false;
-  return _transicoes[p.status]?.contains(dest) ?? false;
-}
+bool _aceitaDrop(PedidoModel p, StatusPedido dest) => pedidoPodeMoverPara(p, dest);
 
 class PedidosKanban extends StatelessWidget {
   const PedidosKanban({super.key});
@@ -271,7 +266,13 @@ class _CardKanban extends StatelessWidget {
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             child: FilledButton(
-                              onPressed: () => context.read<PedidoProvider>().updateStatus(pedido.id, next),
+                              onPressed: () async {
+                              final ok = await context.read<PedidoProvider>().updateStatus(pedido.id, next);
+                              if (!context.mounted || ok) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(context.read<PedidoProvider>().error ?? 'Nao foi possivel atualizar')),
+                              );
+                            },
                               style: FilledButton.styleFrom(
                                 backgroundColor: AppColors.accent,
                                 visualDensity: VisualDensity.compact,
