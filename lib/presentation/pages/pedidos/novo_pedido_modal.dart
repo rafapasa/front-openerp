@@ -5,15 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:provider/provider.dart';
+
 import '../../theme/app_colors.dart';
 import '../clientes/novo_cliente_dialog.dart';
 
 Future<void> showNovoPedidoModal(BuildContext context) {
-  return showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => const NovoPedidoModal(),
-  );
+  return showDialog(context: context, barrierDismissible: false, builder: (_) => const NovoPedidoModal());
 }
 
 class _LinhaItem {
@@ -147,7 +144,10 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
     if (!mounted) return;
     setState(() {
       _enderecos = list;
-      _endereco = list.where((e) => e.principal).cast<EnderecoModel?>().firstWhere((_) => true, orElse: () => list.isEmpty ? null : list.first);
+      _endereco = list
+          .where((e) => e.principal)
+          .cast<EnderecoModel?>()
+          .firstWhere((_) => true, orElse: () => list.isEmpty ? null : list.first);
       _carregandoEnderecos = false;
     });
   }
@@ -236,7 +236,8 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
       return;
     }
     if (_tipoEntrega == 'presencial' && _cliente == null && (balcaoId == null || balcaoId == 0)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tenant sem cliente Balcão. Rode o migrate da API.')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Tenant sem cliente Balcão. Rode o migrate da API.')));
       return;
     }
     if (_tipoEntrega == 'entrega' && _endereco == null) {
@@ -261,26 +262,29 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
         ? _etiqueta.text.trim()
         : (_tipoEntrega == 'presencial' ? nome : '');
     final criado = await context.read<PedidoProvider>().createPedido(
-          clienteId: clienteId,
-          clienteNome: nome,
-          clienteTelefone: fone,
-          itens: itens,
-          observacoes: _obs.text,
-          enderecoEntregaId: _tipoEntrega == 'entrega' ? _endereco?.id : null,
-          origem: _tipoEntrega == 'presencial' ? 'presencial' : 'dashboard',
-          etiqueta: etiqueta,
-        );
+      clienteId: clienteId,
+      clienteNome: nome,
+      clienteTelefone: fone,
+      itens: itens,
+      observacoes: _obs.text,
+      enderecoEntregaId: _tipoEntrega == 'entrega' ? _endereco?.id : null,
+      origem: _tipoEntrega == 'presencial' ? 'presencial' : 'dashboard',
+      etiqueta: etiqueta,
+    );
     if (!mounted) return;
     setState(() => _saving = false);
     if (criado == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.read<PedidoProvider>().error ?? 'Falha ao criar pedido')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(context.read<PedidoProvider>().error ?? 'Falha ao criar pedido')));
       return;
     }
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Pedido #${criado.id} criado'), behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 2)),
+      SnackBar(
+        content: Text('Pedido #${criado.id} criado'),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
     );
     context.read<DashboardProvider>().refreshDashboard();
   }
@@ -300,7 +304,9 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
             children: [
               Row(
                 children: [
-                  const Expanded(child: Text('Novo pedido', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800))),
+                  const Expanded(
+                    child: Text('Novo pedido', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                  ),
                   IconButton(onPressed: _saving ? null : () => Navigator.pop(context), icon: const Icon(Icons.close)),
                 ],
               ),
@@ -323,7 +329,11 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
                           suffixIcon: _buscandoCliente
                               ? const Padding(
                                   padding: EdgeInsets.all(12),
-                                  child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                                  child: SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  ),
                                 )
                               : null,
                         ),
@@ -404,14 +414,20 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
               if (_tipoEntrega == 'entrega') ...[
                 const SizedBox(height: 8),
                 if (_cliente == null)
-                  const Text('Selecione o cliente para confirmar o endereço.', style: TextStyle(fontSize: 13, color: AppColors.textGrey))
+                  const Text(
+                    'Selecione o cliente para confirmar o endereço.',
+                    style: TextStyle(fontSize: 13, color: AppColors.textGrey),
+                  )
                 else if (_carregandoEnderecos)
                   const LinearProgressIndicator(minHeight: 2)
                 else if (_enderecos.isEmpty)
-                  const Text('Este cliente não tem endereço cadastrado.', style: TextStyle(fontSize: 13, color: AppColors.error))
+                  const Text(
+                    'Este cliente não tem endereço cadastrado.',
+                    style: TextStyle(fontSize: 13, color: AppColors.error),
+                  )
                 else
                   DropdownButtonFormField<EnderecoModel>(
-                    value: _endereco,
+                    initialValue: _endereco,
                     isExpanded: true,
                     decoration: const InputDecoration(hintText: 'Confirmar endereço de entrega'),
                     items: _enderecos
@@ -500,9 +516,9 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
                                 onPressed: _saving || _linhas.length == 1
                                     ? null
                                     : () => setState(() {
-                                          linha.dispose();
-                                          _linhas.removeAt(i);
-                                        }),
+                                        linha.dispose();
+                                        _linhas.removeAt(i);
+                                      }),
                                 icon: const Icon(Icons.remove_circle_outline),
                               ),
                             ],
@@ -550,14 +566,21 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Text('Total  R\$ ${_total.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                  Text(
+                    'Total  R\$ ${_total.toStringAsFixed(2)}',
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                  ),
                   const Spacer(),
                   FilledButton(
                     focusNode: _criarFocus,
                     onPressed: _saving ? null : _criar,
                     style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
                     child: _saving
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
                         : const Text('Criar'),
                   ),
                 ],

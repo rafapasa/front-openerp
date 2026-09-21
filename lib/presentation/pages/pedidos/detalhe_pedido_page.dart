@@ -77,7 +77,6 @@ class _DetalhePedidoPageState extends State<DetalhePedidoPage> {
         return Icons.pending_outlined;
       case StatusPedido.confirmado:
         return Icons.check_circle_outline;
-        return Icons.soup_kitchen_outlined;
       case StatusPedido.entregue:
         return Icons.delivery_dining_outlined;
       case StatusPedido.cancelado:

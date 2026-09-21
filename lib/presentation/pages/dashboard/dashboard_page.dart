@@ -6,6 +6,7 @@ import 'package:front_openerp/data/models/enums.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
 import '../pedidos/novo_pedido_modal.dart';
@@ -47,7 +48,9 @@ class _DashboardPageState extends State<DashboardPage> {
     final isWeb = MediaQuery.of(context).size.width > 800;
 
     if (_isLoading || provider.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.primary)));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
     }
 
     if (provider.error != null) {
@@ -60,7 +63,11 @@ class _DashboardPageState extends State<DashboardPage> {
               const SizedBox(height: 16),
               Text('Erro ao carregar dados', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
-              Text(provider.error!, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textGrey)),
+              Text(
+                provider.error!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: AppColors.textGrey),
+              ),
               const SizedBox(height: 16),
               FilledButton(onPressed: _loadData, child: const Text('Tentar novamente')),
             ],
@@ -94,9 +101,15 @@ class _DashboardPageState extends State<DashboardPage> {
                         const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Dashboard', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+                            Text(
+                              'Dashboard',
+                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.textDark),
+                            ),
                             SizedBox(height: 4),
-                            Text('Visão geral do seu negócio em tempo real', style: TextStyle(color: AppColors.textGrey, fontSize: 13)),
+                            Text(
+                              'Visão geral do seu negócio em tempo real',
+                              style: TextStyle(color: AppColors.textGrey, fontSize: 13),
+                            ),
                           ],
                         ),
                         const Spacer(),
@@ -109,16 +122,29 @@ class _DashboardPageState extends State<DashboardPage> {
                         _DateChip(
                           label: 'Até',
                           value: provider.dataFim,
-                          onPick: (d) => provider.setPeriodo(provider.dataInicio.isAfter(d) ? d : provider.dataInicio, d),
+                          onPick: (d) =>
+                              provider.setPeriodo(provider.dataInicio.isAfter(d) ? d : provider.dataInicio, d),
                         ),
                         const SizedBox(width: 12),
-                        OutlinedButton.icon(onPressed: _refreshData, icon: const Icon(Icons.download_outlined, size: 18), label: const Text('Exportar')),
+                        OutlinedButton.icon(
+                          onPressed: _refreshData,
+                          icon: const Icon(Icons.download_outlined, size: 18),
+                          label: const Text('Exportar'),
+                        ),
                         const SizedBox(width: 12),
-                        FilledButton.icon(onPressed: () => showNovoPedidoModal(context), style: FilledButton.styleFrom(backgroundColor: AppColors.accent), icon: const Icon(Icons.add, size: 18), label: const Text('Novo Pedido')),
+                        FilledButton.icon(
+                          onPressed: () => showNovoPedidoModal(context),
+                          style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
+                          icon: const Icon(Icons.add, size: 18),
+                          label: const Text('Novo Pedido'),
+                        ),
                       ],
                     ),
                   if (!isWeb) ...[
-                    const Text('Dashboard', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textDark)),
+                    const Text(
+                      'Dashboard',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textDark),
+                    ),
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
@@ -132,7 +158,8 @@ class _DashboardPageState extends State<DashboardPage> {
                         _DateChip(
                           label: 'Até',
                           value: provider.dataFim,
-                          onPick: (d) => provider.setPeriodo(provider.dataInicio.isAfter(d) ? d : provider.dataInicio, d),
+                          onPick: (d) =>
+                              provider.setPeriodo(provider.dataInicio.isAfter(d) ? d : provider.dataInicio, d),
                         ),
                       ],
                     ),
@@ -167,13 +194,20 @@ class _DashboardPageState extends State<DashboardPage> {
                   // Footer eTools
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.borderLight)),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.verified, size: 14, color: AppColors.accent),
                         SizedBox(width: 6),
-                        Text('Dados sincronizados com o backend', style: TextStyle(fontSize: 11, color: AppColors.textGrey)),
+                        Text(
+                          'Dados sincronizados com o backend',
+                          style: TextStyle(fontSize: 11, color: AppColors.textGrey),
+                        ),
                       ],
                     ),
                   ),
@@ -198,12 +232,44 @@ Widget _buildMetricCards(DashboardProvider provider, bool isWeb) {
     mainAxisSpacing: 16,
     childAspectRatio: isWeb ? 1.7 : 1.45,
     children: [
-      _MetricCard(title: 'Pedidos', value: provider.totalPedidosHoje.toString(), icon: Icons.shopping_cart_outlined, color: AppColors.primary),
-      _MetricCard(title: 'Faturamento', value: 'R\$ ${numberFormat.format(provider.faturamentoHoje)}', icon: Icons.attach_money, color: AppColors.accent),
-      _MetricCard(title: 'Clientes', value: provider.totalClientes.toString(), icon: Icons.people_outline, color: const Color(0xFF0EA5E9)),
-      _MetricCard(title: 'Pendentes', value: provider.pedidosPendentes.toString(), icon: Icons.pending_outlined, color: const Color(0xFFF59E0B)),
-      if (isWeb) _MetricCard(title: 'Faturamento Mês', value: 'R\$ ${numberFormat.format(provider.faturamentoMes)}', icon: Icons.trending_up, color: AppColors.primaryDark),
-      if (isWeb) _MetricCard(title: 'Taxa Conversão', value: '${provider.taxaConversao.toStringAsFixed(1)}%', icon: Icons.percent, color: const Color(0xFF8B5CF6)),
+      _MetricCard(
+        title: 'Pedidos',
+        value: provider.totalPedidosHoje.toString(),
+        icon: Icons.shopping_cart_outlined,
+        color: AppColors.primary,
+      ),
+      _MetricCard(
+        title: 'Faturamento',
+        value: 'R\$ ${numberFormat.format(provider.faturamentoHoje)}',
+        icon: Icons.attach_money,
+        color: AppColors.accent,
+      ),
+      _MetricCard(
+        title: 'Clientes',
+        value: provider.totalClientes.toString(),
+        icon: Icons.people_outline,
+        color: const Color(0xFF0EA5E9),
+      ),
+      _MetricCard(
+        title: 'Pendentes',
+        value: provider.pedidosPendentes.toString(),
+        icon: Icons.pending_outlined,
+        color: const Color(0xFFF59E0B),
+      ),
+      if (isWeb)
+        _MetricCard(
+          title: 'Faturamento Mês',
+          value: 'R\$ ${numberFormat.format(provider.faturamentoMes)}',
+          icon: Icons.trending_up,
+          color: AppColors.primaryDark,
+        ),
+      if (isWeb)
+        _MetricCard(
+          title: 'Taxa Conversão',
+          value: '${provider.taxaConversao.toStringAsFixed(1)}%',
+          icon: Icons.percent,
+          color: const Color(0xFF8B5CF6),
+        ),
     ],
   );
 }
@@ -215,7 +281,9 @@ Widget _buildStatusChart(DashboardProvider provider) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: AppTheme.cardDecoration,
-      child: Center(child: Text('Sem dados de pedidos por status', style: TextStyle(color: Colors.grey[600]))),
+      child: Center(
+        child: Text('Sem dados de pedidos por status', style: TextStyle(color: Colors.grey[600])),
+      ),
     );
   }
 
@@ -241,7 +309,11 @@ Widget _buildStatusChart(DashboardProvider provider) {
       children: [
         Row(
           children: [
-            Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.pie_chart_outline, size: 18, color: AppColors.primary)),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(8)),
+              child: const Icon(Icons.pie_chart_outline, size: 18, color: AppColors.primary),
+            ),
             const SizedBox(width: 10),
             const Text('Pedidos por Status', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             const Spacer(),
@@ -276,8 +348,14 @@ Widget _buildStatusChart(DashboardProvider provider) {
             final status = StatusPedido.fromString(entry.key);
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(color: (colors[entry.key] ?? Colors.grey).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
-              child: Text('${status.label}: ${entry.value}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: colors[entry.key] ?? Colors.grey)),
+              decoration: BoxDecoration(
+                color: (colors[entry.key] ?? Colors.grey).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '${status.label}: ${entry.value}',
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: colors[entry.key] ?? Colors.grey),
+              ),
             );
           }).toList(),
         ),
@@ -288,7 +366,6 @@ Widget _buildStatusChart(DashboardProvider provider) {
 
 Widget _buildRevenueCard(DashboardProvider provider) {
   final numberFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-  final pct = provider.faturamentoMes > 0 ? (provider.faturamentoHoje / provider.faturamentoMes) * 100 : 0;
 
   return Container(
     decoration: AppTheme.cardDecoration,
@@ -298,7 +375,11 @@ Widget _buildRevenueCard(DashboardProvider provider) {
       children: [
         Row(
           children: [
-            Container(padding: const EdgeInsets.all(8), decoration: const BoxDecoration(color: AppColors.accentLight, shape: BoxShape.circle), child: const Icon(Icons.attach_money, size: 18, color: AppColors.accent)),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(color: AppColors.accentLight, shape: BoxShape.circle),
+              child: const Icon(Icons.attach_money, size: 18, color: AppColors.accent),
+            ),
             const SizedBox(width: 10),
             const Text('Faturamento', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           ],
@@ -306,14 +387,31 @@ Widget _buildRevenueCard(DashboardProvider provider) {
         const SizedBox(height: 20),
         Row(
           children: [
-            Expanded(child: _RevenueItem(label: 'Hoje', value: numberFormat.format(provider.faturamentoHoje), color: AppColors.accent)),
-            Expanded(child: _RevenueItem(label: 'Mês', value: numberFormat.format(provider.faturamentoMes), color: AppColors.primary)),
+            Expanded(
+              child: _RevenueItem(
+                label: 'Hoje',
+                value: numberFormat.format(provider.faturamentoHoje),
+                color: AppColors.accent,
+              ),
+            ),
+            Expanded(
+              child: _RevenueItem(
+                label: 'Mês',
+                value: numberFormat.format(provider.faturamentoMes),
+                color: AppColors.primary,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(value: provider.faturamentoMes > 0 ? (provider.faturamentoHoje / provider.faturamentoMes).clamp(0, 1) : 0, backgroundColor: AppColors.background, color: AppColors.accent, minHeight: 8),
+          child: LinearProgressIndicator(
+            value: provider.faturamentoMes > 0 ? (provider.faturamentoHoje / provider.faturamentoMes).clamp(0, 1) : 0,
+            backgroundColor: AppColors.background,
+            color: AppColors.accent,
+            minHeight: 8,
+          ),
         ),
         const SizedBox(height: 8),
         Text('Valores do intervalo selecionado', style: const TextStyle(fontSize: 11, color: AppColors.textGrey)),
@@ -329,7 +427,7 @@ class _MetricCard extends StatelessWidget {
   final Color color;
   final String? trend;
 
-  const _MetricCard({required this.title, required this.value, required this.icon, required this.color, this.trend});
+  const _MetricCard({required this.title, required this.value, required this.icon, required this.color}) : trend = null;
 
   @override
   Widget build(BuildContext context) {
@@ -342,7 +440,14 @@ class _MetricCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: color, size: 20)),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
               const Spacer(),
               if (trend != null) Icon(Icons.trending_up, size: 14, color: AppColors.accent),
             ],
@@ -350,11 +455,22 @@ class _MetricCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textDark), overflow: TextOverflow.ellipsis),
+              Text(
+                value,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textDark),
+                overflow: TextOverflow.ellipsis,
+              ),
               const SizedBox(height: 2),
-              Text(title, style: const TextStyle(fontSize: 12, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 12, color: AppColors.textGrey, fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 6),
-              if (trend != null) Text(trend!, style: const TextStyle(fontSize: 11, color: AppColors.accent, fontWeight: FontWeight.w600)),
+              if (trend != null)
+                Text(
+                  trend!,
+                  style: const TextStyle(fontSize: 11, color: AppColors.accent, fontWeight: FontWeight.w600),
+                ),
             ],
           ),
         ],
@@ -374,14 +490,16 @@ class _RevenueItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: color)),
+        Text(
+          value,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: color),
+        ),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textGrey)),
       ],
     );
   }
 }
-
 
 class _DateChip extends StatelessWidget {
   final String label;

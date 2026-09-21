@@ -190,38 +190,6 @@ enum OrigemPedido {
     }
   }
 
-  StatusPedido? get proximoOperacional {
-    switch (this) {
-      case StatusPedido.pendente:
-        return StatusPedido.confirmado;
-      case StatusPedido.confirmado:
-        return StatusPedido.emPreparo;
-      case StatusPedido.emPreparo:
-        return null; // decide no PedidoModel (entrega vs retirada)
-      case StatusPedido.prontoRetirada:
-        return StatusPedido.entregue;
-      case StatusPedido.saiuEntrega:
-        return StatusPedido.entregue;
-      default:
-        return null;
-    }
-  }
-
-  String get proximoLabel {
-    switch (proximoOperacional) {
-      case StatusPedido.confirmado:
-        return 'Confirmar';
-      case StatusPedido.emPreparo:
-        return 'Preparar';
-      case StatusPedido.saiuEntrega:
-        return 'Saiu p/ entrega';
-      case StatusPedido.entregue:
-        return 'Entregar';
-      default:
-        return '';
-    }
-  }
-
   String get label {
     switch (this) {
       case OrigemPedido.whatsapp:
@@ -269,38 +237,6 @@ enum TenantStatus {
         return 'bloqueado';
       case TenantStatus.suspenso:
         return 'suspenso';
-    }
-  }
-
-  StatusPedido? get proximoOperacional {
-    switch (this) {
-      case StatusPedido.pendente:
-        return StatusPedido.confirmado;
-      case StatusPedido.confirmado:
-        return StatusPedido.emPreparo;
-      case StatusPedido.emPreparo:
-        return null; // decide no PedidoModel (entrega vs retirada)
-      case StatusPedido.prontoRetirada:
-        return StatusPedido.entregue;
-      case StatusPedido.saiuEntrega:
-        return StatusPedido.entregue;
-      default:
-        return null;
-    }
-  }
-
-  String get proximoLabel {
-    switch (proximoOperacional) {
-      case StatusPedido.confirmado:
-        return 'Confirmar';
-      case StatusPedido.emPreparo:
-        return 'Preparar';
-      case StatusPedido.saiuEntrega:
-        return 'Saiu p/ entrega';
-      case StatusPedido.entregue:
-        return 'Entregar';
-      default:
-        return '';
     }
   }
 

@@ -359,3 +359,7 @@ endif
 	git commit -m "$(MSG)"
 git-push:
 	git push -u origin HEAD
+
+
+git-branch-6:
+	git checkout -B front-6
