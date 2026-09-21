@@ -20,6 +20,7 @@ class PedidosPage extends StatefulWidget {
 
 class _PedidosPageState extends State<PedidosPage> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _busca = TextEditingController();
   bool _quadro = true;
 
   @override
@@ -32,6 +33,7 @@ class _PedidosPageState extends State<PedidosPage> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _busca.dispose();
     super.dispose();
   }
 
@@ -66,8 +68,24 @@ class _PedidosPageState extends State<PedidosPage> {
                   const Icon(Icons.shopping_cart_outlined, size: 18, color: AppColors.textGrey),
                   const SizedBox(width: 8),
                   Text(
-                    '${provider.pedidos.length} pedidos',
+                    '${_filtrados(provider.pedidos).length} pedidos',
                     style: const TextStyle(color: AppColors.textGrey, fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 180,
+                    height: 36,
+                    child: TextField(
+                      controller: _busca,
+                      decoration: const InputDecoration(
+                        hintText: 'Nome, #pedido',
+                        prefixIcon: Icon(Icons.search, size: 18),
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (_) => setState(() {}),
+                    ),
                   ),
                   const Spacer(),
                   IconButton(
@@ -107,7 +125,7 @@ class _PedidosPageState extends State<PedidosPage> {
                       const PopupMenuItem(value: 'pendente', child: Text('Pendentes')),
                       const PopupMenuItem(value: 'confirmado', child: Text('Confirmados')),
                       const PopupMenuItem(value: 'em_preparo', child: Text('Em preparo')),
-                      const PopupMenuItem(value: 'pronto', child: Text('Prontos')),
+                      const PopupMenuItem(value: 'pronto_retirada', child: Text('Pronto p/ retirar')),
                       const PopupMenuItem(value: 'saiu_entrega', child: Text('Saiu p/ entrega')),
                       const PopupMenuItem(value: 'entregue', child: Text('Entregues')),
                       const PopupMenuItem(value: 'cancelado', child: Text('Cancelados')),
@@ -135,6 +153,18 @@ class _PedidosPageState extends State<PedidosPage> {
         ),
       ),
     );
+  }
+
+
+  List<PedidoModel> _filtrados(List<PedidoModel> all) {
+    final q = _busca.text.trim().toLowerCase();
+    if (q.isEmpty) return all;
+    return all.where((p) {
+      final et = (p.etiqueta ?? '').toLowerCase();
+      return '#${p.id}'.contains(q) ||
+          p.clienteNome.toLowerCase().contains(q) ||
+          et.contains(q);
+    }).toList();
   }
 
   Widget _buildError(String error, BuildContext context) => Center(
@@ -171,15 +201,15 @@ class _PedidosPageState extends State<PedidosPage> {
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: provider.pedidos.length + (provider.hasMore ? 1 : 0),
+      itemCount: _filtrados(provider.pedidos).length + (provider.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == provider.pedidos.length) {
+        if (index == _filtrados(provider.pedidos).length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
           );
         }
-        return _PedidoCard(pedido: provider.pedidos[index]);
+        return _PedidoCard(pedido: _filtrados(provider.pedidos)[index]);
       },
     );
   }
@@ -248,10 +278,10 @@ class _PedidosPageState extends State<PedidosPage> {
           Expanded(
             child: ListView.separated(
               controller: _scrollController,
-              itemCount: provider.pedidos.length,
+              itemCount: _filtrados(provider.pedidos).length,
               separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.borderLight),
               itemBuilder: (context, index) {
-                final pedido = provider.pedidos[index];
+                final pedido = _filtrados(provider.pedidos)[index];
                 return InkWell(
                   onTap: () => showPedidoDetalheModal(context, pedido.id),
                   child: Padding(
