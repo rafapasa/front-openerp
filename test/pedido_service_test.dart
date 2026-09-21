@@ -60,5 +60,27 @@ void main() {
 
       expect(api.lastData, {'status': 'em_preparo'});
     });
+
+    test('PATCH envia pronto_retirada e parseia envelope data', () async {
+      final api = FakeApiService(
+        responseData: {
+          'data': {...pedidoMinimoJson(), 'status': 'pronto_retirada'},
+        },
+      );
+      final service = PedidoService(api);
+      final pedido = await service.updateStatusPedido(128, StatusPedido.prontoRetirada);
+      expect(api.lastData, {'status': 'pronto_retirada'});
+      expect(pedido.status, StatusPedido.prontoRetirada);
+    });
+
+    test('PATCH parseia pedido sem envelope data', () async {
+      final api = FakeApiService(
+        responseData: {...pedidoMinimoJson(), 'status': 'pronto_retirada'},
+      );
+      final service = PedidoService(api);
+      final pedido = await service.updateStatusPedido(3, StatusPedido.prontoRetirada);
+      expect(pedido.id, 128);
+      expect(pedido.status, StatusPedido.prontoRetirada);
+    });
   });
 }

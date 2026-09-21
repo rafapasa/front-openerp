@@ -6,5 +6,6 @@ export 'enums.dart';
 export 'login_model.dart';
 // export 'pagination_model.dart';
 export 'pedido_model.dart';
+export 'pedido_transicao.dart';
 export 'produto_model.dart';
 export 'usuario_model.dart';
