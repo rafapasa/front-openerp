@@ -7,25 +7,18 @@ import 'package:front_openerp/data/repositories/repositories.dart';
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;
 
-  // ============================================================
-  // 📊 Estado
-  // ============================================================
   UsuarioModel? _usuario;
-  List<LoginConta> _contas = []; // Contas retornadas no /login (por tenant)
+  List<LoginConta> _contas = [];
   bool _isLoading = false;
   String? _error;
   bool _tenantSelecionado = false;
 
-  // ============================================================
-  // 🔍 Getters
-  // ============================================================
   UsuarioModel? get usuario => _usuario;
   List<LoginConta> get contas => _contas;
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isAuthenticated => _authRepository.isAuthenticated;
 
-  // Getters específicos para a seleção de empresa (multi-tenant)
   bool get hasMultipleTenants =>
       _contas.length > 1 || (_usuario?.tenants?.length ?? 0) > 1;
   bool get precisaSelecionarConta => hasMultipleTenants && !_tenantSelecionado;
@@ -33,26 +26,14 @@ class AuthProvider extends ChangeNotifier {
   List<TenantModel>? get tenants => _usuario?.tenants;
   TenantModel? get tenantAtivo => _usuario?.tenantAtivo;
 
-  // ============================================================
-  // 🏗️ Construtor
-  // ============================================================
   AuthProvider(this._authRepository) {
     _init();
   }
 
-  // ============================================================
-  // 🚀 Inicialização
-  // ============================================================
   Future<void> _init() async {
     await restoreSession();
   }
 
-  // ============================================================
-  // 🔐 Login
-  // ============================================================
-  // O backend responde com um LoginResponseList. Se houver apenas uma conta,
-  // ativa direto; se houver várias (mesmo e-mail em várias empresas), mantém
-  // as contas/tokens e aguarda o usuário escolher na tela "Selecionar Empresa".
   Future<bool> login(String email, String password) async {
     _setLoading(true);
     _clearError();
@@ -64,11 +45,10 @@ class AuthProvider extends ChangeNotifier {
       _contas = resultado.contas;
 
       if (resultado.contas.length == 1) {
-        // Uma única conta: ativa e entra direto.
         _usuario = await _authRepository.ativarConta(resultado.contas.first);
+        await _authRepository.salvarContas(resultado.contas);
         _tenantSelecionado = true;
       } else {
-        // Várias contas: persiste e aguarda a seleção de empresa.
         await _authRepository.salvarContas(resultado.contas);
         _usuario = null;
         _tenantSelecionado = false;
@@ -85,9 +65,6 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // ============================================================
-  // 🔄 Selecionar Empresa/Conta
-  // ============================================================
   Future<bool> selectTenant(int tenantId) async {
     _setLoading(true);
     _clearError();
@@ -106,9 +83,24 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // ============================================================
-  // 🚪 Logout
-  // ============================================================
+  Future<void> trocarEmpresa() async {
+    _setLoading(true);
+    try {
+      var contas = _contas;
+      if (contas.isEmpty) {
+        contas = await _authRepository.getContas() ?? const [];
+      }
+      await _authRepository.desativarContaAtual();
+      _usuario = null;
+      _tenantSelecionado = false;
+      _contas = contas;
+      _clearError();
+    } finally {
+      _setLoading(false);
+      notifyListeners();
+    }
+  }
+
   Future<void> logout() async {
     _setLoading(true);
     try {
@@ -117,31 +109,23 @@ class AuthProvider extends ChangeNotifier {
       _contas = [];
       _tenantSelecionado = false;
       _clearError();
-      _setLoading(false);
-      notifyListeners();
     } catch (e) {
       _error = e.toString();
+    } finally {
       _setLoading(false);
       notifyListeners();
     }
   }
 
-  // ============================================================
-  // 💾 Restaurar Sessão
-  // ============================================================
   Future<bool> restoreSession() async {
     _setLoading(true);
     try {
       final restored = await _authRepository.restoreSession();
       if (restored) {
-        // Buscar usuário ativo (com a conta selecionada)
         final user = await _authRepository.getCurrentUser();
         _usuario = user;
-
-        // Contas disponíveis (caso ainda haja múltiplas empresas em aberto)
         final contas = await _authRepository.getContas();
         _contas = contas ?? const [];
-
         _tenantSelecionado = user?.tenantAtivoId != null;
       }
       _setLoading(false);
@@ -154,9 +138,6 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // ============================================================
-  // 🛠️ Métodos Privados
-  // ============================================================
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
@@ -166,4 +147,3 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
   }
 }
-
