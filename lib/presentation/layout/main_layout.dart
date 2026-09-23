@@ -18,10 +18,7 @@ class MainLayout extends StatelessWidget {
   Future<void> _sair(BuildContext context) async {
     await context.read<AuthProvider>().logout();
     if (!context.mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-      (_) => false,
-    );
+    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (_) => false);
   }
 
   Future<void> _trocarEmpresa(BuildContext context) async {
@@ -29,18 +26,13 @@ class MainLayout extends StatelessWidget {
     await auth.trocarEmpresa();
     if (!context.mounted) return;
     if (auth.contas.length > 1) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const SelecionarTenantPage()),
-        (_) => false,
-      );
+      Navigator.of(context)
+          .pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const SelecionarTenantPage()), (_) => false);
       return;
     }
     await auth.logout();
     if (!context.mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-      (_) => false,
-    );
+    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (_) => false);
   }
 
   @override
@@ -49,11 +41,17 @@ class MainLayout extends StatelessWidget {
       builder: (context, constraints) {
         final isWeb = constraints.maxWidth > 800;
         final auth = context.watch<AuthProvider>();
-        final nome = auth.usuario?.nome.isNotEmpty == true
-            ? auth.usuario!.nome
-            : (auth.usuario?.email ?? 'Usuário');
+
+        // ✅ CORRIGIDO: null-safety no `nome`
+        final usuario = auth.usuario;
+        final nome = (usuario?.nome?.isNotEmpty == true) ? usuario!.nome! : (usuario?.email ?? 'Usuário');
+
+        // ✅ CORRIGIDO: agora `nome` é garantidamente String não-nulo
         final inicial = nome.isNotEmpty ? nome[0].toUpperCase() : 'U';
-        final role = auth.usuario?.role ?? '';
+
+        // ✅ CORRIGIDO: depende do campo `role` existir no UsuarioModel
+        // Se NÃO existir, use: final role = usuario?.email ?? '';
+        final role = usuario?.role ?? '';
 
         if (isWeb) {
           return Scaffold(
@@ -74,20 +72,49 @@ class MainLayout extends StatelessWidget {
                           width: double.infinity,
                           fit: BoxFit.fitWidth,
                           filterQuality: FilterQuality.high,
-                          errorBuilder: (_, _, _) => const Text(
+                          errorBuilder: (_, __, ___) => const Text(
                             'OpenERP',
                             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 20),
                           ),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      _SideItem(icon: Icons.dashboard_outlined, label: 'Dashboard', selected: currentIndex == 0, onTap: () => onTap(0)),
-                      _SideItem(icon: Icons.shopping_cart_outlined, label: 'Pedidos', selected: currentIndex == 1, onTap: () => onTap(1)),
-                      _SideItem(icon: Icons.people_outline, label: 'Clientes', selected: currentIndex == 2, onTap: () => onTap(2)),
-                      _SideItem(icon: Icons.inventory_2_outlined, label: 'Produtos', selected: currentIndex == 3, onTap: () => onTap(3)),
-                      _SideItem(icon: Icons.business_outlined, label: 'Empresas', selected: currentIndex == 4, onTap: () => onTap(4)),
+                      _SideItem(
+                        icon: Icons.dashboard_outlined,
+                        label: 'Dashboard',
+                        selected: currentIndex == 0,
+                        onTap: () => onTap(0),
+                      ),
+                      _SideItem(
+                        icon: Icons.shopping_cart_outlined,
+                        label: 'Pedidos',
+                        selected: currentIndex == 1,
+                        onTap: () => onTap(1),
+                      ),
+                      _SideItem(
+                        icon: Icons.people_outline,
+                        label: 'Clientes',
+                        selected: currentIndex == 2,
+                        onTap: () => onTap(2),
+                      ),
+                      _SideItem(
+                        icon: Icons.inventory_2_outlined,
+                        label: 'Produtos',
+                        selected: currentIndex == 3,
+                        onTap: () => onTap(3),
+                      ),
+                      _SideItem(
+                        icon: Icons.business_outlined,
+                        label: 'Empresas',
+                        selected: currentIndex == 4,
+                        onTap: () => onTap(4),
+                      ),
                       const Spacer(),
-                      Container(height: 1, color: Colors.white.withValues(alpha: 0.1), margin: const EdgeInsets.symmetric(horizontal: 16)),
+                      Container(
+                        height: 1,
+                        color: Colors.white.withValues(alpha: 0.1),
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
                       const SizedBox(height: 12),
                       if (auth.hasMultipleTenants)
                         _SideItem(
@@ -96,12 +123,7 @@ class MainLayout extends StatelessWidget {
                           selected: false,
                           onTap: () => _trocarEmpresa(context),
                         ),
-                      _SideItem(
-                        icon: Icons.logout,
-                        label: 'Sair',
-                        selected: false,
-                        onTap: () => _sair(context),
-                      ),
+                      _SideItem(icon: Icons.logout, label: 'Sair', selected: false, onTap: () => _sair(context)),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Container(
@@ -118,7 +140,14 @@ class MainLayout extends StatelessWidget {
                                 height: 32,
                                 decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
                                 child: Center(
-                                  child: Text(inicial, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                                  child: Text(
+                                    inicial,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -126,7 +155,16 @@ class MainLayout extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(nome, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
+                                    Text(
+                                      nome,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    // ✅ role agora é String não-nulo
                                     Text(role, style: const TextStyle(color: Colors.white60, fontSize: 11)),
                                   ],
                                 ),
@@ -138,7 +176,10 @@ class MainLayout extends StatelessWidget {
                       const SizedBox(height: 12),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Text('OpenERP by eTools', style: TextStyle(color: Colors.white.withValues(alpha: 0.35), fontSize: 10)),
+                        child: Text(
+                          'OpenERP by eTools',
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.35), fontSize: 10),
+                        ),
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -155,7 +196,11 @@ class MainLayout extends StatelessWidget {
                           children: [
                             Text(
                               title ?? _getTitle(currentIndex),
-                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: AppColors.textDark),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 20,
+                                color: AppColors.textDark,
+                              ),
                             ),
                             const Spacer(),
                             if (auth.hasMultipleTenants)
@@ -198,11 +243,7 @@ class MainLayout extends StatelessWidget {
                   onPressed: () => _trocarEmpresa(context),
                   icon: const Icon(Icons.swap_horiz),
                 ),
-              IconButton(
-                tooltip: 'Sair',
-                onPressed: () => _sair(context),
-                icon: const Icon(Icons.logout),
-              ),
+              IconButton(tooltip: 'Sair', onPressed: () => _sair(context), icon: const Icon(Icons.logout)),
             ],
           ),
           body: child,
@@ -220,11 +261,31 @@ class MainLayout extends StatelessWidget {
               unselectedItemColor: AppColors.textGrey,
               selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
               items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), activeIcon: Icon(Icons.dashboard), label: 'Dashboard'),
-                BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_outlined), activeIcon: Icon(Icons.shopping_cart), label: 'Pedidos'),
-                BottomNavigationBarItem(icon: Icon(Icons.people_outline), activeIcon: Icon(Icons.people), label: 'Clientes'),
-                BottomNavigationBarItem(icon: Icon(Icons.inventory_2_outlined), activeIcon: Icon(Icons.inventory_2), label: 'Produtos'),
-                BottomNavigationBarItem(icon: Icon(Icons.business_outlined), activeIcon: Icon(Icons.business), label: 'Empresas'),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.dashboard_outlined),
+                  activeIcon: Icon(Icons.dashboard),
+                  label: 'Dashboard',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.shopping_cart_outlined),
+                  activeIcon: Icon(Icons.shopping_cart),
+                  label: 'Pedidos',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.people_outline),
+                  activeIcon: Icon(Icons.people),
+                  label: 'Clientes',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.inventory_2_outlined),
+                  activeIcon: Icon(Icons.inventory_2),
+                  label: 'Produtos',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.business_outlined),
+                  activeIcon: Icon(Icons.business),
+                  label: 'Empresas',
+                ),
               ],
             ),
           ),
@@ -263,7 +324,11 @@ class _SideItem extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: selected ? FontWeight.w700 : FontWeight.w500),
         ),
         trailing: selected
-            ? Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle))
+            ? Container(
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
+              )
             : null,
         onTap: onTap,
         dense: true,
