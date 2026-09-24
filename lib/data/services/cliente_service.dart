@@ -70,4 +70,26 @@ class ClienteService {
     final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
     return EnderecoModel.fromJson(data);
   }
+
+  Future<ClienteModel> updateCliente(int id, Map<String, dynamic> payload) async {
+    final response = await _apiService.put('/clientes/$id', data: payload);
+    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    return ClienteModel.fromJson(data);
+  }
+
+  Future<EnderecoModel> updateEndereco(int clienteId, int enderecoId, Map<String, dynamic> body) async {
+    final response = await _apiService.patch('/clientes/$clienteId/enderecos/$enderecoId', data: body);
+    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    return EnderecoModel.fromJson(data);
+  }
+
+  Future<void> deleteEndereco(int clienteId, int enderecoId) async {
+    await _apiService.delete('/clientes/$clienteId/enderecos/$enderecoId');
+  }
+
+  Future<void> setEnderecoPrincipal(int clienteId, int enderecoId) async {
+    await _apiService.patch('/clientes/$clienteId/enderecos/$enderecoId/principal');
+  }
 }

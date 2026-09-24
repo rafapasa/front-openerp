@@ -1,7 +1,7 @@
 // lib/presentation/pages/clientes/clientes_page.dart
 // Refatorado eTools - Responsivo Web tabela + Mobile cards
 import 'package:flutter/material.dart';
-import 'package:front_openerp/presentation/pages/clientes/detalhe_cliente_page.dart';
+import 'package:front_openerp/presentation/pages/clientes/cliente_detalhe_modal.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -173,7 +173,7 @@ class _ClientesPageState extends State<ClientesPage> {
                 final cliente = provider.clientes[index];
                 final dateFormat = DateFormat('dd/MM/yyyy');
                 return InkWell(
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetalheClientePage(clienteId: cliente.id))),
+                  onTap: () => showClienteDetalheModal(context, cliente.id),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                     child: Row(
@@ -226,7 +226,7 @@ class _ClienteCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: AppTheme.cardDecoration,
       child: InkWell(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetalheClientePage(clienteId: cliente.id))),
+        onTap: () => showClienteDetalheModal(context, cliente.id),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),

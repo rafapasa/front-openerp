@@ -72,7 +72,7 @@ class MainLayout extends StatelessWidget {
                           width: double.infinity,
                           fit: BoxFit.fitWidth,
                           filterQuality: FilterQuality.high,
-                          errorBuilder: (_, __, ___) => const Text(
+                          errorBuilder: (_, _, _) => const Text(
                             'OpenERP',
                             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 20),
                           ),

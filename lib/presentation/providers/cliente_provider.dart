@@ -215,6 +215,83 @@ class ClienteProvider extends ChangeNotifier {
     }
   }
 
+  Future<ClienteModel?> updateCliente(int id, {
+    required String nome,
+    required String telefone,
+    String? nomePerfil,
+    String? email,
+    String? inscricaoFederal,
+  }) async {
+    try {
+      final payload = <String, dynamic>{
+        'nome': nome,
+        'telefone': telefone,
+        if (nomePerfil != null && nomePerfil.isNotEmpty) 'nome_perfil': nomePerfil,
+        if (email != null && email.isNotEmpty) 'email': email,
+        if (inscricaoFederal != null && inscricaoFederal.isNotEmpty) 'inscricao_federal': inscricaoFederal,
+      };
+      final atualizado = await _clienteRepository.updateCliente(id, payload);
+      final index = _clientes.indexWhere((c) => c.id == id);
+      if (index != -1) {
+        _clientes[index] = atualizado;
+        notifyListeners();
+      }
+      return atualizado;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<EnderecoModel?> criarEndereco(int clienteId, Map<String, dynamic> payload) async {
+    try {
+      final criado = await _clienteRepository.createEndereco(clienteId, payload);
+      notifyListeners();
+      return criado;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<EnderecoModel?> editarEndereco(int clienteId, int enderecoId, Map<String, dynamic> payload) async {
+    try {
+      final atualizado = await _clienteRepository.updateEndereco(clienteId, enderecoId, payload);
+      notifyListeners();
+      return atualizado;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<bool> excluirEndereco(int clienteId, int enderecoId) async {
+    try {
+      await _clienteRepository.deleteEndereco(clienteId, enderecoId);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> definirEnderecoPrincipal(int clienteId, int enderecoId) async {
+    try {
+      await _clienteRepository.setEnderecoPrincipal(clienteId, enderecoId);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
