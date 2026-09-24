@@ -1,6 +1,7 @@
 // lib/presentation/providers/tenant_provider.dart
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/models/tenant_model.dart';
+import 'package:front_openerp/data/models/tenant_notificacao_model.dart';
 import 'package:front_openerp/data/repositories/tenant_repository.dart';
 
 class TenantProvider extends ChangeNotifier {
@@ -118,5 +119,46 @@ class TenantProvider extends ChangeNotifier {
     _error = null;
     _selectedTenant = null;
     notifyListeners();
+  }
+
+  Future<List<TenantNotificacaoModel>> listarNotificacoes(int tenantId) async {
+    try {
+      return await _repository.listarNotificacoes(tenantId);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return [];
+    }
+  }
+
+  Future<TenantNotificacaoModel?> criarNotificacao(int tenantId, Map<String, dynamic> body) async {
+    try {
+      return await _repository.criarNotificacao(tenantId, body);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<TenantNotificacaoModel?> atualizarNotificacao(int tenantId, int notifId, Map<String, dynamic> body) async {
+    try {
+      return await _repository.atualizarNotificacao(tenantId, notifId, body);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<bool> excluirNotificacao(int tenantId, int notifId) async {
+    try {
+      await _repository.excluirNotificacao(tenantId, notifId);
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
   }
 }

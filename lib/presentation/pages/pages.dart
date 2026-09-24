@@ -9,5 +9,4 @@ export 'pedidos/pedidos_page.dart';
 export 'produtos/produtos_page.dart';
 export 'splash_page.dart';
 export 'tenants/tenants_page.dart';
-export 'tenants/detalhe_tenant_page.dart';
 export 'tenants/form_tenant_page.dart';

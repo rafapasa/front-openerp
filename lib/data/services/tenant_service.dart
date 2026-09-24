@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:front_openerp/core/helpers/json_helper.dart';
 import 'package:front_openerp/data/models/tenant_model.dart';
+import 'package:front_openerp/data/models/tenant_notificacao_model.dart';
 import 'package:front_openerp/data/services/api_service.dart';
 
 class TenantService {
@@ -66,6 +67,45 @@ class TenantService {
       }
     } catch (e) {
       throw Exception('Erro ao excluir empresa: $e');
+    }
+  }
+
+  Future<List<TenantNotificacaoModel>> listarNotificacoes(int tenantId) async {
+    try {
+      final response = await _api.get('/tenants/$tenantId/notificacoes');
+      final lista = JsonHelper.extractList(response.data);
+      return lista
+          .whereType<Map>()
+          .map((json) => TenantNotificacaoModel.fromJson(Map<String, dynamic>.from(json)))
+          .toList();
+    } catch (e) {
+      throw Exception('Erro ao listar notificacoes: $e');
+    }
+  }
+
+  Future<TenantNotificacaoModel> criarNotificacao(int tenantId, Map<String, dynamic> body) async {
+    try {
+      final response = await _api.post('/tenants/$tenantId/notificacoes', data: body);
+      return TenantNotificacaoModel.fromJson(_asMap(response.data));
+    } catch (e) {
+      throw Exception('Erro ao criar notificacao: $e');
+    }
+  }
+
+  Future<TenantNotificacaoModel> atualizarNotificacao(int tenantId, int notifId, Map<String, dynamic> body) async {
+    try {
+      final response = await _api.put('/tenants/$tenantId/notificacoes/$notifId', data: body);
+      return TenantNotificacaoModel.fromJson(_asMap(response.data));
+    } catch (e) {
+      throw Exception('Erro ao atualizar notificacao: $e');
+    }
+  }
+
+  Future<void> excluirNotificacao(int tenantId, int notifId) async {
+    try {
+      await _api.delete('/tenants/$tenantId/notificacoes/$notifId');
+    } catch (e) {
+      throw Exception('Erro ao excluir notificacao: $e');
     }
   }
 

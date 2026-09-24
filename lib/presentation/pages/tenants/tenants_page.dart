@@ -1,7 +1,7 @@
 // lib/presentation/pages/tenants/tenants_page.dart
 // Refatorado eTools - Responsivo Web (tabela) + Mobile (cards)
 import 'package:flutter/material.dart';
-import 'package:front_openerp/presentation/pages/tenants/detalhe_tenant_page.dart';
+import 'package:front_openerp/presentation/pages/tenants/tenant_detalhe_modal.dart';
 import 'package:front_openerp/presentation/pages/tenants/form_tenant_page.dart';
 import 'package:front_openerp/presentation/providers/tenant_provider.dart';
 import 'package:provider/provider.dart';
@@ -201,7 +201,7 @@ class _TenantsPageState extends State<TenantsPage> {
             decoration: AppTheme.cardDecoration,
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetalheTenantPage(tenant: tenant))),
+              onTap: () => showTenantDetalheModal(context, tenant),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -273,7 +273,7 @@ class _TenantsPageState extends State<TenantsPage> {
               itemBuilder: (context, index) {
                 final tenant = filtered[index];
                 return InkWell(
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetalheTenantPage(tenant: tenant))),
+                  onTap: () => showTenantDetalheModal(context, tenant),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                     child: Row(
