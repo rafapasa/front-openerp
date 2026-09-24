@@ -53,5 +53,31 @@ class ProdutoModel {
     'updated_at': updatedAt.toIso8601String(),
   };
 
+  ProdutoModel copyWith({
+    int? id,
+    int? tenantId,
+    int? categoriaId,
+    String? categoriaNome,
+    String? nome,
+    String? descricao,
+    double? preco,
+    bool? disponivel,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return ProdutoModel(
+      id: id ?? this.id,
+      tenantId: tenantId ?? this.tenantId,
+      categoriaId: categoriaId ?? this.categoriaId,
+      categoriaNome: categoriaNome ?? this.categoriaNome,
+      nome: nome ?? this.nome,
+      descricao: descricao ?? this.descricao,
+      preco: preco ?? this.preco,
+      disponivel: disponivel ?? this.disponivel,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   String get precoFormatado => 'R\$ ${preco.toStringAsFixed(2)}';
 }
