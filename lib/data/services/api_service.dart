@@ -1,17 +1,20 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:front_openerp/core/config/api_config.dart';
 import 'package:front_openerp/data/repositories/local_storage.dart';
 import 'package:uuid/uuid.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://mcp-server.etoolstec.com.br/api/v1';
+  // static const String baseUrl = 'https://mcp-server.etoolstec.com.br/api/v1';
   //  static const String baseUrl = 'http://localhost:8082/api/v1';
+  static String get baseUrl => ApiConfig.baseUrl;
   static const String defaultTenantId = '0';
 
   late final Dio _dio;
   final Uuid _uuid = const Uuid();
 
   ApiService() {
+    ApiConfig.printConfig();
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,

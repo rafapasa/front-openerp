@@ -27,6 +27,8 @@ run: ## Rodar em todas as plataformas
 
 run-web: ## Rodar no Chrome
 	$(FLUTTER) run -d chrome
+	    --dart-define=ENVIRONMENT=dev 
+		--dart-define=API_BASE_URL=https://teste.b.etoolstec.com.br/api/v1
 
 run-web-ssh: ## Rodar web server exposto na rede
 	$(FLUTTER) run -d web-server --web-hostname 0.0.0.0 --web-port 8080
@@ -50,6 +52,8 @@ build: build-web build-apk ## Build para todas as plataformas
 
 build-web: ## Build para Web (release)
 	$(FLUTTER) build web --release
+		--dart-define=ENVIRONMENT=prod
+		--dart-define=API_BASE_URL=https://mcp-server.etoolstec.com.br/api/v1
 
 build-apk: ## Build APK para Android
 	$(FLUTTER) build apk --release

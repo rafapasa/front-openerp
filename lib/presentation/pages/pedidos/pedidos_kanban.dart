@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/models/models.dart';
-import 'package:front_openerp/presentation/pages/pedidos/pedido_detalhe_modal.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pagamento_pedido_dialog.dart';
+import 'package:front_openerp/presentation/pages/pedidos/pedido_detalhe_modal.dart';
 import 'package:front_openerp/presentation/providers/pedido_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -16,16 +16,6 @@ const _colunas = <StatusPedido>[
   StatusPedido.saiuEntrega,
   StatusPedido.entregue,
 ];
-
-const _transicoes = <StatusPedido, Set<StatusPedido>>{
-  StatusPedido.pendente: {StatusPedido.confirmado, StatusPedido.cancelado},
-  StatusPedido.confirmado: {StatusPedido.emPreparo, StatusPedido.cancelado},
-  StatusPedido.emPreparo: {StatusPedido.saiuEntrega, StatusPedido.prontoRetirada, StatusPedido.cancelado},
-  StatusPedido.prontoRetirada: {StatusPedido.entregue, StatusPedido.cancelado},
-  StatusPedido.saiuEntrega: {StatusPedido.entregue, StatusPedido.cancelado},
-  StatusPedido.entregue: {},
-  StatusPedido.cancelado: {},
-};
 
 bool _naColuna(PedidoModel p, StatusPedido col) => p.status == col;
 
@@ -267,12 +257,14 @@ class _CardKanban extends StatelessWidget {
                             fit: BoxFit.scaleDown,
                             child: FilledButton(
                               onPressed: () async {
-                              final ok = await context.read<PedidoProvider>().updateStatus(pedido.id, next);
-                              if (!context.mounted || ok) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(context.read<PedidoProvider>().error ?? 'Nao foi possivel atualizar')),
-                              );
-                            },
+                                final ok = await context.read<PedidoProvider>().updateStatus(pedido.id, next);
+                                if (!context.mounted || ok) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(context.read<PedidoProvider>().error ?? 'Nao foi possivel atualizar'),
+                                  ),
+                                );
+                              },
                               style: FilledButton.styleFrom(
                                 backgroundColor: AppColors.accent,
                                 visualDensity: VisualDensity.compact,
