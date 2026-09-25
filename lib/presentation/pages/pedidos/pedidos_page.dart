@@ -2,6 +2,7 @@
 // Refatorado eTools - Responsivo
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/models/models.dart';
+import 'package:front_openerp/presentation/pages/pedidos/novo_pedido_modal.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pedido_detalhe_modal.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pedidos_kanban.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
@@ -131,6 +132,13 @@ class _PedidosPageState extends State<PedidosPage> {
                       const PopupMenuItem(value: 'cancelado', child: Text('Cancelados')),
                     ],
                   ),
+                  const SizedBox(width: 12),
+                  FilledButton.icon(
+                    onPressed: () => showNovoPedidoModal(context),
+                    style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Novo Pedido'),
+                  ),
                 ],
               ),
             ),
@@ -155,15 +163,12 @@ class _PedidosPageState extends State<PedidosPage> {
     );
   }
 
-
   List<PedidoModel> _filtrados(List<PedidoModel> all) {
     final q = _busca.text.trim().toLowerCase();
     if (q.isEmpty) return all;
     return all.where((p) {
       final et = (p.etiqueta ?? '').toLowerCase();
-      return '#${p.id}'.contains(q) ||
-          p.clienteNome.toLowerCase().contains(q) ||
-          et.contains(q);
+      return '#${p.id}'.contains(q) || p.clienteNome.toLowerCase().contains(q) || et.contains(q);
     }).toList();
   }
 

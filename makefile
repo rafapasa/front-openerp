@@ -9,6 +9,7 @@ DART ?= dart
 PUB = $(FLUTTER) pub
 GIT = git
 MSG ?= "Atualização do projeto $(PROJECT_NAME)"
+COMPOSE_WEB_TESTE := docker-compose.web.teste.yml
 
 GREEN = \033[0;32m
 YELLOW = \033[0;33m
@@ -184,14 +185,41 @@ deploy: ## Sobe openerp-web na mcp-network
 	@docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep openerp-web || true
 	@echo "✅ openerp-web no ar"
 
+
+build-push-t: ## Flutter build web + docker build ARM64 + push (teste)
+	@echo "🌐 flutter build web --release (teste)"
+	$(FLUTTER) build web --release --no-wasm-dry-run
+	@test -f build/web/index.html || (echo "❌ falhou: build/web/index.html"; exit 1)
+	@echo "🐳 Build ARM64 $(WEB_IMAGE):test"
+	DOCKER_BUILDKIT=1 docker build $(NO_CACHE) \
+		--platform linux/arm64 \
+		-f $(DOCKERFILE_WEB) \
+		-t $(WEB_IMAGE):test \
+		.
+	docker push $(WEB_IMAGE):test
+	@echo "✅ $(WEB_IMAGE):test (linux/arm64) no Hub"
+
+deploy-t: ## Sobe openerp-web-teste na mcp-network (porta 8083)
+	@echo "🚀 Deploy teste $(WEB_IMAGE):test→ teste.f.etoolstec.com.br"
+	IMAGE_TAG=test DOCKER_USERNAME=$(DOCKER_USERNAME) WEB_PORT=8083 \
+		docker compose -f $(COMPOSE_WEB_TESTE) pull openerp-web-teste
+	IMAGE_TAG=test DOCKER_USERNAME=$(DOCKER_USERNAME) WEB_PORT=8083 \
+		docker compose -f $(COMPOSE_WEB_TESTE) up -d --pull always --no-deps openerp-web-teste
+	@docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep openerp-web-teste || true
+	@echo "✅ openerp-web-teste no ar em http://localhost:8083"
+
+logs-web-teste: ## Logs do container de teste
+	docker logs -f openerp-web-teste --tail=100
+
 logs-web: ## Logs do container
 	docker logs -f openerp-web --tail=100
 
 .PHONY: help run run-web run-web-ssh run-linux run-android run-ios run-profile run-release \
-	build build-web build-apk build-appbundle build-linux \
-	clean clean-all deps deps-upgrade deps-outdated \
-	analyze test test-coverage format \
-	dev watch gen gen-watch serve \
-	setup env logs pub-cache release \
-	git-up git-status git-add git-commit git-push git-branch-6 git-restore-dash \
-	login build-push deploy logs-web
+        build build-web build-apk build-appbundle build-linux \
+        clean clean-all deps deps-upgrade deps-outdated \
+        analyze test test-coverage format \
+        dev watch gen gen-watch serve \
+        setup env logs pub-cache release \
+        git-up git-status git-add git-commit git-push git-branch-6 git-restore-dash \
+        login build-push deploy logs-web \
+        build-push-t deploy-t logs-web-teste
