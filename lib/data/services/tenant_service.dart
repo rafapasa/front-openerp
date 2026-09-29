@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:front_openerp/core/helpers/json_helper.dart';
+import 'package:front_openerp/data/models/tenant_llm_config.dart';
 import 'package:front_openerp/data/models/tenant_model.dart';
 import 'package:front_openerp/data/models/tenant_notificacao_model.dart';
 import 'package:front_openerp/data/services/api_service.dart';
@@ -56,6 +57,15 @@ class TenantService {
       return TenantModel.fromJson(_asMap(response.data));
     } catch (e) {
       throw Exception('Erro ao atualizar empresa: $e');
+    }
+  }
+
+  Future<TenantModel> atualizarLlmConfig(int id, TenantLlmConfig config) async {
+    try {
+      final response = await _api.put('/tenants/$id/llm-config', data: config.toApiJson());
+      return TenantModel.fromJson(_asMap(response.data));
+    } catch (e) {
+      throw Exception('Erro ao atualizar llm_config: $e');
     }
   }
 
