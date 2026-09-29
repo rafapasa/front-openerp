@@ -1,5 +1,6 @@
 // lib/presentation/providers/tenant_provider.dart
 import 'package:flutter/material.dart';
+import 'package:front_openerp/data/models/tenant_llm_config.dart';
 import 'package:front_openerp/data/models/tenant_model.dart';
 import 'package:front_openerp/data/models/tenant_notificacao_model.dart';
 import 'package:front_openerp/data/repositories/tenant_repository.dart';
@@ -128,6 +129,23 @@ class TenantProvider extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
       return [];
+    }
+  }
+
+  Future<TenantModel?> atualizarLlmConfig(int tenantId, TenantLlmConfig config) async {
+    try {
+      final atualizado = await _repository.updateLlmConfig(tenantId, config);
+      final index = _tenants.indexWhere((t) => t.id == tenantId);
+      if (index != -1) {
+        _tenants[index] = atualizado;
+      }
+      _error = null;
+      notifyListeners();
+      return atualizado;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
     }
   }
 

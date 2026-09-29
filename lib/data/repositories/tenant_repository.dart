@@ -1,4 +1,5 @@
 // lib/data/repositories/tenant_repository.dart
+import 'package:front_openerp/data/models/tenant_llm_config.dart';
 import 'package:front_openerp/data/models/tenant_model.dart';
 import 'package:front_openerp/data/models/tenant_notificacao_model.dart';
 import 'package:front_openerp/data/services/tenant_service.dart';
@@ -38,6 +39,10 @@ class TenantRepository {
     } catch (e) {
       throw Exception('Erro ao atualizar empresa: $e');
     }
+  }
+
+  Future<TenantModel> updateLlmConfig(int id, TenantLlmConfig config) {
+    return _service.atualizarLlmConfig(id, config);
   }
 
   Future<void> delete(int id) async {
