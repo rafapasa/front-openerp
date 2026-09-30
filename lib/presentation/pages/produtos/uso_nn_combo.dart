@@ -24,6 +24,7 @@ class UsoNnCombo extends StatefulWidget {
 
 class _UsoNnComboState extends State<UsoNnCombo> {
   final LayerLink _link = LayerLink();
+  final GlobalKey _campoKey = GlobalKey();
   OverlayEntry? _overlay;
   List<UsoModel> _todos = [];
   late List<int> _selecionados;
@@ -64,6 +65,12 @@ class _UsoNnComboState extends State<UsoNnCombo> {
     }
   }
 
+  double _larguraCampo() {
+    final box = _campoKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return 280;
+    return box.size.width;
+  }
+
   void _fechar() {
     _overlay?.remove();
     _overlay = null;
@@ -74,6 +81,7 @@ class _UsoNnComboState extends State<UsoNnCombo> {
       _fechar();
       return;
     }
+    final largura = _larguraCampo();
     _overlay = OverlayEntry(builder: (ctx) {
       return Stack(
         children: [
@@ -87,9 +95,12 @@ class _UsoNnComboState extends State<UsoNnCombo> {
             child: Material(
               elevation: 8,
               borderRadius: BorderRadius.circular(8),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 280, minWidth: 280),
-                child: _listaCombo(),
+              child: SizedBox(
+                width: largura,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 280),
+                  child: _listaCombo(),
+                ),
               ),
             ),
           ),
@@ -100,16 +111,20 @@ class _UsoNnComboState extends State<UsoNnCombo> {
   }
 
   Widget _listaCombo() {
-    final itens = [..._todos];
     return ListView(
       padding: EdgeInsets.zero,
       shrinkWrap: true,
       children: [
-        for (final uso in itens) _item(uso),
+        for (final uso in _todos) _item(uso),
         ListTile(
           dense: true,
           leading: const Icon(Icons.add, color: AppColors.accent),
-          title: const Text('Adicionar nova', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w600)),
+          title: const Text(
+            'Adicionar nova',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w600),
+          ),
           onTap: () async {
             _fechar();
             final criado = await showUsoEditDialog(context);
@@ -128,12 +143,12 @@ class _UsoNnComboState extends State<UsoNnCombo> {
     final marcado = _selecionados.contains(uso.id);
     return ListTile(
       dense: true,
+      contentPadding: const EdgeInsets.only(left: 12, right: 4),
       leading: Icon(
         marcado ? Icons.check_box : Icons.check_box_outline_blank,
         color: marcado ? AppColors.primary : AppColors.textGrey,
       ),
-      title: Text(uso.label),
-      subtitle: uso.slug.isEmpty ? null : Text(uso.slug, style: const TextStyle(fontSize: 11)),
+      title: Text(uso.label, maxLines: 1, overflow: TextOverflow.ellipsis),
       trailing: IconButton(
         tooltip: 'Editar',
         icon: const Icon(Icons.edit_outlined, size: 18),
@@ -182,6 +197,7 @@ class _UsoNnComboState extends State<UsoNnCombo> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: CompositedTransformTarget(
+        key: _campoKey,
         link: _link,
         child: InkWell(
           onTap: _carregando ? null : _abrir,

@@ -11,6 +11,12 @@ GIT = git
 MSG ?= "Atualização do projeto $(PROJECT_NAME)"
 COMPOSE_WEB_TESTE := docker-compose.web.teste.yml
 
+# Compile-time Flutter (String.fromEnvironment). Nao e env do container.
+API_BASE_URL_PROD ?= https://mcp-server.etoolstec.com.br/api/v1
+API_BASE_URL_DEV  ?= https://teste.b.etoolstec.com.br/api/v1
+DART_DEFINE_PROD = --dart-define=ENVIRONMENT=prod --dart-define=API_BASE_URL=$(API_BASE_URL_PROD)
+DART_DEFINE_DEV  = --dart-define=ENVIRONMENT=dev --dart-define=API_BASE_URL=$(API_BASE_URL_DEV)
+
 GREEN = \033[0;32m
 YELLOW = \033[0;33m
 BLUE = \033[0;34m
@@ -27,9 +33,7 @@ run: ## Rodar em todas as plataformas
 	$(FLUTTER) run
 
 run-web: ## Rodar no Chrome
-	$(FLUTTER) run -d chrome
-	    --dart-define=ENVIRONMENT=dev 
-		--dart-define=API_BASE_URL=https://teste.b.etoolstec.com.br/api/v1
+	$(FLUTTER) run -d chrome $(DART_DEFINE_DEV)
 
 run-web-ssh: ## Rodar web server exposto na rede
 	$(FLUTTER) run -d web-server --web-hostname 0.0.0.0 --web-port 8080
@@ -52,9 +56,7 @@ run-release: ## Rodar em modo release
 build: build-web build-apk ## Build para todas as plataformas
 
 build-web: ## Build para Web (release)
-	$(FLUTTER) build web --release
-		--dart-define=ENVIRONMENT=prod
-		--dart-define=API_BASE_URL=https://mcp-server.etoolstec.com.br/api/v1
+	$(FLUTTER) build web --release --no-wasm-dry-run $(DART_DEFINE_PROD)
 
 build-apk: ## Build APK para Android
 	$(FLUTTER) build apk --release
@@ -147,6 +149,12 @@ endif
 git-push: ## Push
 	git push -u origin HEAD
 
+git-ciclo: ## Volta o worktree para ciclo (nao usa main)
+	git stash push -u -m "wip-ciclo" -- lib/presentation/pages/produtos/uso_edit_dialog.dart lib/presentation/pages/produtos/uso_nn_combo.dart makefile || true
+	git checkout ciclo
+	git stash pop || true
+	git status -sb
+
 git-branch-6: ## Criar branch front-6
 	git checkout -B front-6
 
@@ -168,7 +176,7 @@ ifeq ($(IMAGE_TAG),latest)
 	$(error Use: make build-push IMAGE_TAG=0.1.0 — não pode buildar só latest)
 endif
 	@echo "🌐 flutter build web --release"
-	$(FLUTTER) build web --release --no-wasm-dry-run
+	$(FLUTTER) build web --release --no-wasm-dry-run $(DART_DEFINE_PROD)
 	@test -f build/web/index.html || (echo "❌ falhou: build/web/index.html"; exit 1)
 	@echo "🐳 Build ARM64 $(WEB_IMAGE):$(IMAGE_TAG) + latest"
 	DOCKER_BUILDKIT=1 docker build $(NO_CACHE) \
@@ -190,9 +198,10 @@ deploy: ## Sobe openerp-web na mcp-network
 	@echo "✅ openerp-web no ar"
 
 
-build-push-t: ## Flutter build web + docker build ARM64 + push (teste)
-	@echo "🌐 flutter build web --release (teste)"
-	$(FLUTTER) build web --release --no-wasm-dry-run
+.PHONY: build-push-t
+build-push-t: ## Flutter build web (API teste) + docker ARM64 + push :test
+	@echo "🌐 flutter build web --release API=$(API_BASE_URL_DEV)"
+	$(FLUTTER) build web --release --no-wasm-dry-run $(DART_DEFINE_DEV)
 	@test -f build/web/index.html || (echo "❌ falhou: build/web/index.html"; exit 1)
 	@echo "🐳 Build ARM64 $(WEB_IMAGE):test"
 	DOCKER_BUILDKIT=1 docker build $(NO_CACHE) \
@@ -201,16 +210,17 @@ build-push-t: ## Flutter build web + docker build ARM64 + push (teste)
 		-t $(WEB_IMAGE):test \
 		.
 	docker push $(WEB_IMAGE):test
-	@echo "✅ $(WEB_IMAGE):test (linux/arm64) no Hub"
+	@echo "✅ $(WEB_IMAGE):test enviado (API $(API_BASE_URL_DEV))"
 
+.PHONY: deploy-t
 deploy-t: ## Sobe openerp-web-teste na mcp-network (porta 8083)
-	@echo "🚀 Deploy teste $(WEB_IMAGE):test→ teste.f.etoolstec.com.br"
+	@echo "🚀 Deploy $(WEB_IMAGE):test (API $(API_BASE_URL_DEV))"
 	IMAGE_TAG=test DOCKER_USERNAME=$(DOCKER_USERNAME) WEB_PORT=8083 \
 		docker compose -f $(COMPOSE_WEB_TESTE) pull openerp-web-teste
 	IMAGE_TAG=test DOCKER_USERNAME=$(DOCKER_USERNAME) WEB_PORT=8083 \
 		docker compose -f $(COMPOSE_WEB_TESTE) up -d --pull always --no-deps openerp-web-teste
 	@docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep openerp-web-teste || true
-	@echo "✅ openerp-web-teste no ar em http://localhost:8083"
+	@echo "✅ openerp-web-teste no ar (host:8083 → nginx :80)"
 
 logs-web-teste: ## Logs do container de teste
 	docker logs -f openerp-web-teste --tail=100

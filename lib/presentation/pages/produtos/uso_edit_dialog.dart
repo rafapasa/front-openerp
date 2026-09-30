@@ -23,7 +23,6 @@ class UsoEditDialog extends StatefulWidget {
 
 class _UsoEditDialogState extends State<UsoEditDialog> {
   late final TextEditingController _label;
-  late final TextEditingController _slug;
   late final TextEditingController _sinonimos;
   bool _salvando = false;
   String? _erro;
@@ -32,14 +31,12 @@ class _UsoEditDialogState extends State<UsoEditDialog> {
   void initState() {
     super.initState();
     _label = TextEditingController(text: widget.uso?.label ?? '');
-    _slug = TextEditingController(text: widget.uso?.slug ?? '');
     _sinonimos = TextEditingController(text: widget.uso?.sinonimos ?? '');
   }
 
   @override
   void dispose() {
     _label.dispose();
-    _slug.dispose();
     _sinonimos.dispose();
     super.dispose();
   }
@@ -59,14 +56,12 @@ class _UsoEditDialogState extends State<UsoEditDialog> {
       if (widget.uso == null) {
         saved = await widget.service.criar(
           label: label,
-          slug: _slug.text.trim(),
           sinonimos: _sinonimos.text.trim(),
         );
       } else {
         saved = await widget.service.atualizar(
           widget.uso!.id,
           label: label,
-          slug: _slug.text.trim(),
           sinonimos: _sinonimos.text.trim(),
         );
       }
@@ -87,7 +82,7 @@ class _UsoEditDialogState extends State<UsoEditDialog> {
     return AlertDialog(
       title: Text(criando ? 'Adicionar uso' : 'Editar uso'),
       content: SizedBox(
-        width: 360,
+        width: 468,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -98,17 +93,13 @@ class _UsoEditDialogState extends State<UsoEditDialog> {
             ),
             const SizedBox(height: 10),
             TextField(
-              controller: _slug,
-              decoration: const InputDecoration(
-                labelText: 'Slug (opcional)',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
               controller: _sinonimos,
+              minLines: 3,
+              maxLines: 3,
               decoration: const InputDecoration(
-                labelText: 'Sinonimos (separados por virgula)',
+                labelText: 'Sinonimos',
+                hintText: 'gripe, resfriado, coriza, febre',
+                alignLabelWithHint: true,
                 border: OutlineInputBorder(),
               ),
             ),
