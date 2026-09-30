@@ -227,3 +227,18 @@ logs-web: ## Logs do container
         git-up git-status git-add git-commit git-push git-branch-6 git-restore-dash \
         login build-push deploy logs-web \
         build-push-t deploy-t logs-web-teste
+probe-emp:
+	ls lib/presentation/pages | head
+	find lib -iname '*empresa*' -o -iname '*tenant*' | head -40
+
+
+test-llm-tab:
+	export PATH="$$HOME/flutter/bin:$$PATH"; flutter test test/tenant_llm_config_test.dart
+	export PATH="$$HOME/flutter/bin:$$PATH"; dart analyze lib/data/models/tenant_llm_config.dart lib/data/models/tenant_model.dart lib/presentation/pages/tenants/tenant_llm_tab.dart lib/presentation/pages/tenants/tenant_detalhe_modal.dart
+
+commit-llm-tab:
+	export PATH="$$HOME/flutter/bin:$$PATH"; dart analyze lib/data/services/tenant_service.dart lib/data/repositories/tenant_repository.dart lib/presentation/providers/tenant_provider.dart
+	git add lib/data/models/tenant_llm_config.dart lib/data/models/tenant_model.dart lib/data/services/tenant_service.dart lib/data/repositories/tenant_repository.dart lib/presentation/providers/tenant_provider.dart lib/presentation/pages/tenants/tenant_llm_tab.dart lib/presentation/pages/tenants/tenant_detalhe_modal.dart test/tenant_llm_config_test.dart
+	git checkout -- makefile Makefile || true
+	git commit -m "feat(tenants): aba LLM no modal de empresa (#31)"
+	git push origin ciclo

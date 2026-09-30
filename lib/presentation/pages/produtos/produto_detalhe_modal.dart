@@ -3,6 +3,7 @@ import 'package:front_openerp/core/helpers/snack_helper.dart';
 import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:front_openerp/presentation/theme/app_colors.dart';
+import 'package:front_openerp/presentation/pages/produtos/uso_nn_combo.dart';
 import 'package:front_openerp/presentation/widgets/app_section_card.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -260,6 +261,11 @@ class _ProdutoDetalheModalState extends State<ProdutoDetalheModal> {
               _campo('Nome', _nome, editando: _editando),
               _campo('Descricao', _descricao, editando: _editando, maxLines: 2),
               _campo('Preco (R\$)', _preco, editando: _editando, kb: TextInputType.number),
+              UsoNnCombo(
+                produtoId: p.id,
+                selecionados: p.usos,
+                onProdutoAtualizado: (atualizado) => setState(() => _produto = atualizado),
+              ),
               if (p.categoriaNome != null) ...[
                 const SizedBox(height: 8),
                 Row(

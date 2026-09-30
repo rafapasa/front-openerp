@@ -31,6 +31,7 @@ Widget buildApp() {
       Provider<ClienteService>(create: (context) => ClienteService(context.read<ApiService>())),
       Provider<ProdutoService>(create: (context) => ProdutoService(context.read<ApiService>())),
       Provider<TenantService>(create: (context) => TenantService(context.read<ApiService>())),
+      Provider<UsoService>(create: (context) => UsoService(context.read<ApiService>())),
 
       // Repositories
       Provider<AuthRepository>(create: (context) => AuthRepository(context.read<AuthService>())),
