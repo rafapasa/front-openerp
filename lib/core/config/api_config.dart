@@ -6,7 +6,7 @@ class ApiConfig {
   // Padrão: dev (localhost)
   static const String _baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://teste.b.etoolstec.com.br/api/v1',
+    defaultValue: 'https://mcp-server.etoolstec.com.br/api/v1',
   );
 
   static const String _environment = String.fromEnvironment('ENVIRONMENT', defaultValue: 'dev');
