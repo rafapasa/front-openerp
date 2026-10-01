@@ -1,9 +1,6 @@
-// lib/presentation/pages/pedidos/pedidos_page.dart
-// Refatorado eTools - Responsivo - só barra de filtros alterada
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pedido_detalhe_modal.dart';
-import 'package:front_openerp/presentation/pages/pedidos/pedidos_kanban.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +10,6 @@ import '../../theme/app_theme.dart';
 
 class PedidosPage extends StatefulWidget {
   const PedidosPage({super.key});
-
   @override
   State<PedidosPage> createState() => _PedidosPageState();
 }
@@ -22,7 +18,6 @@ class _PedidosPageState extends State<PedidosPage> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _busca = TextEditingController();
   bool _quadro = true;
-
   String? _statusFilter;
   DateTime? _dataInicio;
   DateTime? _dataFim;
@@ -32,7 +27,7 @@ class _PedidosPageState extends State<PedidosPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
     _scrollController.addListener(_onScroll);
-    _busca.addListener(() => setState(() {})); // pra busca local funcionar
+    _busca.addListener(() => setState(() {}));
   }
 
   @override
@@ -42,18 +37,27 @@ class _PedidosPageState extends State<PedidosPage> {
     super.dispose();
   }
 
-  Future<void> _loadData() async => await context.read<PedidoProvider>().loadPedidos();
+  Future<void> _loadData() async {
+    await context.read<PedidoProvider>().loadPedidos();
+  }
 
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
       final provider = context.read<PedidoProvider>();
-      if (!provider.isLoadingMore && provider.hasMore) provider.loadMore();
+      if (!provider.isLoadingMore && provider.hasMore) {
+        provider.loadMore();
+      }
     }
   }
 
-  Future<void> _refreshData() async => await context.read<PedidoProvider>().refreshPedidos();
+  Future<void> _refreshData() async {
+    await context.read<PedidoProvider>().refreshPedidos();
+  }
 
-  String? _formatDate(DateTime? date) => date == null ? null : DateFormat('yyyy-MM-dd').format(date);
+  String? _formatDate(DateTime? date) {
+    if (date == null) return null;
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
 
   Future<void> _applyFilters() async {
     await context.read<PedidoProvider>().loadPedidos(
@@ -74,37 +78,64 @@ class _PedidosPageState extends State<PedidosPage> {
   }
 
   Future<void> _pickDate({required bool isInicio}) async {
+    if (!mounted) return;
     final now = DateTime.now();
-    final initial = isInicio ? (_dataInicio ?? now.subtract(const Duration(days: 30))) : (_dataFim ?? now);
+    final firstDate = DateTime(now.year - 5);
+    final lastDate = DateTime(now.year + 1, 12, 31);
+    final rawInitial = isInicio ? (_dataInicio ?? now.subtract(const Duration(days: 30))) : (_dataFim ?? now);
+    final initial = rawInitial.isBefore(firstDate)
+        ? firstDate
+        : rawInitial.isAfter(lastDate)
+        ? lastDate
+        : rawInitial;
+
     final picked = await showDatePicker(
       context: context,
       initialDate: initial,
-      firstDate: DateTime(now.year - 5),
-      lastDate: DateTime(now.year + 1, 12, 31),
-      locale: const Locale('pt', 'BR'),
+      firstDate: firstDate,
+      lastDate: lastDate,
+      useRootNavigator: true,
+      builder: (ctx, child) {
+        return Theme(
+          data: Theme.of(ctx).copyWith(
+            dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.textDark,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
-    if (picked == null) return;
+
+    if (picked == null || !mounted) return;
+
     setState(() {
       if (isInicio) {
         _dataInicio = picked;
-        if (_dataFim != null && _dataFim!.isBefore(picked)) _dataFim = picked;
+        if (_dataFim != null && _dataFim!.isBefore(picked)) {
+          _dataFim = picked;
+        }
       } else {
         _dataFim = picked;
-        if (_dataInicio != null && _dataInicio!.isAfter(picked)) _dataInicio = picked;
+        if (_dataInicio != null && _dataInicio!.isAfter(picked)) {
+          _dataInicio = picked;
+        }
       }
     });
     await _applyFilters();
   }
 
   bool get _hasActiveFilters =>
-      _statusFilter != null || _dataInicio != null || _dataFim != null || _busca.text.isNotEmpty;
+      _statusFilter != null || _dataInicio != null || _dataFim != null || _busca.text.trim().isNotEmpty;
 
   String get _statusLabel {
     if (_statusFilter == null) return 'Todos';
     return StatusPedido.fromString(_statusFilter!).label;
   }
 
-  // FILTRO LOCAL por nome e numero - tava faltando no seu main
   List<PedidoModel> _filtrados(List<PedidoModel> lista) {
     final termo = _busca.text.trim().toLowerCase();
     if (termo.isEmpty) return lista;
@@ -132,113 +163,92 @@ class _PedidosPageState extends State<PedidosPage> {
                 top: 16,
                 bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Filtrar pedidos',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Situação',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textGrey),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _statusChip(
+                        label: 'Todos',
+                        selected: _statusFilter == null,
+                        onTap: () => setSheetState(() => _statusFilter = null),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Filtrar pedidos',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Situação',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textGrey),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _statusChip(
-                          label: 'Todos',
-                          selected: _statusFilter == null,
-                          onTap: () => setSheetState(() => _statusFilter = null),
+                      ...StatusPedido.values.map(
+                        (s) => _statusChip(
+                          label: s.label,
+                          selected: _statusFilter == s.toStringValue(),
+                          onTap: () => setSheetState(() => _statusFilter = s.toStringValue()),
                         ),
-                        ...StatusPedido.values.map(
-                          (s) => _statusChip(
-                            label: s.label,
-                            selected: _statusFilter == s.toStringValue(),
-                            onTap: () => setSheetState(() => _statusFilter = s.toStringValue()),
-                          ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _dateField(
+                          label: 'Data início',
+                          value: _dataInicio,
+                          onTap: () => _pickDate(isInicio: true),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Período',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textGrey),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _dateField(
-                            label: 'Data início',
-                            value: _dataInicio,
-                            onTap: () async {
-                              await _pickDate(isInicio: true);
-                              setSheetState(() {});
-                            },
-                          ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _dateField(label: 'Data fim', value: _dataFim, onTap: () => _pickDate(isInicio: false)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            await _clearFilters();
+                            if (sheetContext.mounted) {
+                              Navigator.of(sheetContext).pop();
+                            }
+                          },
+                          child: const Text('Limpar'),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _dateField(
-                            label: 'Data fim',
-                            value: _dataFim,
-                            onTap: () async {
-                              await _pickDate(isInicio: false);
-                              setSheetState(() {});
-                            },
-                          ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () async {
+                            await _applyFilters();
+                            if (sheetContext.mounted) {
+                              Navigator.of(sheetContext).pop();
+                            }
+                          },
+                          style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+                          child: const Text('Aplicar'),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () async {
-                              await _clearFilters();
-                              if (sheetContext.mounted) Navigator.of(sheetContext).pop();
-                            },
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              side: const BorderSide(color: AppColors.border),
-                              foregroundColor: AppColors.textGrey,
-                            ),
-                            child: const Text('Limpar'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: () async {
-                              await _applyFilters();
-                              if (sheetContext.mounted) Navigator.of(sheetContext).pop();
-                            },
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            child: const Text('Aplicar'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             );
           },
@@ -304,6 +314,7 @@ class _PedidosPageState extends State<PedidosPage> {
   Widget build(BuildContext context) {
     final provider = context.watch<PedidoProvider>();
     final isWeb = MediaQuery.of(context).size.width > 800;
+    final lista = _filtrados(provider.pedidos);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -311,7 +322,7 @@ class _PedidosPageState extends State<PedidosPage> {
         padding: EdgeInsets.zero,
         child: Column(
           children: [
-            _buildToolbar(provider, isWeb),
+            _buildToolbar(provider, isWeb, lista),
             if (_hasActiveFilters) _buildActiveFiltersBar(),
             Expanded(
               child: provider.isLoading
@@ -334,17 +345,15 @@ class _PedidosPageState extends State<PedidosPage> {
     );
   }
 
-  // =================== SÓ ISSO AQUI MUDOU ===================
-  Widget _buildToolbar(PedidoProvider provider, bool isWeb) {
+  Widget _buildToolbar(PedidoProvider provider, bool isWeb, List<PedidoModel> listaFiltrada) {
     return Container(
       padding: EdgeInsets.all(isWeb ? 12 : 12),
       decoration: isWeb ? AppTheme.cardDecoration : const BoxDecoration(color: Colors.white),
       child: isWeb
           ? Row(
               children: [
-                // BUSCA por nome e numero
                 SizedBox(
-                  width: 280,
+                  width: 260,
                   child: TextField(
                     controller: _busca,
                     decoration: InputDecoration(
@@ -368,10 +377,11 @@ class _PedidosPageState extends State<PedidosPage> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                // STATUS
                 PopupMenuButton<String>(
                   onSelected: (status) async {
-                    setState(() => _statusFilter = status == 'todos' ? null : status);
+                    setState(() {
+                      _statusFilter = status == 'todos' ? null : status;
+                    });
                     await _applyFilters();
                   },
                   itemBuilder: (context) => [
@@ -388,69 +398,26 @@ class _PedidosPageState extends State<PedidosPage> {
                       children: [
                         const Icon(Icons.filter_list, size: 16),
                         const SizedBox(width: 6),
-                        Text(
-                          _hasActiveFilters ? 'Filtros ($_statusLabel)' : 'Filtrar',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                        ),
+                        Text(_statusLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                // DATAS
                 SizedBox(
-                  width: 135,
+                  width: 130,
                   child: _dateField(label: 'Início', value: _dataInicio, onTap: () => _pickDate(isInicio: true)),
                 ),
                 const SizedBox(width: 8),
                 SizedBox(
-                  width: 135,
+                  width: 130,
                   child: _dateField(label: 'Fim', value: _dataFim, onTap: () => _pickDate(isInicio: false)),
                 ),
                 const Spacer(),
-                // TOGGLE KANBAN / LISTA
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.border),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      InkWell(
-                        onTap: () => setState(() => _quadro = true),
-                        borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: _quadro ? AppColors.primary : Colors.transparent,
-                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
-                          ),
-                          child: Icon(
-                            Icons.view_kanban_outlined,
-                            size: 18,
-                            color: _quadro ? Colors.white : AppColors.textGrey,
-                          ),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () => setState(() => _quadro = false),
-                        borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: !_quadro ? AppColors.primary : Colors.transparent,
-                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
-                          ),
-                          child: Icon(Icons.view_list, size: 18, color: !_quadro ? Colors.white : AppColors.textGrey),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildViewCombo(),
                 const SizedBox(width: 12),
                 Text(
-                  '${_filtrados(provider.pedidos).length} pedidos',
+                  '${listaFiltrada.length} pedidos',
                   style: const TextStyle(color: AppColors.textGrey, fontSize: 12),
                 ),
               ],
@@ -460,7 +427,7 @@ class _PedidosPageState extends State<PedidosPage> {
                 TextField(
                   controller: _busca,
                   decoration: InputDecoration(
-                    hintText: 'Buscar por nome ou nº',
+                    hintText: 'Buscar nome ou nº',
                     prefixIcon: const Icon(Icons.search, size: 18),
                     suffixIcon: _busca.text.isNotEmpty
                         ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => _busca.clear())
@@ -480,59 +447,58 @@ class _PedidosPageState extends State<PedidosPage> {
                     OutlinedButton.icon(
                       onPressed: _openFilterSheet,
                       icon: const Icon(Icons.filter_list, size: 16),
-                      label: Text(_hasActiveFilters ? 'Filtros' : 'Filtrar', style: const TextStyle(fontSize: 12)),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.border),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      ),
+                      label: const Text('Filtrar'),
                     ),
                     const Spacer(),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          InkWell(
-                            onTap: () => setState(() => _quadro = true),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: _quadro ? AppColors.primary : Colors.transparent,
-                                borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
-                              ),
-                              child: Icon(
-                                Icons.view_kanban_outlined,
-                                size: 18,
-                                color: _quadro ? Colors.white : AppColors.textGrey,
-                              ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () => setState(() => _quadro = false),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: !_quadro ? AppColors.primary : Colors.transparent,
-                                borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
-                              ),
-                              child: Icon(
-                                Icons.view_list,
-                                size: 18,
-                                color: !_quadro ? Colors.white : AppColors.textGrey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildViewCombo(),
                   ],
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _buildViewCombo() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<bool>(
+          value: _quadro,
+          isDense: true,
+          icon: const Icon(Icons.keyboard_arrow_down, size: 16),
+          items: const [
+            DropdownMenuItem(
+              value: true,
+              child: Row(
+                children: [
+                  Icon(Icons.view_kanban_outlined, size: 16),
+                  SizedBox(width: 6),
+                  Text('Quadro', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
+            DropdownMenuItem(
+              value: false,
+              child: Row(
+                children: [
+                  Icon(Icons.view_list, size: 16),
+                  SizedBox(width: 6),
+                  Text('Lista', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
+          ],
+          onChanged: (v) {
+            if (v != null) {
+              setState(() => _quadro = v);
+            }
+          },
+        ),
+      ),
     );
   }
 
@@ -545,7 +511,6 @@ class _PedidosPageState extends State<PedidosPage> {
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
-        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           if (_busca.text.isNotEmpty) _activeChip(label: 'Busca: ${_busca.text}', onRemove: () => _busca.clear()),
           if (_statusFilter != null)
@@ -574,13 +539,7 @@ class _PedidosPageState extends State<PedidosPage> {
             ),
           TextButton(
             onPressed: _clearFilters,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.error,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: const Size(0, 32),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Limpar tudo', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+            child: const Text('Limpar tudo', style: TextStyle(fontSize: 12)),
           ),
         ],
       ),
@@ -601,50 +560,43 @@ class _PedidosPageState extends State<PedidosPage> {
           const SizedBox(width: 4),
           InkWell(
             onTap: onRemove,
-            borderRadius: BorderRadius.circular(12),
-            child: const Padding(
-              padding: EdgeInsets.all(2),
-              child: Icon(Icons.close, size: 14, color: AppColors.primary),
-            ),
+            child: const Icon(Icons.close, size: 14, color: AppColors.primary),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildError(String error, BuildContext context) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.error_outline, size: 64, color: AppColors.error),
-        const SizedBox(height: 16),
-        Text('Erro ao carregar pedidos', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 8),
-        Text(
-          error,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.textGrey),
-        ),
-        const SizedBox(height: 16),
-        FilledButton(onPressed: _loadData, child: const Text('Tentar novamente')),
-      ],
-    ),
-  );
-
-  Widget _buildEmpty() => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey[400]),
-        const SizedBox(height: 16),
-        Text('Nenhum pedido encontrado', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
-        if (_hasActiveFilters) ...[
-          const SizedBox(height: 12),
-          TextButton(onPressed: _clearFilters, child: const Text('Limpar filtros')),
+  Widget _buildError(String error, BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+          const SizedBox(height: 16),
+          Text('Erro ao carregar pedidos', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Text(error),
+          const SizedBox(height: 16),
+          FilledButton(onPressed: _loadData, child: const Text('Tentar novamente')),
         ],
-      ],
-    ),
-  );
+      ),
+    );
+  }
+
+  Widget _buildEmpty() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 12),
+          const Text('Nenhum pedido encontrado'),
+          if (_hasActiveFilters) TextButton(onPressed: _clearFilters, child: const Text('Limpar filtros')),
+        ],
+      ),
+    );
+  }
 
   Widget _buildMobileList(PedidoProvider provider) {
     final lista = _filtrados(provider.pedidos);
@@ -668,6 +620,7 @@ class _PedidosPageState extends State<PedidosPage> {
     final numberFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     final dateFormat = DateFormat('dd/MM HH:mm');
     final lista = _filtrados(provider.pedidos);
+
     return Container(
       margin: const EdgeInsets.only(top: 16),
       decoration: AppTheme.cardDecoration,
@@ -683,43 +636,22 @@ class _PedidosPageState extends State<PedidosPage> {
               children: [
                 SizedBox(
                   width: 80,
-                  child: Text(
-                    'PEDIDO',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textGrey),
-                  ),
+                  child: Text('PEDIDO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                 ),
                 Expanded(
                   flex: 2,
-                  child: Text(
-                    'CLIENTE',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textGrey),
-                  ),
+                  child: Text('CLIENTE', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                 ),
                 Expanded(
-                  child: Text(
-                    'DATA',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textGrey),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'ORIGEM',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textGrey),
-                  ),
+                  child: Text('DATA', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                 ),
                 SizedBox(
                   width: 100,
-                  child: Text(
-                    'STATUS',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textGrey),
-                  ),
+                  child: Text('STATUS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                 ),
                 SizedBox(
                   width: 100,
-                  child: Text(
-                    'TOTAL',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textGrey),
-                  ),
+                  child: Text('TOTAL', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
@@ -729,7 +661,7 @@ class _PedidosPageState extends State<PedidosPage> {
             child: ListView.separated(
               controller: _scrollController,
               itemCount: lista.length,
-              separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.borderLight),
+              separatorBuilder: (context, _) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final pedido = lista[index];
                 return InkWell(
@@ -740,72 +672,16 @@ class _PedidosPageState extends State<PedidosPage> {
                       children: [
                         SizedBox(
                           width: 80,
-                          child: Text(
-                            '#${pedido.id}',
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                          ),
+                          child: Text('#${pedido.id}', style: const TextStyle(fontWeight: FontWeight.w700)),
                         ),
+                        Expanded(flex: 2, child: Text(pedido.clienteNome)),
                         Expanded(
-                          flex: 2,
-                          child: Text(
-                            pedido.clienteNome,
-                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                          ),
+                          child: Text(dateFormat.format(pedido.createdAt), style: const TextStyle(fontSize: 12)),
                         ),
-                        Expanded(
-                          child: Text(
-                            dateFormat.format(pedido.createdAt),
-                            style: const TextStyle(fontSize: 12, color: AppColors.textGrey),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryLight,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              pedido.origemLabel,
-                              style: const TextStyle(
-                                color: AppColors.primary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
+                        SizedBox(width: 100, child: Text(pedido.statusLabel)),
                         SizedBox(
                           width: 100,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Color(int.parse(pedido.statusColor.replaceFirst('#', '0xff')))
-                                  .withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              pedido.statusLabel,
-                              style: TextStyle(
-                                color: Color(int.parse(pedido.statusColor.replaceFirst('#', '0xff'))),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 100,
-                          child: Text(
-                            numberFormat.format(pedido.total),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
-                              color: AppColors.textDark,
-                            ),
-                            textAlign: TextAlign.right,
-                          ),
+                          child: Text(numberFormat.format(pedido.total), textAlign: TextAlign.right),
                         ),
                       ],
                     ),
@@ -842,68 +718,71 @@ class _PedidoCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: Color(int.parse(pedido.statusColor.replaceFirst('#', '0xff'))),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
+                  Text('#${pedido.id}', style: const TextStyle(fontWeight: FontWeight.w700)),
                   const SizedBox(width: 8),
-                  Text('#${pedido.id}', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: Color(int.parse(pedido.statusColor.replaceFirst('#', '0xff'))).withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      pedido.statusLabel,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: Color(int.parse(pedido.statusColor.replaceFirst('#', '0xff'))),
-                      ),
-                    ),
-                  ),
+                  Text(pedido.statusLabel, style: const TextStyle(fontSize: 11)),
                   const Spacer(),
-                  Text(
-                    dateFormat.format(pedido.createdAt),
-                    style: const TextStyle(fontSize: 11, color: AppColors.textGrey),
-                  ),
+                  Text(dateFormat.format(pedido.createdAt), style: const TextStyle(fontSize: 11)),
                 ],
               ),
-              const SizedBox(height: 12),
-              Text(pedido.clienteNome, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
+              Text(pedido.clienteNome, style: const TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
               Text(
-                '${pedido.itens.length} itens • ${pedido.origemLabel}',
-                style: const TextStyle(fontSize: 12, color: AppColors.textGrey),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(8)),
-                    child: Text(
-                      pedido.origemLabel,
-                      style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  Text(
-                    numberFormat.format(pedido.total),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textDark),
-                  ),
-                ],
+                numberFormat.format(pedido.total),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+// Placeholder para não quebrar o build - apague se você tem o arquivo real
+class PedidosKanban extends StatelessWidget {
+  const PedidosKanban({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<PedidoProvider>();
+    final agrupados = provider.pedidosAgrupadosPorStatus;
+    return ListView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.all(16),
+      children: agrupados.entries.map((entry) {
+        final status = entry.key;
+        final lista = entry.value;
+        return Container(
+          width: 300,
+          margin: const EdgeInsets.only(right: 12),
+          decoration: AppTheme.cardDecoration,
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Text(status.label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                    const Spacer(),
+                    Text('${lista.length}'),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(8),
+                  itemCount: lista.length,
+                  itemBuilder: (context, index) {
+                    return _PedidoCard(pedido: lista[index]);
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
