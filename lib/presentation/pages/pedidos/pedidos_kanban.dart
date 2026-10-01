@@ -1,3 +1,4 @@
+// lib/presentation/pages/pedidos/pedidos_kanban.dart
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pagamento_pedido_dialog.dart';
@@ -18,15 +19,14 @@ const _colunas = <StatusPedido>[
 ];
 
 bool _naColuna(PedidoModel p, StatusPedido col) => p.status == col;
-
 bool _aceitaDrop(PedidoModel p, StatusPedido dest) => pedidoPodeMoverPara(p, dest);
 
 class PedidosKanban extends StatelessWidget {
-  const PedidosKanban({super.key});
+  final List<PedidoModel> pedidos;
+  const PedidosKanban({super.key, required this.pedidos});
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<PedidoProvider>();
     return LayoutBuilder(
       builder: (context, constraints) {
         final n = _colunas.length;
@@ -44,7 +44,7 @@ class PedidosKanban extends StatelessWidget {
                   child: _Coluna(
                     status: _colunas[i],
                     colunaLargura: colW,
-                    pedidos: provider.pedidos.where((p) => _naColuna(p, _colunas[i])).toList(),
+                    pedidos: pedidos.where((p) => _naColuna(p, _colunas[i])).toList(),
                   ),
                 ),
               ],

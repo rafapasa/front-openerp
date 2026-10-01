@@ -138,6 +138,7 @@ class _PedidosPageState extends State<PedidosPage> {
   Widget build(BuildContext context) {
     final provider = context.watch<PedidoProvider>();
     final isWeb = MediaQuery.of(context).size.width > 800;
+    final filtrados = _filtrados(provider.pedidos);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -145,7 +146,7 @@ class _PedidosPageState extends State<PedidosPage> {
         padding: EdgeInsets.zero,
         child: Column(
           children: [
-            _buildToolbar(provider, isWeb),
+            _buildToolbar(provider, isWeb, filtrados),
             if (_hasActiveFilters) _buildActiveFiltersBar(),
             Expanded(
               child: provider.isLoading
@@ -158,8 +159,8 @@ class _PedidosPageState extends State<PedidosPage> {
                       color: AppColors.primary,
                       onRefresh: _refreshData,
                       child: _quadro
-                          ? const PedidosKanban()
-                          : (isWeb ? _buildWebTable(provider) : _buildMobileList(provider)),
+                          ? PedidosKanban(pedidos: filtrados)
+                          : (isWeb ? _buildWebTable(provider, filtrados) : _buildMobileList(filtrados)),
                     ),
             ),
           ],
@@ -168,7 +169,7 @@ class _PedidosPageState extends State<PedidosPage> {
     );
   }
 
-  Widget _buildToolbar(PedidoProvider provider, bool isWeb) {
+  Widget _buildToolbar(PedidoProvider provider, bool isWeb, List<PedidoModel> filtrados) {
     return Container(
       padding: EdgeInsets.all(isWeb ? 16 : 12),
       decoration: isWeb ? AppTheme.cardDecoration : const BoxDecoration(color: Colors.white),
@@ -178,7 +179,7 @@ class _PedidosPageState extends State<PedidosPage> {
                 const Icon(Icons.shopping_cart_outlined, size: 18, color: AppColors.textGrey),
                 const SizedBox(width: 8),
                 Text(
-                  '${_filtrados(provider.pedidos).length} pedidos',
+                  '${filtrados.length} pedidos',
                   style: const TextStyle(color: AppColors.textGrey, fontSize: 13, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(width: 12),
@@ -188,7 +189,7 @@ class _PedidosPageState extends State<PedidosPage> {
                   child: TextField(
                     controller: _busca,
                     decoration: const InputDecoration(
-                      hintText: 'Nome, #pedido',
+                      hintText: 'Nome, #pedido, etiqueta',
                       prefixIcon: Icon(Icons.search, size: 18),
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -255,7 +256,7 @@ class _PedidosPageState extends State<PedidosPage> {
                     const Icon(Icons.shopping_cart_outlined, size: 18, color: AppColors.textGrey),
                     const SizedBox(width: 8),
                     Text(
-                      '${_filtrados(provider.pedidos).length}',
+                      '${filtrados.length}',
                       style: const TextStyle(color: AppColors.textGrey, fontSize: 13, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(width: 8),
@@ -373,9 +374,7 @@ class _PedidosPageState extends State<PedidosPage> {
             ),
           ],
           onChanged: (v) {
-            if (v != null) {
-              setState(() => _quadro = v);
-            }
+            if (v != null) setState(() => _quadro = v);
           },
         ),
       ),
@@ -486,58 +485,51 @@ class _PedidosPageState extends State<PedidosPage> {
     }).toList();
   }
 
-  Widget _buildError(String error, BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: AppColors.error),
-          const SizedBox(height: 16),
-          Text('Erro ao carregar pedidos', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          Text(
-            error,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textGrey),
-          ),
-          const SizedBox(height: 16),
-          FilledButton(onPressed: _loadData, child: const Text('Tentar novamente')),
-        ],
-      ),
-    );
-  }
+  Widget _buildError(String error, BuildContext context) => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+        const SizedBox(height: 16),
+        Text('Erro ao carregar pedidos', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        Text(
+          error,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppColors.textGrey),
+        ),
+        const SizedBox(height: 16),
+        FilledButton(onPressed: _loadData, child: const Text('Tentar novamente')),
+      ],
+    ),
+  );
 
-  Widget _buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text('Nenhum pedido encontrado', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
-        ],
-      ),
-    );
-  }
+  Widget _buildEmpty() => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey[400]),
+        const SizedBox(height: 16),
+        Text('Nenhum pedido encontrado', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+      ],
+    ),
+  );
 
-  Widget _buildMobileList(PedidoProvider provider) {
+  Widget _buildMobileList(List<PedidoModel> filtrados) {
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: _filtrados(provider.pedidos).length + (provider.hasMore ? 1 : 0),
+      itemCount: filtrados.length + 1,
       itemBuilder: (context, index) {
-        if (index == _filtrados(provider.pedidos).length) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
-          );
+        if (index == filtrados.length) {
+          return const SizedBox(height: 80);
         }
-        return _PedidoCard(pedido: _filtrados(provider.pedidos)[index]);
+        return _PedidoCard(pedido: filtrados[index]);
       },
     );
   }
 
-  Widget _buildWebTable(PedidoProvider provider) {
+  Widget _buildWebTable(PedidoProvider provider, List<PedidoModel> filtrados) {
     final numberFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     final dateFormat = DateFormat('dd/MM HH:mm');
 
@@ -601,10 +593,10 @@ class _PedidosPageState extends State<PedidosPage> {
           Expanded(
             child: ListView.separated(
               controller: _scrollController,
-              itemCount: _filtrados(provider.pedidos).length,
-              separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.borderLight),
+              itemCount: filtrados.length,
+              separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.borderLight),
               itemBuilder: (context, index) {
-                final pedido = _filtrados(provider.pedidos)[index];
+                final pedido = filtrados[index];
                 return InkWell(
                   onTap: () => showPedidoDetalheModal(context, pedido.id),
                   child: Padding(
