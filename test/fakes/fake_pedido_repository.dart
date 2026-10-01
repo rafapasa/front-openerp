@@ -48,5 +48,48 @@ class FakePedidoRepository implements PedidoRepository {
   }
 
   @override
+  Future<PedidoModel> marcarPago(int id, {int? formaPagamentoId, double? valor, String? observacao}) async {
+    final i = store.indexWhere((p) => p.id == id);
+    store[i] = store[i].copyWith(pago: true, pagoEm: DateTime.now());
+    return store[i];
+  }
+
+  @override
+  Future<PedidoModel> createPedido({
+    required int clienteId,
+    required String clienteNome,
+    String clienteTelefone = '',
+    required List<Map<String, dynamic>> itens,
+    String? observacoes,
+    int? enderecoEntregaId,
+    String origem = 'dashboard',
+    String? etiqueta,
+  }) async {
+    final pedido = PedidoModel(
+      id: store.isEmpty ? 1 : store.first.id + 100,
+      clienteNome: clienteNome,
+      clienteTelefone: clienteTelefone,
+      itens: itens
+          .map((e) => ItemPedidoModel(
+                produtoId: e['produto_id'] as int?,
+                nome: '${e['nome'] ?? ''}',
+                quantidade: e['quantidade'] is int ? e['quantidade'] as int : 1,
+                preco: (e['preco'] as num?)?.toDouble() ?? 0,
+              ))
+          .toList(),
+      total: itens.fold<double>(0, (s, e) {
+        final q = e['quantidade'] is int ? e['quantidade'] as int : 1;
+        final p = (e['preco'] as num?)?.toDouble() ?? 0;
+        return s + q * p;
+      }),
+      status: StatusPedido.pendente,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    store.insert(0, pedido);
+    return pedido;
+  }
+
+  @override
   Future<void> clearCache() async {}
 }

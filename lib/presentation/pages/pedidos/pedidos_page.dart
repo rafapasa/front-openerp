@@ -2,7 +2,9 @@
 // Refatorado eTools - Responsivo
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/models/models.dart';
+import 'package:front_openerp/presentation/pages/pedidos/novo_pedido_modal.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pedido_detalhe_modal.dart';
+import 'package:front_openerp/presentation/pages/pedidos/pedidos_kanban.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +21,8 @@ class PedidosPage extends StatefulWidget {
 
 class _PedidosPageState extends State<PedidosPage> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _busca = TextEditingController();
+  bool _quadro = true;
 
   // Filtros locais (aplicados ao provider)
   String? _statusFilter;
@@ -35,6 +39,7 @@ class _PedidosPageState extends State<PedidosPage> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _busca.dispose();
     super.dispose();
   }
 
@@ -304,7 +309,7 @@ class _PedidosPageState extends State<PedidosPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Padding(
-        padding: EdgeInsets.all(isWeb ? 24 : 0),
+        padding: EdgeInsets.zero,
         child: Column(
           children: [
             _buildToolbar(provider, isWeb),
@@ -319,7 +324,9 @@ class _PedidosPageState extends State<PedidosPage> {
                   : RefreshIndicator(
                       color: AppColors.primary,
                       onRefresh: _refreshData,
-                      child: isWeb ? _buildWebTable(provider) : _buildMobileList(provider),
+                      child: _quadro
+                          ? const PedidosKanban()
+                          : (isWeb ? _buildWebTable(provider) : _buildMobileList(provider)),
                     ),
             ),
           ],
@@ -472,6 +479,15 @@ class _PedidosPageState extends State<PedidosPage> {
     );
   }
 
+  List<PedidoModel> _filtrados(List<PedidoModel> all) {
+    final q = _busca.text.trim().toLowerCase();
+    if (q.isEmpty) return all;
+    return all.where((p) {
+      final et = (p.etiqueta ?? '').toLowerCase();
+      return '#${p.id}'.contains(q) || p.clienteNome.toLowerCase().contains(q) || et.contains(q);
+    }).toList();
+  }
+
   Widget _buildError(String error, BuildContext context) => Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -510,15 +526,15 @@ class _PedidosPageState extends State<PedidosPage> {
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: provider.pedidos.length + (provider.hasMore ? 1 : 0),
+      itemCount: _filtrados(provider.pedidos).length + (provider.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == provider.pedidos.length) {
+        if (index == _filtrados(provider.pedidos).length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
           );
         }
-        return _PedidoCard(pedido: provider.pedidos[index]);
+        return _PedidoCard(pedido: _filtrados(provider.pedidos)[index]);
       },
     );
   }
@@ -587,10 +603,10 @@ class _PedidosPageState extends State<PedidosPage> {
           Expanded(
             child: ListView.separated(
               controller: _scrollController,
-              itemCount: provider.pedidos.length,
+              itemCount: _filtrados(provider.pedidos).length,
               separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.borderLight),
               itemBuilder: (context, index) {
-                final pedido = provider.pedidos[index];
+                final pedido = _filtrados(provider.pedidos)[index];
                 return InkWell(
                   onTap: () => showPedidoDetalheModal(context, pedido.id),
                   child: Padding(

@@ -1,3 +1,4 @@
+import 'package:front_openerp/core/helpers/json_helper.dart';
 import 'package:front_openerp/data/models/models.dart';
 
 import 'services.dart';
@@ -31,9 +32,7 @@ class PedidoService {
 
   Future<PedidoModel> getPedidoById(int id) async {
     final response = await _apiService.get('/pedidos/$id');
-    final map = response.data as Map<String, dynamic>;
-    final data = map['data'] as Map<String, dynamic>;
-    return PedidoModel.fromJson(data);
+    return PedidoModel.fromJson(_mapPedido(response.data));
   }
 
   Future<PedidoModel> updateStatusPedido(int id, StatusPedido status, {String? motivo}) async {
@@ -42,12 +41,9 @@ class PedidoService {
       if (motivo != null && motivo.trim().isNotEmpty) 'motivo': motivo.trim(),
     };
     final response = await _apiService.patch('/pedidos/$id/status', data: body);
-    final map = response.data as Map<String, dynamic>;
-    final data = map['data'] as Map<String, dynamic>;
-    return PedidoModel.fromJson(data);
+    return PedidoModel.fromJson(_mapPedido(response.data));
   }
 
-  /// Endpoint ainda não existe no back. Quando existir, ligar em issue #14.
   Future<PedidoModel> marcarPago(int id, {int? formaPagamentoId, double? valor, String? observacao}) async {
     try {
       final response = await _apiService.patch(
@@ -77,4 +73,39 @@ class PedidoService {
       (json) => PedidoModel.fromJson(json as Map<String, dynamic>),
     );
   }
+
+  Future<PedidoModel> createPedido({
+    required int clienteId,
+    required String clienteNome,
+    String clienteTelefone = '',
+    required List<Map<String, dynamic>> itens,
+    String? observacoes,
+    int? enderecoEntregaId,
+    String origem = 'dashboard',
+    String? etiqueta,
+  }) async {
+    final response = await _apiService.post('/pedidos', data: {
+      'cliente_id': clienteId,
+      'cliente_nome': clienteNome,
+      'cliente_telefone': clienteTelefone,
+      'itens': itens,
+      if (observacoes != null && observacoes.trim().isNotEmpty) 'observacoes': observacoes.trim(),
+      if (enderecoEntregaId != null) 'endereco_entrega_id': enderecoEntregaId,
+      'origem': origem,
+      if (etiqueta != null && etiqueta.trim().isNotEmpty) 'etiqueta': etiqueta.trim(),
+    });
+    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    return PedidoModel.fromJson(data);
+  }
+}
+
+
+Map<String, dynamic> _mapPedido(dynamic raw) {
+  final data = JsonHelper.extractData(raw);
+  if (data is Map<String, dynamic>) return data;
+  if (data is Map) return Map<String, dynamic>.from(data);
+  if (raw is Map<String, dynamic>) return raw;
+  if (raw is Map) return Map<String, dynamic>.from(raw);
+  throw Exception('Resposta de pedido invalida');
 }

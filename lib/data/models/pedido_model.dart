@@ -13,13 +13,34 @@ class ItemPedidoModel {
 
   ItemPedidoModel({this.produtoId, required this.nome, required this.quantidade, required this.preco, this.observacao});
 
+  static String _firstNonEmpty(List<dynamic> values) {
+    for (final value in values) {
+      final text = JsonHelper.toStr(value).trim();
+      if (text.isNotEmpty) return text;
+    }
+    return '';
+  }
+
   factory ItemPedidoModel.fromJson(Map<String, dynamic> json) {
+    final produtoItem = json['produto_item'] is Map
+        ? Map<String, dynamic>.from(json['produto_item'] as Map)
+        : const <String, dynamic>{};
+
     return ItemPedidoModel(
-      produtoId: json['produto_id'] != null ? JsonHelper.toInt(json['produto_id']) : null,
-      nome: JsonHelper.toStr(json['nome']),
-      quantidade: JsonHelper.toInt(json['quantidade']),
-      preco: JsonHelper.toDouble(json['preco']),
-      observacao: json['observacao'] as String?,
+      produtoId: (json['produto_id'] ?? produtoItem['id']) != null
+          ? JsonHelper.toInt(json['produto_id'] ?? produtoItem['id'])
+          : null,
+      nome: _firstNonEmpty([
+        json['nome'],
+        produtoItem['nome'],
+        json['produto_nome'],
+        produtoItem['descricao'],
+      ]),
+      quantidade: JsonHelper.toInt(json['quantidade'] ?? json['qtd']),
+      preco: JsonHelper.toDouble(
+        json['preco'] ?? json['preco_unitario'] ?? produtoItem['preco'],
+      ),
+      observacao: (json['observacao'] ?? json['obs']) as String?,
     );
   }
 
@@ -120,6 +141,7 @@ class PedidoModel {
   final String? observacoes;
   final int? tempoEstimado;
   final OrigemPedido origem;
+  final String? etiqueta;
   final DateTime createdAt;
   final DateTime updatedAt;
   final ClienteModel? cliente;
@@ -143,6 +165,7 @@ class PedidoModel {
     this.observacoes,
     this.tempoEstimado,
     this.origem = OrigemPedido.whatsapp,
+    this.etiqueta,
     required this.createdAt,
     required this.updatedAt,
     this.cliente,
@@ -170,6 +193,7 @@ class PedidoModel {
       observacoes: json['observacoes'] as String?,
       tempoEstimado: json['tempo_estimado'] != null ? JsonHelper.toInt(json['tempo_estimado']) : null,
       origem: OrigemPedido.fromString(JsonHelper.toStr(json['origem'], fallback: 'whatsapp')),
+      etiqueta: JsonHelper.toStr(json['etiqueta']),
       createdAt: JsonHelper.toDateTimeOrNow(json['created_at']),
       updatedAt: JsonHelper.toDateTimeOrNow(json['updated_at']),
       cliente: json['cliente'] != null ? ClienteModel.fromJson(json['cliente'] as Map<String, dynamic>) : null,
@@ -248,10 +272,43 @@ class PedidoModel {
   bool get podeCancelar =>
       status == StatusPedido.pendente ||
       status == StatusPedido.confirmado ||
-      status == StatusPedido.preparando ||
       status == StatusPedido.emPreparo;
   bool get isAtivo => status != StatusPedido.entregue && status != StatusPedido.cancelado;
   bool get isPago => pago == true || pagamentos.any((p) => p.isPago);
+  bool get isEntrega => enderecoEntregaId != null || enderecoEntrega != null;
+
+  StatusPedido? get proximoOperacional {
+    switch (status) {
+      case StatusPedido.pendente:
+        return StatusPedido.confirmado;
+      case StatusPedido.confirmado:
+        return StatusPedido.emPreparo;
+      case StatusPedido.emPreparo:
+        return isEntrega ? StatusPedido.saiuEntrega : StatusPedido.prontoRetirada;
+      case StatusPedido.prontoRetirada:
+      case StatusPedido.saiuEntrega:
+        return StatusPedido.entregue;
+      default:
+        return null;
+    }
+  }
+
+  String get proximoLabel {
+    switch (proximoOperacional) {
+      case StatusPedido.confirmado:
+        return 'Confirmar';
+      case StatusPedido.emPreparo:
+        return 'Preparar';
+      case StatusPedido.saiuEntrega:
+        return 'Saiu p/ entrega';
+      case StatusPedido.prontoRetirada:
+        return 'Pronto p/ retirar';
+      case StatusPedido.entregue:
+        return isEntrega ? 'Entregar' : 'Retirado';
+      default:
+        return '';
+    }
+  }
   String get formaPagamentoResumo {
     if (pagamentos.isEmpty) return '—';
     return pagamentos.map((p) => p.forma).join(', ');

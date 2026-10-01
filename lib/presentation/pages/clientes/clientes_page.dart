@@ -1,13 +1,14 @@
 // lib/presentation/pages/clientes/clientes_page.dart
 // Refatorado eTools - Responsivo Web tabela + Mobile cards
 import 'package:flutter/material.dart';
-import 'package:front_openerp/presentation/pages/clientes/detalhe_cliente_page.dart';
+import 'package:front_openerp/presentation/pages/clientes/cliente_detalhe_modal.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../data/models/models.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_theme.dart';
+import 'package:front_openerp/presentation/pages/clientes/novo_cliente_dialog.dart';
 
 class ClientesPage extends StatefulWidget {
   const ClientesPage({super.key});
@@ -65,7 +66,7 @@ class _ClientesPageState extends State<ClientesPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Padding(
-        padding: EdgeInsets.all(isWeb ? 24 : 0),
+        padding: EdgeInsets.zero,
         child: Column(
           children: [
             // Toolbar
@@ -89,7 +90,7 @@ class _ClientesPageState extends State<ClientesPage> {
                   ),
                   if (isWeb) ...[
                     const SizedBox(width: 12),
-                    FilledButton.icon(onPressed: () {}, icon: const Icon(Icons.person_add_alt_1_outlined, size: 18), label: const Text('Novo Cliente'), style: FilledButton.styleFrom(backgroundColor: AppColors.primary)),
+                    FilledButton.icon(onPressed: () => showNovoClienteDialog(context), icon: const Icon(Icons.person_add_alt_1_outlined, size: 18), label: const Text('Novo Cliente'), style: FilledButton.styleFrom(backgroundColor: AppColors.primary)),
                   ],
                 ],
               ),
@@ -110,7 +111,7 @@ class _ClientesPageState extends State<ClientesPage> {
           ],
         ),
       ),
-      floatingActionButton: isWeb ? null : FloatingActionButton.extended(onPressed: () {}, backgroundColor: AppColors.primary, foregroundColor: Colors.white, icon: const Icon(Icons.add), label: const Text('Novo', style: TextStyle(fontWeight: FontWeight.w700))),
+      floatingActionButton: isWeb ? null : FloatingActionButton.extended(onPressed: () => showNovoClienteDialog(context), backgroundColor: AppColors.primary, foregroundColor: Colors.white, icon: const Icon(Icons.add), label: const Text('Novo', style: TextStyle(fontWeight: FontWeight.w700))),
     );
   }
 
@@ -172,7 +173,7 @@ class _ClientesPageState extends State<ClientesPage> {
                 final cliente = provider.clientes[index];
                 final dateFormat = DateFormat('dd/MM/yyyy');
                 return InkWell(
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetalheClientePage(clienteId: cliente.id))),
+                  onTap: () => showClienteDetalheModal(context, cliente.id),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                     child: Row(
@@ -225,7 +226,7 @@ class _ClienteCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: AppTheme.cardDecoration,
       child: InkWell(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetalheClientePage(clienteId: cliente.id))),
+        onTap: () => showClienteDetalheModal(context, cliente.id),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),

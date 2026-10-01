@@ -131,6 +131,28 @@ class ProdutoRepository {
     }
   }
 
+  Future<ProdutoModel> createProduto(Map<String, dynamic> body) async {
+    final criado = await _produtoService.createProduto(body);
+    await LocalStorage.clearCache(LocalStorage.produtosKey);
+    return criado;
+  }
+
+  Future<ProdutoModel> updateProduto(int id, Map<String, dynamic> body) async {
+    final atualizado = await _produtoService.updateProduto(id, body);
+    await LocalStorage.clearCache(LocalStorage.produtosKey);
+    return atualizado;
+  }
+
+  Future<void> deleteProduto(int id) async {
+    await _produtoService.deleteProduto(id);
+    await LocalStorage.clearCache(LocalStorage.produtosKey);
+  }
+
+  Future<void> toggleDisponibilidade(int id, bool disponivel) async {
+    await _produtoService.toggleDisponibilidade(id, disponivel);
+    await LocalStorage.clearCache(LocalStorage.produtosKey);
+  }
+
   // ============================================================
   // 🗑️ Limpar cache
   // ============================================================

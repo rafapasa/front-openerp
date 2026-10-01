@@ -37,4 +37,26 @@ class ProdutoService {
         : {};
     return ProdutoModel.fromJson(data);
   }
+
+  Future<ProdutoModel> createProduto(Map<String, dynamic> body) async {
+    final response = await _apiService.post('/produtos', data: body);
+    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    return ProdutoModel.fromJson(data);
+  }
+
+  Future<ProdutoModel> updateProduto(int id, Map<String, dynamic> body) async {
+    final response = await _apiService.put('/produtos/$id', data: body);
+    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    return ProdutoModel.fromJson(data);
+  }
+
+  Future<void> deleteProduto(int id) async {
+    await _apiService.delete('/produtos/$id');
+  }
+
+  Future<void> toggleDisponibilidade(int id, bool disponivel) async {
+    await _apiService.patch('/produtos/$id/disponibilidade', data: {'disponivel': disponivel});
+  }
 }
