@@ -20,6 +20,11 @@ class PedidosPage extends StatefulWidget {
 class _PedidosPageState extends State<PedidosPage> {
   final ScrollController _scrollController = ScrollController();
 
+  // Filtros locais (aplicados ao provider)
+  String? _statusFilter;
+  DateTime? _dataInicio;
+  DateTime? _dataFim;
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +49,253 @@ class _PedidosPageState extends State<PedidosPage> {
 
   Future<void> _refreshData() async => await context.read<PedidoProvider>().refreshPedidos();
 
+  // ============================================================
+  // 🔍 Filtros
+  // ============================================================
+  String? _formatDate(DateTime? date) => date == null ? null : DateFormat('yyyy-MM-dd').format(date);
+
+  Future<void> _applyFilters() async {
+    await context.read<PedidoProvider>().loadPedidos(
+      status: _statusFilter,
+      dataInicio: _formatDate(_dataInicio),
+      dataFim: _formatDate(_dataFim),
+    );
+  }
+
+  Future<void> _clearFilters() async {
+    setState(() {
+      _statusFilter = null;
+      _dataInicio = null;
+      _dataFim = null;
+    });
+    await context.read<PedidoProvider>().loadPedidos();
+  }
+
+  Future<void> _pickDate({required bool isInicio}) async {
+    final now = DateTime.now();
+    final initial = isInicio ? (_dataInicio ?? now.subtract(const Duration(days: 30))) : (_dataFim ?? now);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(now.year - 5),
+      lastDate: DateTime(now.year + 1, 12, 31),
+      locale: const Locale('pt', 'BR'),
+    );
+    if (picked == null) return;
+    setState(() {
+      if (isInicio) {
+        _dataInicio = picked;
+        if (_dataFim != null && _dataFim!.isBefore(picked)) _dataFim = picked;
+      } else {
+        _dataFim = picked;
+        if (_dataInicio != null && _dataInicio!.isAfter(picked)) _dataInicio = picked;
+      }
+    });
+  }
+
+  bool get _hasActiveFilters => _statusFilter != null || _dataInicio != null || _dataFim != null;
+
+  String get _statusLabel {
+    if (_statusFilter == null) return 'Todos';
+    return StatusPedido.fromString(_statusFilter!).label;
+  }
+
+  // ============================================================
+  // 🎛️ Bottom sheet de filtros (mobile)
+  // ============================================================
+  void _openFilterSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 16,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppColors.border,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Filtrar pedidos',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Situação',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textGrey),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _statusChip(
+                          label: 'Todos',
+                          selected: _statusFilter == null,
+                          onTap: () => setSheetState(() => _statusFilter = null),
+                        ),
+                        ...StatusPedido.values.map(
+                          (s) => _statusChip(
+                            label: s.label,
+                            selected: _statusFilter == s.toStringValue(),
+                            onTap: () => setSheetState(() => _statusFilter = s.toStringValue()),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Período',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textGrey),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _dateField(
+                            label: 'Data início',
+                            value: _dataInicio,
+                            onTap: () async {
+                              await _pickDate(isInicio: true);
+                              setSheetState(() {});
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _dateField(
+                            label: 'Data fim',
+                            value: _dataFim,
+                            onTap: () async {
+                              await _pickDate(isInicio: false);
+                              setSheetState(() {});
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () async {
+                              await _clearFilters();
+                              if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: const BorderSide(color: AppColors.border),
+                              foregroundColor: AppColors.textGrey,
+                            ),
+                            child: const Text('Limpar'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () async {
+                              await _applyFilters();
+                              if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            child: const Text('Aplicar'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _statusChip({required String label, required bool selected, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : AppColors.background,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: selected ? AppColors.primary : AppColors.border),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: selected ? Colors.white : AppColors.textGrey,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _dateField({required String label, required DateTime? value, required VoidCallback onTap}) {
+    final fmt = DateFormat('dd/MM/yyyy');
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.textGrey),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                value == null ? label : fmt.format(value),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: value == null ? AppColors.textGrey : AppColors.textDark,
+                  fontWeight: value == null ? FontWeight.w400 : FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // 🏗️ Build
+  // ============================================================
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PedidoProvider>();
@@ -55,55 +307,8 @@ class _PedidosPageState extends State<PedidosPage> {
         padding: EdgeInsets.all(isWeb ? 24 : 0),
         child: Column(
           children: [
-            // Toolbar
-            Container(
-              padding: EdgeInsets.all(isWeb ? 16 : 12),
-              decoration: isWeb ? AppTheme.cardDecoration : const BoxDecoration(color: Colors.white),
-              child: Row(
-                children: [
-                  const Icon(Icons.shopping_cart_outlined, size: 18, color: AppColors.textGrey),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${provider.pedidos.length} pedidos',
-                    style: const TextStyle(color: AppColors.textGrey, fontSize: 13, fontWeight: FontWeight.w500),
-                  ),
-                  const Spacer(),
-                  PopupMenuButton<String>(
-                    icon: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.filter_list, size: 16),
-                          SizedBox(width: 6),
-                          Text('Filtrar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                    onSelected: (status) {
-                      if (status == 'todos') {
-                        provider.clearFilters();
-                      } else {
-                        provider.loadPedidos(status: status);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(value: 'todos', child: Text('Todos')),
-                      const PopupMenuItem(value: 'pendente', child: Text('Pendentes')),
-                      const PopupMenuItem(value: 'confirmado', child: Text('Confirmados')),
-                      const PopupMenuItem(value: 'em_preparo', child: Text('Em preparo')),
-                      const PopupMenuItem(value: 'pronto', child: Text('Prontos')),
-                      const PopupMenuItem(value: 'saiu_entrega', child: Text('Saiu p/ entrega')),
-                      const PopupMenuItem(value: 'entregue', child: Text('Entregues')),
-                      const PopupMenuItem(value: 'cancelado', child: Text('Cancelados')),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            _buildToolbar(provider, isWeb),
+            if (_hasActiveFilters) _buildActiveFiltersBar(),
             Expanded(
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
@@ -119,6 +324,150 @@ class _PedidosPageState extends State<PedidosPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildToolbar(PedidoProvider provider, bool isWeb) {
+    return Container(
+      padding: EdgeInsets.all(isWeb ? 16 : 12),
+      decoration: isWeb ? AppTheme.cardDecoration : const BoxDecoration(color: Colors.white),
+      child: Row(
+        children: [
+          const Icon(Icons.shopping_cart_outlined, size: 18, color: AppColors.textGrey),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              '${provider.pedidos.length} pedidos',
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: AppColors.textGrey, fontSize: 13, fontWeight: FontWeight.w500),
+            ),
+          ),
+          const Spacer(),
+          if (isWeb)
+            PopupMenuButton<String>(
+              icon: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.filter_list, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      _hasActiveFilters ? 'Filtros ($_statusLabel)' : 'Filtrar',
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+              onSelected: (status) async {
+                setState(() => _statusFilter = status == 'todos' ? null : status);
+                await _applyFilters();
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(value: 'todos', child: Text('Todos')),
+                ...StatusPedido.values.map(
+                  (s) => PopupMenuItem(value: s.toStringValue(), child: Text(s.label)),
+                ),
+              ],
+            )
+          else
+            OutlinedButton.icon(
+              onPressed: _openFilterSheet,
+              icon: const Icon(Icons.filter_list, size: 16),
+              label: Text(
+                _hasActiveFilters ? 'Filtros' : 'Filtrar',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.textDark,
+                side: const BorderSide(color: AppColors.border),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActiveFiltersBar() {
+    final fmt = DateFormat('dd/MM/yyyy');
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      color: Colors.white,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          if (_statusFilter != null)
+            _activeChip(
+              label: _statusLabel,
+              onRemove: () async {
+                setState(() => _statusFilter = null);
+                await _applyFilters();
+              },
+            ),
+          if (_dataInicio != null)
+            _activeChip(
+              label: 'De ${fmt.format(_dataInicio!)}',
+              onRemove: () async {
+                setState(() => _dataInicio = null);
+                await _applyFilters();
+              },
+            ),
+          if (_dataFim != null)
+            _activeChip(
+              label: 'Até ${fmt.format(_dataFim!)}',
+              onRemove: () async {
+                setState(() => _dataFim = null);
+                await _applyFilters();
+              },
+            ),
+          TextButton(
+            onPressed: _clearFilters,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.error,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(0, 32),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Limpar tudo', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _activeChip({required String label, required VoidCallback onRemove}) {
+    return Container(
+      padding: const EdgeInsets.only(left: 12, right: 6, top: 4, bottom: 4),
+      decoration: BoxDecoration(
+        color: AppColors.primaryLight,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary),
+          ),
+          const SizedBox(width: 4),
+          InkWell(
+            onTap: onRemove,
+            borderRadius: BorderRadius.circular(12),
+            child: const Padding(
+              padding: EdgeInsets.all(2),
+              child: Icon(Icons.close, size: 14, color: AppColors.primary),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -149,6 +498,10 @@ class _PedidosPageState extends State<PedidosPage> {
         Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey[400]),
         const SizedBox(height: 16),
         Text('Nenhum pedido encontrado', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+        if (_hasActiveFilters) ...[
+          const SizedBox(height: 12),
+          TextButton(onPressed: _clearFilters, child: const Text('Limpar filtros')),
+        ],
       ],
     ),
   );
