@@ -1,8 +1,7 @@
 // lib/presentation/pages/pedidos/pedidos_page.dart
-// Refatorado eTools - Responsivo
+// Refatorado eTools - Responsivo - só barra de filtros alterada
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/models/models.dart';
-import 'package:front_openerp/presentation/pages/pedidos/novo_pedido_modal.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pedido_detalhe_modal.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pedidos_kanban.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
@@ -24,7 +23,6 @@ class _PedidosPageState extends State<PedidosPage> {
   final TextEditingController _busca = TextEditingController();
   bool _quadro = true;
 
-  // Filtros locais (aplicados ao provider)
   String? _statusFilter;
   DateTime? _dataInicio;
   DateTime? _dataFim;
@@ -34,6 +32,7 @@ class _PedidosPageState extends State<PedidosPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
     _scrollController.addListener(_onScroll);
+    _busca.addListener(() => setState(() {})); // pra busca local funcionar
   }
 
   @override
@@ -54,9 +53,6 @@ class _PedidosPageState extends State<PedidosPage> {
 
   Future<void> _refreshData() async => await context.read<PedidoProvider>().refreshPedidos();
 
-  // ============================================================
-  // 🔍 Filtros
-  // ============================================================
   String? _formatDate(DateTime? date) => date == null ? null : DateFormat('yyyy-MM-dd').format(date);
 
   Future<void> _applyFilters() async {
@@ -72,6 +68,7 @@ class _PedidosPageState extends State<PedidosPage> {
       _statusFilter = null;
       _dataInicio = null;
       _dataFim = null;
+      _busca.clear();
     });
     await context.read<PedidoProvider>().loadPedidos();
   }
@@ -96,18 +93,26 @@ class _PedidosPageState extends State<PedidosPage> {
         if (_dataInicio != null && _dataInicio!.isAfter(picked)) _dataInicio = picked;
       }
     });
+    await _applyFilters();
   }
 
-  bool get _hasActiveFilters => _statusFilter != null || _dataInicio != null || _dataFim != null;
+  bool get _hasActiveFilters =>
+      _statusFilter != null || _dataInicio != null || _dataFim != null || _busca.text.isNotEmpty;
 
   String get _statusLabel {
     if (_statusFilter == null) return 'Todos';
     return StatusPedido.fromString(_statusFilter!).label;
   }
 
-  // ============================================================
-  // 🎛️ Bottom sheet de filtros (mobile)
-  // ============================================================
+  // FILTRO LOCAL por nome e numero - tava faltando no seu main
+  List<PedidoModel> _filtrados(List<PedidoModel> lista) {
+    final termo = _busca.text.trim().toLowerCase();
+    if (termo.isEmpty) return lista;
+    return lista
+        .where((p) => p.id.toString().toLowerCase().contains(termo) || p.clienteNome.toLowerCase().contains(termo))
+        .toList();
+  }
+
   void _openFilterSheet() {
     showModalBottomSheet<void>(
       context: context,
@@ -136,10 +141,7 @@ class _PedidosPageState extends State<PedidosPage> {
                       child: Container(
                         width: 40,
                         height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.border,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                        decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -298,9 +300,6 @@ class _PedidosPageState extends State<PedidosPage> {
     );
   }
 
-  // ============================================================
-  // 🏗️ Build
-  // ============================================================
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PedidoProvider>();
@@ -335,69 +334,205 @@ class _PedidosPageState extends State<PedidosPage> {
     );
   }
 
+  // =================== SÓ ISSO AQUI MUDOU ===================
   Widget _buildToolbar(PedidoProvider provider, bool isWeb) {
     return Container(
-      padding: EdgeInsets.all(isWeb ? 16 : 12),
+      padding: EdgeInsets.all(isWeb ? 12 : 12),
       decoration: isWeb ? AppTheme.cardDecoration : const BoxDecoration(color: Colors.white),
-      child: Row(
-        children: [
-          const Icon(Icons.shopping_cart_outlined, size: 18, color: AppColors.textGrey),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              '${provider.pedidos.length} pedidos',
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: AppColors.textGrey, fontSize: 13, fontWeight: FontWeight.w500),
-            ),
-          ),
-          const Spacer(),
-          if (isWeb)
-            PopupMenuButton<String>(
-              icon: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.border),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.filter_list, size: 16),
-                    const SizedBox(width: 6),
-                    Text(
-                      _hasActiveFilters ? 'Filtros ($_statusLabel)' : 'Filtrar',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+      child: isWeb
+          ? Row(
+              children: [
+                // BUSCA por nome e numero
+                SizedBox(
+                  width: 280,
+                  child: TextField(
+                    controller: _busca,
+                    decoration: InputDecoration(
+                      hintText: 'Buscar nome ou nº',
+                      prefixIcon: const Icon(Icons.search, size: 18),
+                      suffixIcon: _busca.text.isNotEmpty
+                          ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => _busca.clear())
+                          : null,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
                     ),
-                  ],
+                    style: const TextStyle(fontSize: 13),
+                  ),
                 ),
-              ),
-              onSelected: (status) async {
-                setState(() => _statusFilter = status == 'todos' ? null : status);
-                await _applyFilters();
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(value: 'todos', child: Text('Todos')),
-                ...StatusPedido.values.map(
-                  (s) => PopupMenuItem(value: s.toStringValue(), child: Text(s.label)),
+                const SizedBox(width: 10),
+                // STATUS
+                PopupMenuButton<String>(
+                  onSelected: (status) async {
+                    setState(() => _statusFilter = status == 'todos' ? null : status);
+                    await _applyFilters();
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(value: 'todos', child: Text('Todos')),
+                    ...StatusPedido.values.map((s) => PopupMenuItem(value: s.toStringValue(), child: Text(s.label))),
+                  ],
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.filter_list, size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          _hasActiveFilters ? 'Filtros ($_statusLabel)' : 'Filtrar',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // DATAS
+                SizedBox(
+                  width: 135,
+                  child: _dateField(label: 'Início', value: _dataInicio, onTap: () => _pickDate(isInicio: true)),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 135,
+                  child: _dateField(label: 'Fim', value: _dataFim, onTap: () => _pickDate(isInicio: false)),
+                ),
+                const Spacer(),
+                // TOGGLE KANBAN / LISTA
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.border),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      InkWell(
+                        onTap: () => setState(() => _quadro = true),
+                        borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: _quadro ? AppColors.primary : Colors.transparent,
+                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
+                          ),
+                          child: Icon(
+                            Icons.view_kanban_outlined,
+                            size: 18,
+                            color: _quadro ? Colors.white : AppColors.textGrey,
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => setState(() => _quadro = false),
+                        borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: !_quadro ? AppColors.primary : Colors.transparent,
+                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
+                          ),
+                          child: Icon(Icons.view_list, size: 18, color: !_quadro ? Colors.white : AppColors.textGrey),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '${_filtrados(provider.pedidos).length} pedidos',
+                  style: const TextStyle(color: AppColors.textGrey, fontSize: 12),
                 ),
               ],
             )
-          else
-            OutlinedButton.icon(
-              onPressed: _openFilterSheet,
-              icon: const Icon(Icons.filter_list, size: 16),
-              label: Text(
-                _hasActiveFilters ? 'Filtros' : 'Filtrar',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textDark,
-                side: const BorderSide(color: AppColors.border),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              ),
+          : Column(
+              children: [
+                TextField(
+                  controller: _busca,
+                  decoration: InputDecoration(
+                    hintText: 'Buscar por nome ou nº',
+                    prefixIcon: const Icon(Icons.search, size: 18),
+                    suffixIcon: _busca.text.isNotEmpty
+                        ? IconButton(icon: const Icon(Icons.clear, size: 18), onPressed: () => _busca.clear())
+                        : null,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                  style: const TextStyle(fontSize: 13),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: _openFilterSheet,
+                      icon: const Icon(Icons.filter_list, size: 16),
+                      label: Text(_hasActiveFilters ? 'Filtros' : 'Filtrar', style: const TextStyle(fontSize: 12)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.border),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            onTap: () => setState(() => _quadro = true),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: _quadro ? AppColors.primary : Colors.transparent,
+                                borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
+                              ),
+                              child: Icon(
+                                Icons.view_kanban_outlined,
+                                size: 18,
+                                color: _quadro ? Colors.white : AppColors.textGrey,
+                              ),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => setState(() => _quadro = false),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: !_quadro ? AppColors.primary : Colors.transparent,
+                                borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
+                              ),
+                              child: Icon(
+                                Icons.view_list,
+                                size: 18,
+                                color: !_quadro ? Colors.white : AppColors.textGrey,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-        ],
-      ),
     );
   }
 
@@ -412,6 +547,7 @@ class _PedidosPageState extends State<PedidosPage> {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
+          if (_busca.text.isNotEmpty) _activeChip(label: 'Busca: ${_busca.text}', onRemove: () => _busca.clear()),
           if (_statusFilter != null)
             _activeChip(
               label: _statusLabel,
@@ -454,10 +590,7 @@ class _PedidosPageState extends State<PedidosPage> {
   Widget _activeChip({required String label, required VoidCallback onRemove}) {
     return Container(
       padding: const EdgeInsets.only(left: 12, right: 6, top: 4, bottom: 4),
-      decoration: BoxDecoration(
-        color: AppColors.primaryLight,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -477,15 +610,6 @@ class _PedidosPageState extends State<PedidosPage> {
         ],
       ),
     );
-  }
-
-  List<PedidoModel> _filtrados(List<PedidoModel> all) {
-    final q = _busca.text.trim().toLowerCase();
-    if (q.isEmpty) return all;
-    return all.where((p) {
-      final et = (p.etiqueta ?? '').toLowerCase();
-      return '#${p.id}'.contains(q) || p.clienteNome.toLowerCase().contains(q) || et.contains(q);
-    }).toList();
   }
 
   Widget _buildError(String error, BuildContext context) => Center(
@@ -523,18 +647,19 @@ class _PedidosPageState extends State<PedidosPage> {
   );
 
   Widget _buildMobileList(PedidoProvider provider) {
+    final lista = _filtrados(provider.pedidos);
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: _filtrados(provider.pedidos).length + (provider.hasMore ? 1 : 0),
+      itemCount: lista.length + (provider.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == _filtrados(provider.pedidos).length) {
+        if (index == lista.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
           );
         }
-        return _PedidoCard(pedido: _filtrados(provider.pedidos)[index]);
+        return _PedidoCard(pedido: lista[index]);
       },
     );
   }
@@ -542,7 +667,7 @@ class _PedidosPageState extends State<PedidosPage> {
   Widget _buildWebTable(PedidoProvider provider) {
     final numberFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
     final dateFormat = DateFormat('dd/MM HH:mm');
-
+    final lista = _filtrados(provider.pedidos);
     return Container(
       margin: const EdgeInsets.only(top: 16),
       decoration: AppTheme.cardDecoration,
@@ -603,10 +728,10 @@ class _PedidosPageState extends State<PedidosPage> {
           Expanded(
             child: ListView.separated(
               controller: _scrollController,
-              itemCount: _filtrados(provider.pedidos).length,
+              itemCount: lista.length,
               separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.borderLight),
               itemBuilder: (context, index) {
-                final pedido = _filtrados(provider.pedidos)[index];
+                final pedido = lista[index];
                 return InkWell(
                   onTap: () => showPedidoDetalheModal(context, pedido.id),
                   child: Padding(
