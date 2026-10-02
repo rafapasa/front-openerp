@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:front_openerp/data/models/tenant_model.dart';
 import 'package:front_openerp/presentation/theme/app_colors.dart';
+
 import 'tenant_dados_tab.dart';
 import 'tenant_configuracoes_tab.dart';
 import 'tenant_llm_tab.dart';
@@ -82,15 +83,9 @@ class _TenantDetalheModalState extends State<TenantDetalheModal> with SingleTick
             child: TabBarView(
               controller: _tabController,
               children: [
-                TenantDadosTab(
-                  tenant: _tenant,
-                  onSaved: (atualizado) => setState(() => _tenant = atualizado),
-                ),
+                TenantDadosTab(tenant: _tenant, onSaved: (atualizado) => setState(() => _tenant = atualizado)),
                 TenantConfiguracoesTab(tenantId: _tenant.id ?? 0),
-                TenantLlmTab(
-                  tenant: _tenant,
-                  onSaved: (atualizado) => setState(() => _tenant = atualizado),
-                ),
+                TenantLlmTab(tenant: _tenant, onSaved: (atualizado) => setState(() => _tenant = atualizado)),
               ],
             ),
           ),

@@ -29,12 +29,8 @@ class TenantLlmConfig {
   factory TenantLlmConfig.fromJson(dynamic raw) {
     if (raw is! Map) return const TenantLlmConfig();
     final map = Map<String, dynamic>.from(raw);
-    final prompts = map['prompts'] is Map
-        ? Map<String, dynamic>.from(map['prompts'] as Map)
-        : <String, dynamic>{};
-    final regras = map['regras'] is Map
-        ? Map<String, dynamic>.from(map['regras'] as Map)
-        : <String, dynamic>{};
+    final prompts = map['prompts'] is Map ? Map<String, dynamic>.from(map['prompts'] as Map) : <String, dynamic>{};
+    final regras = map['regras'] is Map ? Map<String, dynamic>.from(map['regras'] as Map) : <String, dynamic>{};
     return TenantLlmConfig(
       segmento: _str(map['segmento']),
       videoFrame: _str(prompts['video_frame']),

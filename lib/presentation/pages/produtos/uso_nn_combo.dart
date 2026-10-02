@@ -11,12 +11,7 @@ class UsoNnCombo extends StatefulWidget {
   final List<UsoModel> selecionados;
   final ValueChanged<ProdutoModel> onProdutoAtualizado;
 
-  const UsoNnCombo({
-    super.key,
-    required this.produtoId,
-    required this.selecionados,
-    required this.onProdutoAtualizado,
-  });
+  const UsoNnCombo({super.key, required this.produtoId, required this.selecionados, required this.onProdutoAtualizado});
 
   @override
   State<UsoNnCombo> createState() => _UsoNnComboState();
@@ -82,31 +77,30 @@ class _UsoNnComboState extends State<UsoNnCombo> {
       return;
     }
     final largura = _larguraCampo();
-    _overlay = OverlayEntry(builder: (ctx) {
-      return Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(onTap: _fechar, behavior: HitTestBehavior.translucent),
-          ),
-          CompositedTransformFollower(
-            link: _link,
-            showWhenUnlinked: false,
-            offset: const Offset(0, 48),
-            child: Material(
-              elevation: 8,
-              borderRadius: BorderRadius.circular(8),
-              child: SizedBox(
-                width: largura,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 280),
-                  child: _listaCombo(),
+    _overlay = OverlayEntry(
+      builder: (ctx) {
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: GestureDetector(onTap: _fechar, behavior: HitTestBehavior.translucent),
+            ),
+            CompositedTransformFollower(
+              link: _link,
+              showWhenUnlinked: false,
+              offset: const Offset(0, 48),
+              child: Material(
+                elevation: 8,
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  width: largura,
+                  child: ConstrainedBox(constraints: const BoxConstraints(maxHeight: 280), child: _listaCombo()),
                 ),
               ),
             ),
-          ),
-        ],
-      );
-    });
+          ],
+        );
+      },
+    );
     Overlay.of(context).insert(_overlay!);
   }
 
@@ -207,11 +201,7 @@ class _UsoNnComboState extends State<UsoNnCombo> {
               border: OutlineInputBorder(),
               suffixIcon: Icon(Icons.arrow_drop_down),
             ),
-            child: Text(
-              _carregando ? 'Carregando...' : _resumo,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: Text(_carregando ? 'Carregando...' : _resumo, maxLines: 2, overflow: TextOverflow.ellipsis),
           ),
         ),
       ),

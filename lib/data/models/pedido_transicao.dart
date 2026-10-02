@@ -4,11 +4,7 @@ import 'pedido_model.dart';
 const transicoesPedido = <StatusPedido, Set<StatusPedido>>{
   StatusPedido.pendente: {StatusPedido.confirmado, StatusPedido.cancelado},
   StatusPedido.confirmado: {StatusPedido.emPreparo, StatusPedido.cancelado},
-  StatusPedido.emPreparo: {
-    StatusPedido.saiuEntrega,
-    StatusPedido.prontoRetirada,
-    StatusPedido.cancelado,
-  },
+  StatusPedido.emPreparo: {StatusPedido.saiuEntrega, StatusPedido.prontoRetirada, StatusPedido.cancelado},
   StatusPedido.prontoRetirada: {StatusPedido.entregue, StatusPedido.cancelado},
   StatusPedido.saiuEntrega: {StatusPedido.entregue, StatusPedido.cancelado},
   StatusPedido.entregue: {},

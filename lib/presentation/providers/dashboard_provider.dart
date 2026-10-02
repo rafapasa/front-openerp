@@ -65,10 +65,7 @@ class DashboardProvider extends ChangeNotifier {
     _isRefreshing = true;
     notifyListeners();
     try {
-      _dashboard = await _dashboardRepository.refreshDashboard(
-        dataInicio: _dataInicio,
-        dataFim: _dataFim,
-      );
+      _dashboard = await _dashboardRepository.refreshDashboard(dataInicio: _dataInicio, dataFim: _dataFim);
       _clearError();
     } catch (e) {
       _error = e.toString();

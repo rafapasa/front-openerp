@@ -54,16 +54,9 @@ class _UsoEditDialogState extends State<UsoEditDialog> {
     try {
       final UsoModel saved;
       if (widget.uso == null) {
-        saved = await widget.service.criar(
-          label: label,
-          sinonimos: _sinonimos.text.trim(),
-        );
+        saved = await widget.service.criar(label: label, sinonimos: _sinonimos.text.trim());
       } else {
-        saved = await widget.service.atualizar(
-          widget.uso!.id,
-          label: label,
-          sinonimos: _sinonimos.text.trim(),
-        );
+        saved = await widget.service.atualizar(widget.uso!.id, label: label, sinonimos: _sinonimos.text.trim());
       }
       if (!mounted) return;
       Navigator.of(context).pop(saved);
@@ -113,10 +106,7 @@ class _UsoEditDialogState extends State<UsoEditDialog> {
       ),
       actions: [
         TextButton(onPressed: _salvando ? null : () => Navigator.pop(context), child: const Text('Cancelar')),
-        FilledButton(
-          onPressed: _salvando ? null : _salvar,
-          child: Text(criando ? 'Criar' : 'Salvar'),
-        ),
+        FilledButton(onPressed: _salvando ? null : _salvar, child: Text(criando ? 'Criar' : 'Salvar')),
       ],
     );
   }

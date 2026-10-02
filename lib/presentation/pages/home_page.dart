@@ -6,6 +6,7 @@ import 'package:front_openerp/presentation/pages/dashboard/dashboard_page.dart';
 import 'package:front_openerp/presentation/pages/pedidos/pedidos_page.dart';
 import 'package:front_openerp/presentation/pages/produtos/produtos_page.dart';
 import 'package:front_openerp/presentation/pages/tenants/tenants_page.dart';
+
 import '../layout/main_layout.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,13 +19,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = const [
-    DashboardPage(),
-    PedidosPage(),
-    ClientesPage(),
-    ProdutosPage(),
-    TenantsPage(),
-  ];
+  final List<Widget> _pages = const [DashboardPage(), PedidosPage(), ClientesPage(), ProdutosPage(), TenantsPage()];
 
   @override
   Widget build(BuildContext context) {

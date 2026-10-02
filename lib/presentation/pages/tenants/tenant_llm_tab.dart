@@ -40,9 +40,7 @@ class _TenantLlmTabState extends State<TenantLlmTab> {
     _visaoLista = TextEditingController(text: cfg.visaoLista ?? '');
     _transcribe = TextEditingController(text: cfg.transcribe ?? '');
     _unidade = TextEditingController(text: cfg.unidadeArea ?? '');
-    _margem = TextEditingController(
-      text: cfg.margemQuantidade == null ? '' : cfg.margemQuantidade.toString(),
-    );
+    _margem = TextEditingController(text: cfg.margemQuantidade == null ? '' : cfg.margemQuantidade.toString());
   }
 
   double? _parseMargem(String raw) {
@@ -137,10 +135,7 @@ class _TenantLlmTabState extends State<TenantLlmTab> {
                     Expanded(
                       child: TextField(
                         controller: _unidade,
-                        decoration: const InputDecoration(
-                          labelText: 'Unidade de area',
-                          hintText: 'm2',
-                        ),
+                        decoration: const InputDecoration(labelText: 'Unidade de area', hintText: 'm2'),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -149,10 +144,7 @@ class _TenantLlmTabState extends State<TenantLlmTab> {
                         controller: _margem,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
-                        decoration: const InputDecoration(
-                          labelText: 'Margem quantidade',
-                          hintText: '1.1',
-                        ),
+                        decoration: const InputDecoration(labelText: 'Margem quantidade', hintText: '1.1'),
                       ),
                     ),
                   ],
@@ -191,20 +183,14 @@ class _TenantLlmTabState extends State<TenantLlmTab> {
                   controller: _visaoLista,
                   minLines: 2,
                   maxLines: 5,
-                  decoration: const InputDecoration(
-                    labelText: 'Imagem — lista',
-                    alignLabelWithHint: true,
-                  ),
+                  decoration: const InputDecoration(labelText: 'Imagem — lista', alignLabelWithHint: true),
                 ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: _transcribe,
                   minLines: 2,
                   maxLines: 4,
-                  decoration: const InputDecoration(
-                    labelText: 'Audio — transcricao',
-                    alignLabelWithHint: true,
-                  ),
+                  decoration: const InputDecoration(labelText: 'Audio — transcricao', alignLabelWithHint: true),
                 ),
               ],
             ),
@@ -212,10 +198,7 @@ class _TenantLlmTabState extends State<TenantLlmTab> {
           const SizedBox(height: 16),
           Row(
             children: [
-              TextButton(
-                onPressed: _salvando ? null : _limpar,
-                child: const Text('Limpar (usar padrao)'),
-              ),
+              TextButton(onPressed: _salvando ? null : _limpar, child: const Text('Limpar (usar padrao)')),
               const Spacer(),
               FilledButton(
                 onPressed: _salvando ? null : _salvar,

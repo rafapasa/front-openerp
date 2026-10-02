@@ -64,7 +64,10 @@ class _ClienteDetalheModalState extends State<ClienteDetalheModal> with SingleTi
   }
 
   Future<void> _load() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     final provider = context.read<ClienteProvider>();
     final fetched = await provider.getClienteById(widget.clienteId);
     if (!mounted) return;
@@ -98,16 +101,16 @@ class _ClienteDetalheModalState extends State<ClienteDetalheModal> with SingleTi
             child: _loading
                 ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                 : _error != null
-                    ? Center(child: Text(_error!))
-                    : _cliente == null
-                        ? const Center(child: Text('Cliente nao encontrado'))
-                        : TabBarView(
-                            controller: _tabController,
-                            children: [
-                              ClienteDadosTab(cliente: _cliente!, onSaved: _load),
-                              ClientePedidosTab(clienteId: widget.clienteId),
-                            ],
-                          ),
+                ? Center(child: Text(_error!))
+                : _cliente == null
+                ? const Center(child: Text('Cliente nao encontrado'))
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      ClienteDadosTab(cliente: _cliente!, onSaved: _load),
+                      ClientePedidosTab(clienteId: widget.clienteId),
+                    ],
+                  ),
           ),
         ],
       ),
@@ -118,17 +121,20 @@ class _ClienteDetalheModalState extends State<ClienteDetalheModal> with SingleTi
     final c = _cliente;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.border))),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.border)),
+      ),
       child: Row(
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(c?.nome ?? 'Cliente #${widget.clienteId}',
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-                if (c != null)
-                  Text(c.telefone, style: const TextStyle(color: AppColors.textGrey, fontSize: 12)),
+                Text(
+                  c?.nome ?? 'Cliente #${widget.clienteId}',
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                ),
+                if (c != null) Text(c.telefone, style: const TextStyle(color: AppColors.textGrey, fontSize: 12)),
               ],
             ),
           ),

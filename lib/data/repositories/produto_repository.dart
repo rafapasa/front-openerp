@@ -154,6 +154,25 @@ class ProdutoRepository {
   }
 
   // ============================================================
+  // 🔤 Tokens do produto
+  // ============================================================
+  Future<List<ProdutoTokenModel>> listarTokens(int produtoId) {
+    return _produtoService.listarTokens(produtoId);
+  }
+
+  Future<List<ProdutoTokenModel>> criarTokens(int produtoId, List<ProdutoTokenModel> tokens) {
+    return _produtoService.criarTokens(produtoId, tokens);
+  }
+
+  Future<List<ProdutoTokenModel>> atualizarTokens(int produtoId, List<ProdutoTokenModel> tokens) {
+    return _produtoService.atualizarTokens(produtoId, tokens);
+  }
+
+  Future<void> excluirTokens(int produtoId, List<int> ids) {
+    return _produtoService.excluirTokens(produtoId, ids);
+  }
+
+  // ============================================================
   // 🗑️ Limpar cache
   // ============================================================
   Future<void> clearCache() async {

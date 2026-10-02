@@ -56,7 +56,8 @@ class ClienteService {
         'telefone': telefone,
         'nome_perfil': (nomePerfil != null && nomePerfil.trim().isNotEmpty) ? nomePerfil.trim() : nome,
         if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
-        if (inscricaoFederal != null && inscricaoFederal.trim().isNotEmpty) 'inscricao_federal': inscricaoFederal.trim(),
+        if (inscricaoFederal != null && inscricaoFederal.trim().isNotEmpty)
+          'inscricao_federal': inscricaoFederal.trim(),
       },
     );
     final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};

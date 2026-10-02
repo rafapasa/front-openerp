@@ -29,22 +29,15 @@ class UsoModel {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'tenant_id': tenantId,
-        'slug': slug,
-        'label': label,
-        'sinonimos': sinonimos,
-        'ativo': ativo,
-      };
+    'id': id,
+    'tenant_id': tenantId,
+    'slug': slug,
+    'label': label,
+    'sinonimos': sinonimos,
+    'ativo': ativo,
+  };
 
-  UsoModel copyWith({
-    int? id,
-    int? tenantId,
-    String? slug,
-    String? label,
-    String? sinonimos,
-    bool? ativo,
-  }) {
+  UsoModel copyWith({int? id, int? tenantId, String? slug, String? label, String? sinonimos, bool? ativo}) {
     return UsoModel(
       id: id ?? this.id,
       tenantId: tenantId ?? this.tenantId,

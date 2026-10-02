@@ -235,6 +235,49 @@ class ProdutoProvider extends ChangeNotifier {
   }
 
   // ============================================================
+  // 🔤 Tokens do produto
+  // ============================================================
+  Future<List<ProdutoTokenModel>> listarTokens(int produtoId) async {
+    try {
+      return await _produtoRepository.listarTokens(produtoId);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return [];
+    }
+  }
+
+  Future<List<ProdutoTokenModel>> criarTokens(int produtoId, List<ProdutoTokenModel> tokens) async {
+    try {
+      return await _produtoRepository.criarTokens(produtoId, tokens);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<List<ProdutoTokenModel>> atualizarTokens(int produtoId, List<ProdutoTokenModel> tokens) async {
+    try {
+      return await _produtoRepository.atualizarTokens(produtoId, tokens);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> excluirTokens(int produtoId, List<int> ids) async {
+    try {
+      await _produtoRepository.excluirTokens(produtoId, ids);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // ============================================================
   // 🔄 Refresh
   // ============================================================
   Future<void> refreshProdutos() async {

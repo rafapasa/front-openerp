@@ -84,22 +84,24 @@ class PedidoService {
     String origem = 'dashboard',
     String? etiqueta,
   }) async {
-    final response = await _apiService.post('/pedidos', data: {
-      'cliente_id': clienteId,
-      'cliente_nome': clienteNome,
-      'cliente_telefone': clienteTelefone,
-      'itens': itens,
-      if (observacoes != null && observacoes.trim().isNotEmpty) 'observacoes': observacoes.trim(),
-      if (enderecoEntregaId != null) 'endereco_entrega_id': enderecoEntregaId,
-      'origem': origem,
-      if (etiqueta != null && etiqueta.trim().isNotEmpty) 'etiqueta': etiqueta.trim(),
-    });
+    final response = await _apiService.post(
+      '/pedidos',
+      data: {
+        'cliente_id': clienteId,
+        'cliente_nome': clienteNome,
+        'cliente_telefone': clienteTelefone,
+        'itens': itens,
+        if (observacoes != null && observacoes.trim().isNotEmpty) 'observacoes': observacoes.trim(),
+        if (enderecoEntregaId != null) 'endereco_entrega_id': enderecoEntregaId,
+        'origem': origem,
+        if (etiqueta != null && etiqueta.trim().isNotEmpty) 'etiqueta': etiqueta.trim(),
+      },
+    );
     final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
     final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
     return PedidoModel.fromJson(data);
   }
 }
-
 
 Map<String, dynamic> _mapPedido(dynamic raw) {
   final data = JsonHelper.extractData(raw);

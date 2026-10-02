@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 
 /// Barra de título cinza igual à listagem (CLIENTE / ITENS / …).
@@ -85,7 +86,9 @@ class AppEditModal extends StatelessWidget {
                 ],
               ),
             ),
-            Expanded(child: Padding(padding: const EdgeInsets.all(16), child: body)),
+            Expanded(
+              child: Padding(padding: const EdgeInsets.all(16), child: body),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Row(mainAxisAlignment: MainAxisAlignment.end, children: footer),

@@ -23,21 +23,14 @@ class AuthRepository {
   }
 
   Future<void> salvarContas(List<LoginConta> contas) async {
-    await LocalStorage.saveData(
-      LocalStorage.contasLoginKey,
-      contas.map((c) => c.toJson()).toList(),
-    );
+    await LocalStorage.saveData(LocalStorage.contasLoginKey, contas.map((c) => c.toJson()).toList());
   }
 
   Future<List<LoginConta>?> getContas() async {
-    final cached =
-        LocalStorage.getData<List<dynamic>>(LocalStorage.contasLoginKey);
+    final cached = LocalStorage.getData<List<dynamic>>(LocalStorage.contasLoginKey);
     if (cached == null) return null;
     try {
-      return cached
-          .whereType<Map<String, dynamic>>()
-          .map(LoginConta.fromJson)
-          .toList();
+      return cached.whereType<Map<String, dynamic>>().map(LoginConta.fromJson).toList();
     } catch (e) {
       return null;
     }

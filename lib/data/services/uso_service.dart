@@ -8,33 +8,26 @@ class UsoService {
   UsoService(this._apiService);
 
   Future<List<UsoModel>> listar({bool? ativo, String? q, int limit = 200}) async {
-    final response = await _apiService.get('/usos', queryParameters: {
-      'page': 1,
-      'limit': limit,
-      if (ativo != null) 'ativo': ativo,
-      if (q != null && q.isNotEmpty) 'q': q,
-    });
+    final response = await _apiService.get(
+      '/usos',
+      queryParameters: {
+        'page': 1,
+        'limit': limit,
+        if (ativo != null) 'ativo': ativo,
+        if (q != null && q.isNotEmpty) 'q': q,
+      },
+    );
     final paginated = JsonHelper.extractPaginated(response.data);
     final list = paginated['data'];
     if (list is! List) return [];
-    return list
-        .whereType<Map>()
-        .map((e) => UsoModel.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
+    return list.whereType<Map>().map((e) => UsoModel.fromJson(Map<String, dynamic>.from(e))).toList();
   }
 
-  Future<UsoModel> criar({
-    required String label,
-    String slug = '',
-    String sinonimos = '',
-    bool ativo = true,
-  }) async {
-    final response = await _apiService.post('/usos', data: {
-      'label': label,
-      if (slug.isNotEmpty) 'slug': slug,
-      'sinonimos': sinonimos,
-      'ativo': ativo,
-    });
+  Future<UsoModel> criar({required String label, String slug = '', String sinonimos = '', bool ativo = true}) async {
+    final response = await _apiService.post(
+      '/usos',
+      data: {'label': label, if (slug.isNotEmpty) 'slug': slug, 'sinonimos': sinonimos, 'ativo': ativo},
+    );
     return _unwrap(response.data);
   }
 
@@ -45,12 +38,15 @@ class UsoService {
     String sinonimos = '',
     bool? ativo,
   }) async {
-    final response = await _apiService.put('/usos/$id', data: {
-      'label': label,
-      if (slug.isNotEmpty) 'slug': slug,
-      'sinonimos': sinonimos,
-      if (ativo != null) 'ativo': ativo,
-    });
+    final response = await _apiService.put(
+      '/usos/$id',
+      data: {
+        'label': label,
+        if (slug.isNotEmpty) 'slug': slug,
+        'sinonimos': sinonimos,
+        if (ativo != null) 'ativo': ativo,
+      },
+    );
     return _unwrap(response.data);
   }
 
@@ -59,9 +55,7 @@ class UsoService {
   }
 
   Future<ProdutoModel> vincularProduto(int produtoId, List<int> usoIds) async {
-    final response = await _apiService.put('/produtos/$produtoId/usos', data: {
-      'uso_ids': usoIds,
-    });
+    final response = await _apiService.put('/produtos/$produtoId/usos', data: {'uso_ids': usoIds});
     return _unwrapProduto(response.data);
   }
 

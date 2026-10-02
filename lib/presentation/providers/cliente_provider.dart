@@ -215,7 +215,8 @@ class ClienteProvider extends ChangeNotifier {
     }
   }
 
-  Future<ClienteModel?> updateCliente(int id, {
+  Future<ClienteModel?> updateCliente(
+    int id, {
     required String nome,
     required String telefone,
     String? nomePerfil,

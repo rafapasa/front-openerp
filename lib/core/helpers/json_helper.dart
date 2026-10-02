@@ -1,4 +1,3 @@
-
 class JsonHelper {
   static int toInt(dynamic value, {int fallback = 0}) {
     if (value == null) return fallback;

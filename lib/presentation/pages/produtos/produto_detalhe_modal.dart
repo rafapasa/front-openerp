@@ -3,6 +3,7 @@ import 'package:front_openerp/core/helpers/snack_helper.dart';
 import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
 import 'package:front_openerp/presentation/theme/app_colors.dart';
+import 'package:front_openerp/presentation/pages/produtos/produto_token_tab.dart';
 import 'package:front_openerp/presentation/pages/produtos/uso_nn_combo.dart';
 import 'package:front_openerp/presentation/widgets/app_section_card.dart';
 import 'package:intl/intl.dart';
@@ -45,7 +46,9 @@ class ProdutoDetalheModal extends StatefulWidget {
   State<ProdutoDetalheModal> createState() => _ProdutoDetalheModalState();
 }
 
-class _ProdutoDetalheModalState extends State<ProdutoDetalheModal> {
+class _ProdutoDetalheModalState extends State<ProdutoDetalheModal> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   ProdutoModel? _produto;
   bool _loading = true;
   bool _salvando = false;
@@ -59,7 +62,19 @@ class _ProdutoDetalheModalState extends State<ProdutoDetalheModal> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    if (_produto != null) {
+      _nome.dispose();
+      _descricao.dispose();
+      _preco.dispose();
+    }
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -84,16 +99,6 @@ class _ProdutoDetalheModalState extends State<ProdutoDetalheModal> {
     _nome = TextEditingController(text: p.nome);
     _descricao = TextEditingController(text: p.descricao ?? '');
     _preco = TextEditingController(text: p.preco.toStringAsFixed(2).replaceAll('.', ','));
-  }
-
-  @override
-  void dispose() {
-    if (_produto != null) {
-      _nome.dispose();
-      _descricao.dispose();
-      _preco.dispose();
-    }
-    super.dispose();
   }
 
   Future<void> _salvar() async {
@@ -149,6 +154,17 @@ class _ProdutoDetalheModalState extends State<ProdutoDetalheModal> {
       child: Column(
         children: [
           _header(),
+          if (!_loading && _error == null && _produto != null)
+            TabBar(
+              controller: _tabController,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textGrey,
+              indicatorColor: AppColors.primary,
+              tabs: const [
+                Tab(icon: Icon(Icons.info_outline, size: 18), text: 'Dados'),
+                Tab(icon: Icon(Icons.tag, size: 18), text: 'Tokens'),
+              ],
+            ),
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
@@ -156,7 +172,13 @@ class _ProdutoDetalheModalState extends State<ProdutoDetalheModal> {
                 ? Center(child: Text(_error!))
                 : _produto == null
                 ? const Center(child: Text('Produto nao encontrado'))
-                : _body(),
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _dadosTab(),
+                      ProdutoTokenTab(produtoId: widget.produtoId),
+                    ],
+                  ),
           ),
           if (!_loading && _error == null && _produto != null) _footerAcoes(),
         ],
@@ -211,7 +233,7 @@ class _ProdutoDetalheModalState extends State<ProdutoDetalheModal> {
     return AppSectionCard(titulo: titulo, child: child);
   }
 
-  Widget _body() {
+  Widget _dadosTab() {
     final p = _produto!;
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 

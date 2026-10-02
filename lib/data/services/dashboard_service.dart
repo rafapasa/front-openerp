@@ -22,10 +22,7 @@ class DashboardService {
   Future<DashboardModel> getDashboard({DateTime? dataInicio, DateTime? dataFim}) async {
     final inicio = dataInicio != null ? _day(dataInicio) : _day(DateTime.now());
     final fim = dataFim != null ? _day(dataFim) : inicio;
-    final query = <String, dynamic>{
-      'data_inicio': _ymd(inicio),
-      'data_fim': _ymd(fim),
-    };
+    final query = <String, dynamic>{'data_inicio': _ymd(inicio), 'data_fim': _ymd(fim)};
 
     DashboardModel base;
     try {
@@ -47,11 +44,7 @@ class DashboardService {
       );
     }
 
-    final pedidosRes = await _apiService.get('/pedidos', queryParameters: {
-      'page': 1,
-      'limit': 200,
-      ...query,
-    });
+    final pedidosRes = await _apiService.get('/pedidos', queryParameters: {'page': 1, 'limit': 200, ...query});
     final lista = JsonHelper.extractList(pedidosRes.data);
 
     final status = <String, int>{};

@@ -95,7 +95,6 @@ class ProdutoModel {
   String get precoFormatado => 'R\$ ${preco.toStringAsFixed(2)}';
 }
 
-
 List<int> _parseUsoIds(Map<String, dynamic> json) {
   final raw = json['uso_ids'];
   if (raw is List) {
@@ -106,8 +105,5 @@ List<int> _parseUsoIds(Map<String, dynamic> json) {
 
 List<UsoModel> _parseUsos(dynamic raw) {
   if (raw is! List) return const [];
-  return raw
-      .whereType<Map>()
-      .map((e) => UsoModel.fromJson(Map<String, dynamic>.from(e)))
-      .toList();
+  return raw.whereType<Map>().map((e) => UsoModel.fromJson(Map<String, dynamic>.from(e))).toList();
 }

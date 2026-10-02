@@ -7,7 +7,7 @@ import 'package:front_openerp/data/repositories/tenant_repository.dart';
 
 class TenantProvider extends ChangeNotifier {
   final TenantRepository _repository;
-  
+
   List<TenantModel> _tenants = [];
   bool _isLoading = false;
   String? _error;

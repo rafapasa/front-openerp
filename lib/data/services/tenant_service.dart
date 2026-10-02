@@ -21,10 +21,7 @@ class TenantService {
     try {
       final response = await _api.get('/tenants');
       final lista = JsonHelper.extractList(response.data);
-      return lista
-          .whereType<Map>()
-          .map((json) => TenantModel.fromJson(Map<String, dynamic>.from(json)))
-          .toList();
+      return lista.whereType<Map>().map((json) => TenantModel.fromJson(Map<String, dynamic>.from(json))).toList();
     } catch (e) {
       throw Exception('Erro ao listar empresas: $e');
     }

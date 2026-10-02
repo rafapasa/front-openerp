@@ -59,4 +59,50 @@ class ProdutoService {
   Future<void> toggleDisponibilidade(int id, bool disponivel) async {
     await _apiService.patch('/produtos/$id/disponibilidade', data: {'disponivel': disponivel});
   }
+
+  // ============================================================
+  // 🔤 Tokens do produto
+  // ============================================================
+  Future<List<ProdutoTokenModel>> listarTokens(int produtoId) async {
+    final response = await _apiService.get('/produtos/$produtoId/token');
+    final list = JsonHelper.extractList(response.data);
+    return list
+        .whereType<Map>()
+        .map((e) => ProdutoTokenModel.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
+  Future<List<ProdutoTokenModel>> criarTokens(
+    int produtoId,
+    List<ProdutoTokenModel> tokens,
+  ) async {
+    final response = await _apiService.post(
+      '/produtos/$produtoId/token',
+      data: tokens.map((e) => e.toCreateJson()).toList(),
+    );
+    return _parseTokens(response.data);
+  }
+
+  Future<List<ProdutoTokenModel>> atualizarTokens(
+    int produtoId,
+    List<ProdutoTokenModel> tokens,
+  ) async {
+    final response = await _apiService.put(
+      '/produtos/$produtoId/token',
+      data: tokens.map((e) => e.toUpdateJson()).toList(),
+    );
+    return _parseTokens(response.data);
+  }
+
+  Future<void> excluirTokens(int produtoId, List<int> ids) async {
+    await _apiService.delete('/produtos/$produtoId/token', data: ids);
+  }
+
+  List<ProdutoTokenModel> _parseTokens(dynamic raw) {
+    final list = JsonHelper.extractList(raw);
+    return list
+        .whereType<Map>()
+        .map((e) => ProdutoTokenModel.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
 }

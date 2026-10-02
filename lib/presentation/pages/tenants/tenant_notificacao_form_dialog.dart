@@ -55,9 +55,7 @@ class _TenantNotificacaoFormDialogState extends State<TenantNotificacaoFormDialo
 
   Future<void> _salvar() async {
     if (_destino.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Destino e obrigatorio')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Destino e obrigatorio')));
       return;
     }
     setState(() => _saving = true);
@@ -74,9 +72,7 @@ class _TenantNotificacaoFormDialogState extends State<TenantNotificacaoFormDialo
     if (!mounted) return;
     setState(() => _saving = false);
     if (result == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(provider.error ?? 'Erro ao salvar')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(provider.error ?? 'Erro ao salvar')));
       return;
     }
     Navigator.pop(context, result);
@@ -95,8 +91,10 @@ class _TenantNotificacaoFormDialogState extends State<TenantNotificacaoFormDialo
               Row(
                 children: [
                   Expanded(
-                    child: Text(_editando ? 'Editar notificacao' : 'Nova notificacao',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                    child: Text(
+                      _editando ? 'Editar notificacao' : 'Nova notificacao',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    ),
                   ),
                   IconButton(onPressed: _saving ? null : () => Navigator.pop(context), icon: const Icon(Icons.close)),
                 ],
@@ -111,9 +109,7 @@ class _TenantNotificacaoFormDialogState extends State<TenantNotificacaoFormDialo
                           DropdownButtonFormField<String>(
                             initialValue: _canal,
                             decoration: const InputDecoration(labelText: 'Canal'),
-                            items: const [
-                              DropdownMenuItem(value: 'whatsapp', child: Text('WhatsApp')),
-                            ],
+                            items: const [DropdownMenuItem(value: 'whatsapp', child: Text('WhatsApp'))],
                             onChanged: _saving ? null : (v) => setState(() => _canal = v ?? 'whatsapp'),
                           ),
                           const SizedBox(height: 12),
@@ -130,9 +126,7 @@ class _TenantNotificacaoFormDialogState extends State<TenantNotificacaoFormDialo
                           DropdownButtonFormField<String>(
                             initialValue: _evento,
                             decoration: const InputDecoration(labelText: 'Evento'),
-                            items: const [
-                              DropdownMenuItem(value: 'novo_pedido', child: Text('Novo pedido')),
-                            ],
+                            items: const [DropdownMenuItem(value: 'novo_pedido', child: Text('Novo pedido'))],
                             onChanged: _saving ? null : (v) => setState(() => _evento = v ?? 'novo_pedido'),
                           ),
                           const SizedBox(height: 8),
@@ -156,7 +150,11 @@ class _TenantNotificacaoFormDialogState extends State<TenantNotificacaoFormDialo
                   onPressed: _saving ? null : _salvar,
                   style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
                   child: _saving
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
                       : Text(_editando ? 'Salvar' : 'Criar'),
                 ),
               ),

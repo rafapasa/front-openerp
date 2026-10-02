@@ -19,8 +19,7 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isAuthenticated => _authRepository.isAuthenticated;
 
-  bool get hasMultipleTenants =>
-      _contas.length > 1 || (_usuario?.tenants?.length ?? 0) > 1;
+  bool get hasMultipleTenants => _contas.length > 1 || (_usuario?.tenants?.length ?? 0) > 1;
   bool get precisaSelecionarConta => hasMultipleTenants && !_tenantSelecionado;
   bool get tenantSelecionado => _tenantSelecionado;
   List<TenantModel>? get tenants => _usuario?.tenants;

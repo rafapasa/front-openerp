@@ -4,6 +4,7 @@ import 'package:front_openerp/presentation/providers/tenant_provider.dart';
 import 'package:front_openerp/presentation/theme/app_colors.dart';
 import 'package:front_openerp/presentation/widgets/app_section_card.dart';
 import 'package:provider/provider.dart';
+
 import 'tenant_notificacao_form_dialog.dart';
 
 class TenantConfiguracoesTab extends StatefulWidget {
@@ -28,7 +29,10 @@ class _TenantConfiguracoesTabState extends State<TenantConfiguracoesTab> {
     setState(() => _loading = true);
     final list = await context.read<TenantProvider>().listarNotificacoes(widget.tenantId);
     if (!mounted) return;
-    setState(() { _notificacoes = list; _loading = false; });
+    setState(() {
+      _notificacoes = list;
+      _loading = false;
+    });
   }
 
   Future<void> _adicionar() async {
@@ -91,47 +95,54 @@ class _TenantConfiguracoesTabState extends State<TenantConfiguracoesTab> {
               titulo: 'Nenhuma configuracao',
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8),
-                child: Text('Adicione um destino para receber notificacoes de novos pedidos.',
-                    style: TextStyle(color: AppColors.textGrey, fontSize: 13)),
+                child: Text(
+                  'Adicione um destino para receber notificacoes de novos pedidos.',
+                  style: TextStyle(color: AppColors.textGrey, fontSize: 13),
+                ),
               ),
             )
           else
-            ..._notificacoes.map((n) => Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.borderLight),
+            ..._notificacoes.map(
+              (n) => Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          n.ativo ? Icons.check_circle : Icons.pause_circle,
+                          size: 16,
+                          color: n.ativo ? AppColors.success : AppColors.textGrey,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(n.canal.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
+                        const Spacer(),
+                        IconButton(
+                          tooltip: 'Editar',
+                          icon: const Icon(Icons.edit_outlined, size: 18),
+                          onPressed: () => _editar(n),
+                        ),
+                        IconButton(
+                          tooltip: 'Excluir',
+                          icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error),
+                          onPressed: () => _excluir(n),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(n.destino, style: const TextStyle(fontSize: 13)),
+                    Text('Evento: ${n.evento}', style: const TextStyle(fontSize: 11, color: AppColors.textGrey)),
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(n.ativo ? Icons.check_circle : Icons.pause_circle, size: 16,
-                          color: n.ativo ? AppColors.success : AppColors.textGrey),
-                      const SizedBox(width: 6),
-                      Text(n.canal.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
-                      const Spacer(),
-                      IconButton(
-                        tooltip: 'Editar',
-                        icon: const Icon(Icons.edit_outlined, size: 18),
-                        onPressed: () => _editar(n),
-                      ),
-                      IconButton(
-                        tooltip: 'Excluir',
-                        icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error),
-                        onPressed: () => _excluir(n),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(n.destino, style: const TextStyle(fontSize: 13)),
-                  Text('Evento: ${n.evento}', style: const TextStyle(fontSize: 11, color: AppColors.textGrey)),
-                ],
-              ),
-            )),
+            ),
         ],
       ),
     );

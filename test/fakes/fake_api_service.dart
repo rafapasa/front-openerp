@@ -70,9 +70,11 @@ class FakeApiService implements ApiService {
   }
 
   @override
-  Future<Response> delete(String path, {Map<String, dynamic>? queryParameters, Options? options}) async {
+  Future<Response> delete(String path, {dynamic data, Map<String, dynamic>? queryParameters, Options? options}) async {
     lastMethod = 'DELETE';
     lastPath = path;
+    lastData = data;
+    lastQuery = queryParameters;
     return _ok(path);
   }
 }

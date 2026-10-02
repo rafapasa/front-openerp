@@ -8,11 +8,7 @@ class DashboardRepository {
 
   DashboardRepository(this._dashboardService);
 
-  Future<DashboardModel> getDashboard({
-    bool forceRefresh = false,
-    DateTime? dataInicio,
-    DateTime? dataFim,
-  }) async {
+  Future<DashboardModel> getDashboard({bool forceRefresh = false, DateTime? dataInicio, DateTime? dataFim}) async {
     final useCache = dataInicio == null && dataFim == null;
 
     if (useCache && !forceRefresh && LocalStorage.isCacheValid(LocalStorage.dashboardKey)) {
@@ -23,10 +19,7 @@ class DashboardRepository {
     }
 
     try {
-      final dashboard = await _dashboardService.getDashboard(
-        dataInicio: dataInicio,
-        dataFim: dataFim,
-      );
+      final dashboard = await _dashboardService.getDashboard(dataInicio: dataInicio, dataFim: dataFim);
       if (useCache) {
         await LocalStorage.saveData(LocalStorage.dashboardKey, dashboard.toJson());
       }

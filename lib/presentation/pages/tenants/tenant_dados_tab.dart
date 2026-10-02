@@ -98,7 +98,12 @@ class _TenantDadosTabState extends State<TenantDadosTab> {
                 Row(
                   children: [
                     TextButton(
-                      onPressed: _salvando ? null : () { _carregarValores(); setState(() => _editando = false); },
+                      onPressed: _salvando
+                          ? null
+                          : () {
+                              _carregarValores();
+                              setState(() => _editando = false);
+                            },
                       child: const Text('Cancelar'),
                     ),
                     const SizedBox(width: 8),
@@ -106,7 +111,11 @@ class _TenantDadosTabState extends State<TenantDadosTab> {
                       onPressed: _salvando ? null : _salvar,
                       style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
                       child: _salvando
-                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
                           : const Text('Salvar'),
                     ),
                   ],
@@ -124,8 +133,7 @@ class _TenantDadosTabState extends State<TenantDadosTab> {
             titulo: 'Auditoria',
             child: Column(
               children: [
-                if (widget.tenant.createdAt != null)
-                  _info('Criado em', dateFormat.format(widget.tenant.createdAt!)),
+                if (widget.tenant.createdAt != null) _info('Criado em', dateFormat.format(widget.tenant.createdAt!)),
                 if (widget.tenant.updatedAt != null)
                   _info('Atualizado em', dateFormat.format(widget.tenant.updatedAt!)),
                 _info('ID', widget.tenant.id?.toString() ?? '-'),
@@ -154,8 +162,13 @@ class _TenantDadosTabState extends State<TenantDadosTab> {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          SizedBox(width: 110, child: Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textGrey))),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500))),
+          SizedBox(
+            width: 110,
+            child: Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textGrey)),
+          ),
+          Expanded(
+            child: Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+          ),
         ],
       ),
     );

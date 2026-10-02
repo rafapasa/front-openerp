@@ -8,11 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../theme/app_colors.dart';
 
-Future<EnderecoModel?> showEnderecoFormDialog(
-  BuildContext context, {
-  required int clienteId,
-  EnderecoModel? endereco,
-}) {
+Future<EnderecoModel?> showEnderecoFormDialog(BuildContext context, {required int clienteId, EnderecoModel? endereco}) {
   return showDialog<EnderecoModel>(
     context: context,
     barrierDismissible: false,
@@ -94,7 +90,8 @@ class _EnderecoFormDialogState extends State<EnderecoFormDialog> {
         });
       }
     } catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Falha ao consultar o CEP')));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Falha ao consultar o CEP')));
     } finally {
       if (mounted) setState(() => _buscandoCep = false);
     }
@@ -130,15 +127,19 @@ class _EnderecoFormDialogState extends State<EnderecoFormDialog> {
     if (!mounted) return;
     setState(() => _saving = false);
     if (result == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(provider.error ?? 'Erro ao salvar endereco')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(provider.error ?? 'Erro ao salvar endereco')));
       return;
     }
     Navigator.pop(context, result);
   }
 
-  Widget _field(TextEditingController c, String hint, {TextInputType? kb, List<TextInputFormatter>? fmt, int flex = 1}) {
+  Widget _field(
+    TextEditingController c,
+    String hint, {
+    TextInputType? kb,
+    List<TextInputFormatter>? fmt,
+    int flex = 1,
+  }) {
     return Expanded(
       flex: flex,
       child: TextField(
@@ -164,8 +165,10 @@ class _EnderecoFormDialogState extends State<EnderecoFormDialog> {
               Row(
                 children: [
                   Expanded(
-                    child: Text(_editando ? 'Editar endereco' : 'Novo endereco',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                    child: Text(
+                      _editando ? 'Editar endereco' : 'Novo endereco',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    ),
                   ),
                   IconButton(onPressed: _saving ? null : () => Navigator.pop(context), icon: const Icon(Icons.close)),
                 ],
@@ -179,34 +182,47 @@ class _EnderecoFormDialogState extends State<EnderecoFormDialog> {
                         children: [
                           Row(
                             children: [
-                              _field(_cep, 'CEP', kb: TextInputType.number, fmt: [FilteringTextInputFormatter.digitsOnly]),
+                              _field(
+                                _cep,
+                                'CEP',
+                                kb: TextInputType.number,
+                                fmt: [FilteringTextInputFormatter.digitsOnly],
+                              ),
                               const SizedBox(width: 8),
                               FilledButton.icon(
                                 onPressed: _saving || _buscandoCep ? null : _buscarCep,
                                 style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
                                 icon: _buscandoCep
-                                    ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                    ? const SizedBox(
+                                        width: 14,
+                                        height: 14,
+                                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                      )
                                     : const Icon(Icons.search, size: 18),
                                 label: const Text('Buscar CEP'),
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Row(children: [
-                            _field(_logradouro, 'Logradouro *', flex: 3),
-                            const SizedBox(width: 8),
-                            _field(_numero, 'Numero *'),
-                          ]),
+                          Row(
+                            children: [
+                              _field(_logradouro, 'Logradouro *', flex: 3),
+                              const SizedBox(width: 8),
+                              _field(_numero, 'Numero *'),
+                            ],
+                          ),
                           const SizedBox(height: 8),
                           Row(children: [_field(_complemento, 'Complemento')]),
                           const SizedBox(height: 8),
-                          Row(children: [
-                            _field(_bairro, 'Bairro'),
-                            const SizedBox(width: 8),
-                            _field(_cidade, 'Cidade', flex: 2),
-                            const SizedBox(width: 8),
-                            _field(_estado, 'UF'),
-                          ]),
+                          Row(
+                            children: [
+                              _field(_bairro, 'Bairro'),
+                              const SizedBox(width: 8),
+                              _field(_cidade, 'Cidade', flex: 2),
+                              const SizedBox(width: 8),
+                              _field(_estado, 'UF'),
+                            ],
+                          ),
                           const SizedBox(height: 8),
                           Row(children: [_field(_referencia, 'Referencia')]),
                           const SizedBox(height: 8),
@@ -242,7 +258,11 @@ class _EnderecoFormDialogState extends State<EnderecoFormDialog> {
                   onPressed: _saving ? null : _salvar,
                   style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
                   child: _saving
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
                       : Text(_editando ? 'Salvar' : 'Criar'),
                 ),
               ),

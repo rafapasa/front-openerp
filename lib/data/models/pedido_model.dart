@@ -30,16 +30,9 @@ class ItemPedidoModel {
       produtoId: (json['produto_id'] ?? produtoItem['id']) != null
           ? JsonHelper.toInt(json['produto_id'] ?? produtoItem['id'])
           : null,
-      nome: _firstNonEmpty([
-        json['nome'],
-        produtoItem['nome'],
-        json['produto_nome'],
-        produtoItem['descricao'],
-      ]),
+      nome: _firstNonEmpty([json['nome'], produtoItem['nome'], json['produto_nome'], produtoItem['descricao']]),
       quantidade: JsonHelper.toInt(json['quantidade'] ?? json['qtd']),
-      preco: JsonHelper.toDouble(
-        json['preco'] ?? json['preco_unitario'] ?? produtoItem['preco'],
-      ),
+      preco: JsonHelper.toDouble(json['preco'] ?? json['preco_unitario'] ?? produtoItem['preco']),
       observacao: (json['observacao'] ?? json['obs']) as String?,
     );
   }
@@ -270,9 +263,7 @@ class PedidoModel {
   String get origemLabel => origem.label;
   String get totalFormatado => 'R\$ ${total.toStringAsFixed(2)}';
   bool get podeCancelar =>
-      status == StatusPedido.pendente ||
-      status == StatusPedido.confirmado ||
-      status == StatusPedido.emPreparo;
+      status == StatusPedido.pendente || status == StatusPedido.confirmado || status == StatusPedido.emPreparo;
   bool get isAtivo => status != StatusPedido.entregue && status != StatusPedido.cancelado;
   bool get isPago => pago == true || pagamentos.any((p) => p.isPago);
   bool get isEntrega => enderecoEntregaId != null || enderecoEntrega != null;
@@ -309,6 +300,7 @@ class PedidoModel {
         return '';
     }
   }
+
   String get formaPagamentoResumo {
     if (pagamentos.isEmpty) return '—';
     return pagamentos.map((p) => p.forma).join(', ');
