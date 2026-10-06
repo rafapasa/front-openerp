@@ -25,8 +25,8 @@ class PedidoService {
     };
     final response = await _apiService.get('/pedidos', queryParameters: queryParams);
     return PaginatedResponse<PedidoModel>.fromJson(
-      response.data as Map<String, dynamic>,
-      (json) => PedidoModel.fromJson(json as Map<String, dynamic>),
+      _comoMapa(response.data),
+      (json) => PedidoModel.fromJson(_comoMapa(json)),
     );
   }
 
@@ -69,8 +69,8 @@ class PedidoService {
       queryParameters: {'page': page, 'limit': limit},
     );
     return PaginatedResponse<PedidoModel>.fromJson(
-      response.data as Map<String, dynamic>,
-      (json) => PedidoModel.fromJson(json as Map<String, dynamic>),
+      _comoMapa(response.data),
+      (json) => PedidoModel.fromJson(_comoMapa(json)),
     );
   }
 
@@ -107,6 +107,12 @@ Map<String, dynamic> _mapPedido(dynamic raw) {
   final data = JsonHelper.extractData(raw);
   if (data is Map<String, dynamic>) return data;
   if (data is Map) return Map<String, dynamic>.from(data);
+  if (raw is Map<String, dynamic>) return raw;
+  if (raw is Map) return Map<String, dynamic>.from(raw);
+  throw Exception('Resposta de pedido invalida');
+}
+
+Map<String, dynamic> _comoMapa(dynamic raw) {
   if (raw is Map<String, dynamic>) return raw;
   if (raw is Map) return Map<String, dynamic>.from(raw);
   throw Exception('Resposta de pedido invalida');
