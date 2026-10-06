@@ -255,4 +255,8 @@ commit-llm-tab:
 
 .PHONY: limpar
 limpar:
-	bash tmp-push.sh
+	git rm -f tmp-push.sh
+	git add makefile
+	git commit -m 'chore: remove script temporario'
+	git push origin dev
+	git status -sb
