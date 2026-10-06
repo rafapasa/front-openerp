@@ -20,6 +20,7 @@ class ClientesPage extends StatefulWidget {
 }
 
 class _ClientesPageState extends State<ClientesPage> {
+  bool _cards = false;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
 
@@ -96,6 +97,8 @@ class _ClientesPageState extends State<ClientesPage> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  _seletorVisual(),
                   if (isWeb) ...[
                     const SizedBox(width: 12),
                     FilledButton.icon(
@@ -118,7 +121,7 @@ class _ClientesPageState extends State<ClientesPage> {
                   : RefreshIndicator(
                       color: AppColors.primary,
                       onRefresh: _refreshData,
-                      child: isWeb ? _buildWebTable(provider) : _buildMobileList(provider),
+                      child: _cards ? _buildCards(provider) : (isWeb ? _buildWebTable(provider) : _buildMobileList(provider)),
                     ),
             ),
           ],
@@ -165,6 +168,33 @@ class _ClientesPageState extends State<ClientesPage> {
       ],
     ),
   );
+
+  Widget _seletorVisual() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(20)),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<bool>(
+          value: _cards,
+          isDense: true,
+          items: const [
+            DropdownMenuItem(value: false, child: Text('Lista')),
+            DropdownMenuItem(value: true, child: Text('Card')),
+          ],
+          onChanged: (v) { if (v != null) setState(() => _cards = v); },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCards(ClienteProvider provider) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(12),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 360, mainAxisExtent: 150, crossAxisSpacing: 12, mainAxisSpacing: 12),
+      itemCount: provider.clientes.length,
+      itemBuilder: (_, i) => _ClienteCard(cliente: provider.clientes[i]),
+    );
+  }
 
   Widget _buildMobileList(ClienteProvider provider) {
     return ListView.builder(

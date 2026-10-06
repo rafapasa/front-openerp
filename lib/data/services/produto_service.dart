@@ -26,29 +26,29 @@ class ProdutoService {
     final paginated = JsonHelper.extractPaginated(response.data);
     return PaginatedResponse<ProdutoModel>.fromJson(
       paginated,
-      (json) => ProdutoModel.fromJson(json as Map<String, dynamic>),
+      (json) => ProdutoModel.fromJson(JsonHelper.asMap(json)),
     );
   }
 
   Future<ProdutoModel> getProdutoById(int id) async {
     final response = await _apiService.get('/produtos/$id');
-    final Map<String, dynamic> data = response.data is Map<String, dynamic>
-        ? (response.data['data'] as Map<String, dynamic>? ?? response.data as Map<String, dynamic>)
-        : {};
+    final Map<String, dynamic> data = response.data is Map
+        ? JsonHelper.asMap(response.data['data'] ?? response.data)
+        : <String, dynamic>{};
     return ProdutoModel.fromJson(data);
   }
 
   Future<ProdutoModel> createProduto(Map<String, dynamic> body) async {
     final response = await _apiService.post('/produtos', data: body);
-    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
-    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    final map = JsonHelper.asMap(response.data);
+    final data = JsonHelper.asMap(map['data'] ?? map);
     return ProdutoModel.fromJson(data);
   }
 
   Future<ProdutoModel> updateProduto(int id, Map<String, dynamic> body) async {
     final response = await _apiService.put('/produtos/$id', data: body);
-    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
-    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    final map = JsonHelper.asMap(response.data);
+    final data = JsonHelper.asMap(map['data'] ?? map);
     return ProdutoModel.fromJson(data);
   }
 

@@ -59,14 +59,22 @@ class MainLayout extends StatelessWidget {
             backgroundColor: AppColors.background,
             body: Row(
               children: [
-                Container(
-                  width: 268,
+                _BarraLateral(
+                  builder: (recolhida, recolher) => Container(
+                  width: recolhida ? 76 : 268,
                   color: AppColors.primaryDark,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 20),
-                      Padding(
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          tooltip: recolhida ? 'Expandir menu' : 'Recolher menu',
+                          onPressed: recolher,
+                          icon: Icon(recolhida ? Icons.chevron_right : Icons.chevron_left, color: Colors.white),
+                        ),
+                      ),
+                      if (!recolhida) Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Image.asset(
                           'assets/images/Logo_openerp_3D.png',
@@ -83,30 +91,35 @@ class MainLayout extends StatelessWidget {
                       _SideItem(
                         icon: Icons.dashboard_outlined,
                         label: 'Dashboard',
+                        compact: recolhida,
                         selected: currentIndex == 0,
                         onTap: () => onTap(0),
                       ),
                       _SideItem(
                         icon: Icons.shopping_cart_outlined,
                         label: 'Pedidos',
+                        compact: recolhida,
                         selected: currentIndex == 1,
                         onTap: () => onTap(1),
                       ),
                       _SideItem(
                         icon: Icons.people_outline,
                         label: 'Clientes',
+                        compact: recolhida,
                         selected: currentIndex == 2,
                         onTap: () => onTap(2),
                       ),
                       _SideItem(
                         icon: Icons.inventory_2_outlined,
                         label: 'Produtos',
+                        compact: recolhida,
                         selected: currentIndex == 3,
                         onTap: () => onTap(3),
                       ),
                       _SideItem(
                         icon: Icons.business_outlined,
                         label: 'Empresas',
+                        compact: recolhida,
                         selected: currentIndex == 4,
                         onTap: () => onTap(4),
                       ),
@@ -121,10 +134,11 @@ class MainLayout extends StatelessWidget {
                         _SideItem(
                           icon: Icons.swap_horiz,
                           label: 'Trocar empresa',
+                          compact: recolhida,
                           selected: false,
                           onTap: () => _trocarEmpresa(context),
                         ),
-                      _SideItem(icon: Icons.logout, label: 'Sair', selected: false, onTap: () => _sair(context)),
+                      _SideItem(icon: Icons.logout, label: 'Sair', compact: recolhida, selected: false, onTap: () => _sair(context)),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Container(
@@ -185,6 +199,7 @@ class MainLayout extends StatelessWidget {
                       const SizedBox(height: 16),
                     ],
                   ),
+                ),
                 ),
                 Expanded(
                   child: Column(
@@ -301,26 +316,31 @@ class MainLayout extends StatelessWidget {
                   icon: Icon(Icons.dashboard_outlined),
                   activeIcon: Icon(Icons.dashboard),
                   label: 'Dashboard',
+                        compact: recolhida,
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.shopping_cart_outlined),
                   activeIcon: Icon(Icons.shopping_cart),
                   label: 'Pedidos',
+                        compact: recolhida,
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.people_outline),
                   activeIcon: Icon(Icons.people),
                   label: 'Clientes',
+                        compact: recolhida,
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.inventory_2_outlined),
                   activeIcon: Icon(Icons.inventory_2),
                   label: 'Produtos',
+                        compact: recolhida,
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.business_outlined),
                   activeIcon: Icon(Icons.business),
                   label: 'Empresas',
+                        compact: recolhida,
                 ),
               ],
             ),
@@ -336,13 +356,27 @@ class MainLayout extends StatelessWidget {
   }
 }
 
+class _BarraLateral extends StatefulWidget {
+  final Widget Function(bool recolhida, VoidCallback recolher) builder;
+  const _BarraLateral({required this.builder});
+  @override
+  State<_BarraLateral> createState() => _BarraLateralState();
+}
+
+class _BarraLateralState extends State<_BarraLateral> {
+  bool _recolhida = false;
+  @override
+  Widget build(BuildContext context) => widget.builder(_recolhida, () => setState(() => _recolhida = !_recolhida));
+}
+
 class _SideItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool selected;
+  final bool compact;
   final VoidCallback onTap;
 
-  const _SideItem({required this.icon, required this.label, required this.selected, required this.onTap});
+  const _SideItem({required this.icon, required this.label, required this.selected, required this.onTap, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
@@ -355,11 +389,11 @@ class _SideItem extends StatelessWidget {
       ),
       child: ListTile(
         leading: Icon(icon, color: Colors.white, size: 20),
-        title: Text(
+        title: compact ? null : Text(
           label,
           style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: selected ? FontWeight.w700 : FontWeight.w500),
         ),
-        trailing: selected
+        trailing: !compact && selected
             ? Container(
                 width: 6,
                 height: 6,

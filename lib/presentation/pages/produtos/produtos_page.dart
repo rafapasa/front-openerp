@@ -18,6 +18,7 @@ class ProdutosPage extends StatefulWidget {
 }
 
 class _ProdutosPageState extends State<ProdutosPage> {
+  bool _cards = true;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
 
@@ -88,6 +89,8 @@ class _ProdutosPageState extends State<ProdutosPage> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  _seletorVisual(),
                   if (isWeb) ...[
                     const SizedBox(width: 12),
                     FilledButton.icon(
@@ -110,7 +113,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
                   : RefreshIndicator(
                       color: AppColors.primary,
                       onRefresh: _refreshData,
-                      child: isWeb ? _buildWebGrid(provider) : _buildMobileGrid(provider),
+                      child: _cards ? (isWeb ? _buildWebGrid(provider) : _buildMobileGrid(provider)) : _buildLista(provider),
                     ),
             ),
           ],
@@ -156,6 +159,40 @@ class _ProdutosPageState extends State<ProdutosPage> {
       ],
     ),
   );
+
+  Widget _seletorVisual() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(20)),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<bool>(
+          value: _cards,
+          isDense: true,
+          items: const [
+            DropdownMenuItem(value: false, child: Text('Lista')),
+            DropdownMenuItem(value: true, child: Text('Card')),
+          ],
+          onChanged: (v) { if (v != null) setState(() => _cards = v); },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLista(ProdutoProvider provider) {
+    return ListView.separated(
+      padding: const EdgeInsets.all(12),
+      itemCount: provider.produtos.length,
+      separatorBuilder: (_, _) => const Divider(height: 1),
+      itemBuilder: (_, i) {
+        final p = provider.produtos[i];
+        return ListTile(
+          title: Text(p.nome, maxLines: 1, overflow: TextOverflow.ellipsis),
+          subtitle: Text(p.preco.toStringAsFixed(2)),
+          trailing: Text(p.disponivel ? 'Disponível' : 'Indisponível'),
+        );
+      },
+    );
+  }
 
   Widget _buildMobileGrid(ProdutoProvider provider) {
     return GridView.builder(

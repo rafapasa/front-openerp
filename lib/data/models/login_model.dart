@@ -90,7 +90,7 @@ TenantModel _tenantDoLogin(Map<String, dynamic> user) {
   return TenantModel.fromJson(map);
 }
 
-class LoginResultado {
+gt class LoginResultado {
   final int count;
   final List<LoginConta> contas;
 

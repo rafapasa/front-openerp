@@ -56,11 +56,16 @@ class JsonHelper {
     return [];
   }
 
+  static Map<String, dynamic> asMap(dynamic raw) {
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is Map) return Map<String, dynamic>.from(raw);
+    return {};
+  }
+
   static Map<String, dynamic> extractPaginated(dynamic responseData) {
-    if (responseData is Map<String, dynamic>) {
-      if (responseData.containsKey('data') && responseData.containsKey('total')) {
-        return responseData;
-      }
+    if (responseData is Map) {
+      final map = asMap(responseData);
+      if (map.containsKey('data') && map.containsKey('total')) return map;
     }
     // fallback legado
     if (responseData is List) {

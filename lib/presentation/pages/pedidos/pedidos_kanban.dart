@@ -32,36 +32,24 @@ class PedidosKanban extends StatelessWidget {
         final n = _colunas.length;
         final gap = 8.0;
         final livre = constraints.maxWidth.isFinite ? constraints.maxWidth : 1200.0;
-        final colW = (livre - gap * (n - 1)) / n;
-        final aperta = colW < 180;
-        final larguraColuna = aperta ? 220.0 : colW;
+        final larguraColuna = (livre - gap * (n - 1)) / n;
         final colunas = [
           for (var i = 0; i < n; i++)
-            SizedBox(
-              width: aperta ? larguraColuna : null,
-              child: _Coluna(
-                status: _colunas[i],
-                colunaLargura: larguraColuna,
-                pedidos: pedidos.where((p) => _naColuna(p, _colunas[i])).toList(),
-              ),
+            _Coluna(
+              status: _colunas[i],
+              colunaLargura: larguraColuna,
+              pedidos: pedidos.where((p) => _naColuna(p, _colunas[i])).toList(),
             ),
         ];
-        final quadro = aperta
-            ? ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: colunas.length,
-                separatorBuilder: (_, _) => SizedBox(width: gap),
-                itemBuilder: (_, i) => colunas[i],
-              )
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (var i = 0; i < colunas.length; i++) ...[
-                    if (i > 0) SizedBox(width: gap),
-                    Expanded(child: colunas[i]),
-                  ],
-                ],
-              );
+        final quadro = Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < colunas.length; i++) ...[
+              if (i > 0) SizedBox(width: gap),
+              Expanded(child: colunas[i]),
+            ],
+          ],
+        );
         return SizedBox(
           width: constraints.maxWidth.isFinite ? constraints.maxWidth : null,
           height: constraints.maxHeight.isFinite ? constraints.maxHeight : null,
