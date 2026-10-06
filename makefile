@@ -253,6 +253,6 @@ commit-llm-tab:
 	git commit -m "feat(tenants): aba LLM no modal de empresa (#31)"
 	git push origin ciclo
 
-.PHONY: fechar
-fechar:
-	bash .git-juntar.sh
+.PHONY: limpar
+limpar:
+	bash tmp-push.sh
