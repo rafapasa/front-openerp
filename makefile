@@ -166,7 +166,7 @@ IMAGE_TAG       ?= latest
 WEB_IMAGE       := $(DOCKER_USERNAME)/openerp-web
 DOCKERFILE_WEB  := Dockerfile.web
 COMPOSE_WEB     := docker-compose.web.yml
-NO_CACHE        ?=
+NO_CACHE        ?= --no-cache
 
 login: ## docker login no Hub
 	docker login -u $(DOCKER_USERNAME)

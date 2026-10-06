@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_openerp/presentation/widgets/viewport_box.dart';
 import 'package:front_openerp/data/models/tenant_model.dart';
 import 'package:front_openerp/presentation/theme/app_colors.dart';
 
@@ -16,7 +17,7 @@ Future<void> showTenantDetalheModal(BuildContext context, TenantModel tenant) {
         insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720, maxHeight: 780),
+          constraints: caixaDaJanela(context, maxWidth: 720),
           child: TenantDetalheModal(tenant: tenant),
         ),
       ),

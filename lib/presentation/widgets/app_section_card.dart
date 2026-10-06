@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import 'viewport_box.dart';
 
 /// Barra de título cinza igual à listagem (CLIENTE / ITENS / …).
 class AppSectionCard extends StatelessWidget {
@@ -66,7 +67,7 @@ class AppEditModal extends StatelessWidget {
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+        constraints: caixaDaJanela(context, maxWidth: maxWidth),
         child: Column(
           children: [
             Container(
@@ -91,7 +92,7 @@ class AppEditModal extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: footer),
+              child: Wrap(alignment: WrapAlignment.end, spacing: 8, runSpacing: 8, children: footer),
             ),
           ],
         ),

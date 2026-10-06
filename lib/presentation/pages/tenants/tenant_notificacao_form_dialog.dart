@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_openerp/presentation/widgets/viewport_box.dart';
 import 'package:front_openerp/data/models/tenant_notificacao_model.dart';
 import 'package:front_openerp/presentation/providers/tenant_provider.dart';
 import 'package:front_openerp/presentation/theme/app_colors.dart';
@@ -83,7 +84,7 @@ class _TenantNotificacaoFormDialogState extends State<TenantNotificacaoFormDialo
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480, maxHeight: 720),
+        constraints: caixaDaJanela(context, maxWidth: 480),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
