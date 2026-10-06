@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_openerp/presentation/widgets/viewport_box.dart';
 import 'package:front_openerp/core/helpers/snack_helper.dart';
 import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
@@ -19,7 +20,7 @@ Future<void> showProdutoDetalheModal(BuildContext context, int produtoId) {
         insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640, maxHeight: 760),
+          constraints: caixaDaJanela(context, maxWidth: 640),
           child: ProdutoDetalheModal(produtoId: produtoId),
         ),
       ),

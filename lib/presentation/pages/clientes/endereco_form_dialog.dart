@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:front_openerp/presentation/widgets/viewport_box.dart';
 import 'package:flutter/services.dart';
 import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
@@ -157,7 +158,7 @@ class _EnderecoFormDialogState extends State<EnderecoFormDialog> {
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560, maxHeight: 720),
+        constraints: caixaDaJanela(context, maxWidth: 560),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(

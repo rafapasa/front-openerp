@@ -194,21 +194,30 @@ class MainLayout extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 28),
                         child: Row(
                           children: [
-                            Text(
-                              title ?? _getTitle(currentIndex),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 20,
-                                color: AppColors.textDark,
+                            Expanded(
+                              child: Text(
+                                title ?? _getTitle(currentIndex),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 20,
+                                  color: AppColors.textDark,
+                                ),
                               ),
                             ),
-                            const Spacer(),
                             if (auth.hasMultipleTenants)
-                              TextButton.icon(
-                                onPressed: () => _trocarEmpresa(context),
-                                icon: const Icon(Icons.swap_horiz, size: 18),
-                                label: const Text('Trocar empresa'),
-                              ),
+                              constraints.maxWidth > 1100
+                                  ? TextButton.icon(
+                                      onPressed: () => _trocarEmpresa(context),
+                                      icon: const Icon(Icons.swap_horiz, size: 18),
+                                      label: const Text('Trocar empresa'),
+                                    )
+                                  : IconButton(
+                                      tooltip: 'Trocar empresa',
+                                      onPressed: () => _trocarEmpresa(context),
+                                      icon: const Icon(Icons.swap_horiz),
+                                    ),
                             IconButton(
                               tooltip: 'Sair',
                               onPressed: () => _sair(context),
