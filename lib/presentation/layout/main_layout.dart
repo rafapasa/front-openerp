@@ -1,5 +1,6 @@
 // lib/presentation/layout/main_layout.dart
 import 'package:flutter/material.dart';
+import 'package:front_openerp/presentation/pages/auth/conta_page.dart';
 import 'package:front_openerp/presentation/pages/auth/login_page.dart';
 import 'package:front_openerp/presentation/pages/auth/selecionar_tenant_page.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
@@ -224,10 +225,23 @@ class MainLayout extends StatelessWidget {
                               icon: const Icon(Icons.logout, color: AppColors.textGrey),
                             ),
                             const SizedBox(width: 8),
-                            CircleAvatar(
-                              radius: 16,
-                              backgroundColor: AppColors.primary,
-                              child: Text(inicial, style: const TextStyle(color: Colors.white, fontSize: 12)),
+                            PopupMenuButton<String>(
+                              tooltip: 'Conta',
+                              onSelected: (v) {
+                                if (v == 'empresa') _trocarEmpresa(context);
+                                if (v == 'conta') Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ContaPage()));
+                                if (v == 'sair') _sair(context);
+                              },
+                              itemBuilder: (_) => const [
+                                PopupMenuItem(value: 'empresa', child: Text('Troca de empresa')),
+                                PopupMenuItem(value: 'conta', child: Text('Dados da Conta')),
+                                PopupMenuItem(value: 'sair', child: Text('Logout')),
+                              ],
+                              child: CircleAvatar(
+                                radius: 16,
+                                backgroundColor: AppColors.primary,
+                                child: Text(inicial, style: const TextStyle(color: Colors.white, fontSize: 12)),
+                              ),
                             ),
                           ],
                         ),
@@ -252,7 +266,20 @@ class MainLayout extends StatelessWidget {
                   onPressed: () => _trocarEmpresa(context),
                   icon: const Icon(Icons.swap_horiz),
                 ),
-              IconButton(tooltip: 'Sair', onPressed: () => _sair(context), icon: const Icon(Icons.logout)),
+              PopupMenuButton<String>(
+                tooltip: 'Conta',
+                onSelected: (v) {
+                  if (v == 'empresa') _trocarEmpresa(context);
+                  if (v == 'conta') Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ContaPage()));
+                  if (v == 'sair') _sair(context);
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'empresa', child: Text('Troca de empresa')),
+                  PopupMenuItem(value: 'conta', child: Text('Dados da Conta')),
+                  PopupMenuItem(value: 'sair', child: Text('Logout')),
+                ],
+                icon: const Icon(Icons.account_circle),
+              ),
             ],
           ),
           body: child,
