@@ -2,17 +2,17 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:front_openerp/presentation/widgets/viewport_box.dart';
 import 'package:flutter/services.dart';
 import 'package:front_openerp/core/helpers/json_helper.dart';
+import 'package:front_openerp/core/helpers/launch_url.dart';
 import 'package:front_openerp/data/models/models.dart';
 import 'package:front_openerp/data/services/api_service.dart';
 import 'package:front_openerp/presentation/providers/providers.dart';
+import 'package:front_openerp/presentation/widgets/app_section_card.dart';
+import 'package:front_openerp/presentation/widgets/viewport_box.dart';
 import 'package:provider/provider.dart';
 
 import '../../theme/app_colors.dart';
-import 'package:front_openerp/core/helpers/launch_url.dart';
-import 'package:front_openerp/presentation/widgets/app_section_card.dart';
 import '../clientes/novo_cliente_dialog.dart';
 
 Future<void> showNovoPedidoModal(BuildContext context) {
@@ -54,13 +54,8 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
   Timer? _clienteDebounce;
   Timer? _produtoDebounce;
   List<ClienteModel> _clientesSugestao = [];
-  List<ProdutoModel> _produtosSugestao = [];
   int _clienteHi = 0;
-  int _produtoHi = 0;
-  int? _linhaBuscandoProduto;
   bool _saving = false;
-  bool _buscandoCliente = false;
-  bool _buscandoProduto = false;
   String _tipoEntrega = 'entrega';
   final _cardCliente = GlobalKey();
   double? _alturaModal;
@@ -70,13 +65,14 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
   final _etiqueta = TextEditingController();
   List<EnderecoModel> _enderecos = [];
   EnderecoModel? _endereco;
-  bool _carregandoEnderecos = false;
 
   @override
   void initState() {
     super.initState();
     _abas = TabController(length: 4, vsync: this);
-    _abas.addListener(() { if (mounted) setState(() {}); });
+    _abas.addListener(() {
+      if (mounted) setState(() {});
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) => _medir());
     _carregarFormas();
   }
@@ -90,15 +86,22 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
 
   Future<void> _carregarFormas() async {
     try {
-      final res = await context.read<ApiService>().get('/formas-pagamento', queryParameters: {'limit': 50, 'ativo': 'true'});
+      final res = await context.read<ApiService>().get(
+        '/formas-pagamento',
+        queryParameters: {'limit': 50, 'ativo': 'true'},
+      );
       final list = JsonHelper.extractList(res.data);
       final formas = <({int id, String nome})>[];
       for (final e in list) {
-        if (e is Map<String, dynamic>) formas.add((id: JsonHelper.toInt(e['id']), nome: JsonHelper.toStr(e['nome'], fallback: 'Forma')));
+        if (e is Map<String, dynamic>) {
+          formas.add((id: JsonHelper.toInt(e['id']), nome: JsonHelper.toStr(e['nome'], fallback: 'Forma')));
+        }
       }
       if (!mounted) return;
       setState(() {
-        _formas..clear()..addAll(formas);
+        _formas
+          ..clear()
+          ..addAll(formas);
         _formaId = formas.isEmpty ? null : formas.first.id;
       });
     } catch (_) {}
@@ -141,46 +144,17 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
       return;
     }
     _clienteDebounce = Timer(const Duration(milliseconds: 280), () async {
-      setState(() => _buscandoCliente = true);
       await context.read<ClienteProvider>().searchByNome(q);
       if (!mounted) return;
       setState(() {
-        _buscandoCliente = false;
         _clientesSugestao = context.read<ClienteProvider>().clientes;
         _clienteHi = 0;
       });
     });
   }
 
-  void _onProdutoChanged(int index, String raw) {
-    _produtoDebounce?.cancel();
-    final q = raw.trim();
-    final linha = _linhas[index];
-    if (linha.produto != null && q != linha.produto!.nome) linha.produto = null;
-    if (q.length < 3) {
-      setState(() {
-        _produtosSugestao = [];
-        _linhaBuscandoProduto = null;
-        _produtoHi = 0;
-      });
-      return;
-    }
-    _linhaBuscandoProduto = index;
-    _produtoDebounce = Timer(const Duration(milliseconds: 280), () async {
-      setState(() => _buscandoProduto = true);
-      await context.read<ProdutoProvider>().searchByNome(q);
-      if (!mounted) return;
-      setState(() {
-        _buscandoProduto = false;
-        _produtosSugestao = context.read<ProdutoProvider>().produtos;
-        _produtoHi = 0;
-      });
-    });
-  }
-
   Future<void> _carregarEnderecos(int clienteId) async {
     setState(() {
-      _carregandoEnderecos = true;
       _enderecos = [];
       _endereco = null;
     });
@@ -188,19 +162,16 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
     if (!mounted) return;
     setState(() {
       _enderecos = list;
-      _endereco = list.where((e) => e.principal).cast<EnderecoModel?>().firstWhere((_) => true, orElse: () => list.isEmpty ? null : list.first);
-      _carregandoEnderecos = false;
+      _endereco = list
+          .where((e) => e.principal)
+          .cast<EnderecoModel?>()
+          .firstWhere((_) => true, orElse: () => list.isEmpty ? null : list.first);
     });
     if (list.isEmpty) {
       _novoEndereco();
     } else if (list.length > 1) {
       _escolherEndereco();
     }
-  }
-
-  String _fmtEndereco(EnderecoModel e) {
-    final comp = (e.complemento ?? '').trim();
-    return '${e.logradouro}, ${e.numero}${comp.isEmpty ? '' : ' — $comp'}\n${e.bairro} — ${e.cidade}/${e.estado}\nCEP ${e.cep}';
   }
 
   void _pickCliente(ClienteModel c) {
@@ -214,26 +185,6 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
     if (_linhas.first.buscaFocus.canRequestFocus) {
       _linhas.first.buscaFocus.requestFocus();
     }
-  }
-
-  void _pickProduto(int index, ProdutoModel p) {
-    final linha = _linhas[index];
-    setState(() {
-      linha.produto = p;
-      linha.busca.text = p.nome;
-      _produtosSugestao = [];
-      _linhaBuscandoProduto = null;
-    });
-    linha.qtdFocus.requestFocus();
-    linha.qtd.selection = TextSelection(baseOffset: 0, extentOffset: linha.qtd.text.length);
-  }
-
-  void _addLinha() {
-    final nova = _LinhaItem();
-    setState(() => _linhas.add(nova));
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) nova.buscaFocus.requestFocus();
-    });
   }
 
   KeyEventResult _onClienteKey(FocusNode node, KeyEvent event) {
@@ -250,25 +201,6 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
     if (event.logicalKey == LogicalKeyboardKey.enter) {
       _pickCliente(_clientesSugestao[_clienteHi]);
       return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
-
-  KeyEventResult _onProdutoKey(int index, FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
-    if (_linhaBuscandoProduto == index && _produtosSugestao.isNotEmpty) {
-      if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-        setState(() => _produtoHi = (_produtoHi + 1) % _produtosSugestao.length);
-        return KeyEventResult.handled;
-      }
-      if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-        setState(() => _produtoHi = (_produtoHi - 1 + _produtosSugestao.length) % _produtosSugestao.length);
-        return KeyEventResult.handled;
-      }
-      if (event.logicalKey == LogicalKeyboardKey.enter) {
-        _pickProduto(index, _produtosSugestao[_produtoHi]);
-        return KeyEventResult.handled;
-      }
     }
     return KeyEventResult.ignored;
   }
@@ -341,7 +273,6 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
     context.read<DashboardProvider>().refreshDashboard();
   }
 
-
   Future<void> _escolherEndereco() async {
     if (_cliente == null) return;
     final escolhido = await showDialog<int>(
@@ -372,8 +303,14 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('${e.logradouro}, ${e.numero}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-                                Text('${e.bairro} — ${e.cidade}/${e.estado}', style: const TextStyle(fontSize: 13, color: AppColors.textGrey)),
+                                Text(
+                                  '${e.logradouro}, ${e.numero}',
+                                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                                ),
+                                Text(
+                                  '${e.bairro} — ${e.cidade}/${e.estado}',
+                                  style: const TextStyle(fontSize: 13, color: AppColors.textGrey),
+                                ),
                               ],
                             ),
                           ),
@@ -407,7 +344,9 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
       await _novoEndereco();
       return;
     }
-    setState(() => _endereco = _enderecos.cast<EnderecoModel?>().firstWhere((e) => e?.id == escolhido, orElse: () => null));
+    setState(
+      () => _endereco = _enderecos.cast<EnderecoModel?>().firstWhere((e) => e?.id == escolhido, orElse: () => null),
+    );
   }
 
   Future<void> _novoEndereco() async {
@@ -421,7 +360,10 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
     final cidade = TextEditingController();
     final uf = TextEditingController();
     var buscando = false;
-    InputDecoration dec(String hint) => const InputDecoration(isDense: true, contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10)).copyWith(hintText: hint);
+    InputDecoration dec(String hint) => const InputDecoration(
+      isDense: true,
+      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+    ).copyWith(hintText: hint);
     final criado = await showDialog<EnderecoModel>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -456,15 +398,31 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
                     children: [
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: SizedBox(width: 150, child: TextField(controller: cep, decoration: dec('CEP'), keyboardType: TextInputType.number, onChanged: (_) { if (cep.text.replaceAll(RegExp(r'\D'), '').length == 8) buscar(); })),
+                        child: SizedBox(
+                          width: 150,
+                          child: TextField(
+                            controller: cep,
+                            decoration: dec('CEP'),
+                            keyboardType: TextInputType.number,
+                            onChanged: (_) {
+                              if (cep.text.replaceAll(RegExp(r'\D'), '').length == 8) buscar();
+                            },
+                          ),
+                        ),
                       ),
                       if (buscando) const LinearProgressIndicator(minHeight: 2),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Expanded(flex: 85, child: TextField(controller: cidade, decoration: dec('Cidade'))),
+                          Expanded(
+                            flex: 85,
+                            child: TextField(controller: cidade, decoration: dec('Cidade')),
+                          ),
                           const SizedBox(width: 8),
-                          Expanded(flex: 15, child: TextField(controller: uf, decoration: dec('UF'))),
+                          Expanded(
+                            flex: 15,
+                            child: TextField(controller: uf, decoration: dec('UF')),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -472,9 +430,15 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Expanded(flex: 15, child: TextField(controller: numero, decoration: dec('Número'))),
+                          Expanded(
+                            flex: 15,
+                            child: TextField(controller: numero, decoration: dec('Número')),
+                          ),
                           const SizedBox(width: 8),
-                          Expanded(flex: 85, child: TextField(controller: bairro, decoration: dec('Bairro'))),
+                          Expanded(
+                            flex: 85,
+                            child: TextField(controller: bairro, decoration: dec('Bairro')),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -544,12 +508,19 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    const Align(alignment: Alignment.centerLeft, child: Text('Adicionar item', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16))),
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Adicionar item', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                    ),
                     const SizedBox(height: 8),
                     TextField(
                       autofocus: true,
                       controller: busca,
-                      decoration: const InputDecoration(isDense: true, hintText: 'Buscar produto (3+ letras)', prefixIcon: Icon(Icons.search, size: 18)),
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        hintText: 'Buscar produto (3+ letras)',
+                        prefixIcon: Icon(Icons.search, size: 18),
+                      ),
                       onChanged: (v) {
                         debounce?.cancel();
                         if (v.trim().length < 3) {
@@ -573,7 +544,10 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
                           final on = escolhido?.id == p.id;
                           return Material(
                             color: on ? AppColors.accent.withValues(alpha: 0.12) : Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: const BorderSide(color: AppColors.border)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: const BorderSide(color: AppColors.border),
+                            ),
                             child: ListTile(
                               dense: true,
                               visualDensity: VisualDensity.compact,
@@ -636,32 +610,16 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
     qtdFocus.dispose();
   }
 
-  Widget _campo(String label, String valor) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textGrey)),
-          const SizedBox(height: 4),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(color: const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.border)),
-            child: Text(valor.isEmpty ? '—' : valor),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _sideBtn(IconData icon, String label, Color color, VoidCallback onTap) {
     return SizedBox(
       width: 108,
       child: OutlinedButton.icon(
         onPressed: onTap,
         icon: Icon(icon, size: 16, color: color),
-        label: Text(label, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w700)),
+        label: Text(
+          label,
+          style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w700),
+        ),
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           side: BorderSide(color: color.withValues(alpha: 0.35)),
@@ -684,7 +642,12 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
           children: [
             const Text('Etiqueta', style: TextStyle(fontWeight: FontWeight.w800)),
             const SizedBox(width: 12),
-            Expanded(child: TextField(controller: _etiqueta, decoration: const InputDecoration(isDense: true, hintText: 'Etiqueta'))),
+            Expanded(
+              child: TextField(
+                controller: _etiqueta,
+                decoration: const InputDecoration(isDense: true, hintText: 'Etiqueta'),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -706,7 +669,11 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
                   controller: _clienteBusca,
                   focusNode: _clienteFocus,
                   style: const TextStyle(fontSize: 16),
-                  decoration: const InputDecoration(isDense: true, hintText: 'Buscar cliente (3+ letras)', prefixIcon: Icon(Icons.search, size: 18)),
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    hintText: 'Buscar cliente (3+ letras)',
+                    prefixIcon: Icon(Icons.search, size: 18),
+                  ),
                   onChanged: _onClienteChanged,
                 ),
               ),
@@ -732,7 +699,10 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
                     visualDensity: VisualDensity.compact,
                     selected: i == _clienteHi,
                     selectedTileColor: AppColors.accent.withValues(alpha: 0.12),
-                    title: Text('${_clientesSugestao[i].nome}   ${_clientesSugestao[i].telefone}', style: const TextStyle(fontSize: 16)),
+                    title: Text(
+                      '${_clientesSugestao[i].nome}   ${_clientesSugestao[i].telefone}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
                     onTap: () => _pickCliente(_clientesSugestao[i]),
                   ),
               ],
@@ -749,22 +719,32 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(c?.nome ?? 'Cliente não selecionado', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
+                    Text(
+                      c?.nome ?? 'Cliente não selecionado',
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
+                    ),
                     const SizedBox(height: 6),
                     Text(linha, style: const TextStyle(fontSize: 15)),
-                    if (cidade.isNotEmpty) Text(cidade, style: const TextStyle(fontSize: 13, color: AppColors.textGrey)),
+                    if (cidade.isNotEmpty)
+                      Text(cidade, style: const TextStyle(fontSize: 13, color: AppColors.textGrey)),
                   ],
                 ),
               ),
               Column(
                 children: [
-                  _sideBtn(Icons.call, 'Ligar', AppColors.primary, () { if (fone.isNotEmpty) openExternalUrl('tel:+$fone'); }),
+                  _sideBtn(Icons.call, 'Ligar', AppColors.primary, () {
+                    if (fone.isNotEmpty) openExternalUrl('tel:+$fone');
+                  }),
                   const SizedBox(height: 6),
-                  _sideBtn(Icons.chat, 'WhatsApp', const Color(0xFF25D366), () { if (fone.isNotEmpty) openExternalUrl('https://wa.me/$fone'); }),
+                  _sideBtn(Icons.chat, 'WhatsApp', const Color(0xFF25D366), () {
+                    if (fone.isNotEmpty) openExternalUrl('https://wa.me/$fone');
+                  }),
                   const SizedBox(height: 6),
                   _sideBtn(Icons.map_outlined, 'Maps', const Color(0xFFEA4335), () {
                     if (e == null) return;
-                    openExternalUrl('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent('${e.logradouro}, ${e.numero}, ${e.cidade}')}');
+                    openExternalUrl(
+                      'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent('${e.logradouro}, ${e.numero}, ${e.cidade}')}',
+                    );
                   }),
                 ],
               ),
@@ -817,7 +797,10 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
           children: [
             Icon(on ? Icons.check_circle : Icons.circle_outlined, size: 16, color: AppColors.primary),
             const SizedBox(width: 6),
-            Text(label, style: TextStyle(color: AppColors.primary, fontWeight: on ? FontWeight.w800 : FontWeight.w500)),
+            Text(
+              label,
+              style: TextStyle(color: AppColors.primary, fontWeight: on ? FontWeight.w800 : FontWeight.w500),
+            ),
           ],
         ),
       ),
@@ -835,8 +818,18 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
               padding: const EdgeInsets.symmetric(vertical: 2),
               child: Row(
                 children: [
-                  SizedBox(width: 24, child: Text('${l.quantidade}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800))),
-                  Expanded(child: Text(l.produto!.nome, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13))),
+                  SizedBox(
+                    width: 24,
+                    child: Text('${l.quantidade}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+                  ),
+                  Expanded(
+                    child: Text(
+                      l.produto!.nome,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
                   Text(l.produto!.preco.toStringAsFixed(2), style: const TextStyle(fontSize: 13)),
                   if (remover)
                     IconButton(
@@ -868,7 +861,10 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
         const SizedBox(height: 8),
         Align(
           alignment: Alignment.centerRight,
-          child: Text('Total  R\$ ${_total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+          child: Text(
+            'Total  R\$ ${_total.toStringAsFixed(2)}',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+          ),
         ),
       ],
     );
@@ -887,34 +883,53 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
           items: [for (final f in _formas) DropdownMenuItem(value: f.id, child: Text(f.nome))],
           onChanged: (v) => setState(() => _formaId = v),
         ),
-        if (_formas.isEmpty) const Padding(padding: EdgeInsets.only(top: 6), child: Text('Nenhuma forma cadastrada para esta empresa.')),
+        if (_formas.isEmpty)
+          const Padding(padding: EdgeInsets.only(top: 6), child: Text('Nenhuma forma cadastrada para esta empresa.')),
         const SizedBox(height: 12),
         const Text('Observações', style: TextStyle(fontWeight: FontWeight.w800)),
         const SizedBox(height: 6),
-        TextField(controller: _obs, maxLines: 3, decoration: const InputDecoration(isDense: true, hintText: 'Observações do pedido')),
+        TextField(
+          controller: _obs,
+          maxLines: 3,
+          decoration: const InputDecoration(isDense: true, hintText: 'Observações do pedido'),
+        ),
         if (nome.isNotEmpty) const SizedBox(height: 0),
       ],
     );
   }
 
   Widget _abaGeral() {
-    final itens = _linhas.where((l) => l.produto != null).toList();
+    _linhas.where((l) => l.produto != null).toList();
     final e = _endereco;
     final forma = _formas.where((f) => f.id == _formaId).map((f) => f.nome).firstOrNull ?? '';
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
-        Text('Cliente', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textGrey)),
+        Text(
+          'Cliente',
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textGrey),
+        ),
         Text(_cliente?.nome ?? 'Balcão', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
         Text(e == null ? _tipoEntrega : '${e.logradouro}, ${e.numero}', style: const TextStyle(fontSize: 13)),
-        if (e != null) Text('${e.cidade} / ${e.estado}', style: const TextStyle(fontSize: 12, color: AppColors.textGrey)),
+        if (e != null)
+          Text('${e.cidade} / ${e.estado}', style: const TextStyle(fontSize: 12, color: AppColors.textGrey)),
         const Divider(),
-        Text('Itens', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textGrey)),
+        Text(
+          'Itens',
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textGrey),
+        ),
         _listaItens(remover: false),
         const Divider(),
-        Align(alignment: Alignment.centerRight, child: Text('Total  R\$ ${_total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800))),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            'Total  R\$ ${_total.toStringAsFixed(2)}',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+          ),
+        ),
         if (forma.isNotEmpty) Text(forma, style: const TextStyle(fontSize: 13)),
-        if (_obs.text.trim().isNotEmpty) Text(_obs.text.trim(), style: const TextStyle(fontSize: 12, color: AppColors.textGrey)),
+        if (_obs.text.trim().isNotEmpty)
+          Text(_obs.text.trim(), style: const TextStyle(fontSize: 12, color: AppColors.textGrey)),
       ],
     );
   }
@@ -953,7 +968,12 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
               unselectedLabelColor: AppColors.textGrey,
               indicatorSize: TabBarIndicatorSize.tab,
               indicator: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(8)),
-              tabs: const [Tab(text: 'Cliente'), Tab(text: 'Itens'), Tab(text: 'Pagamento'), Tab(text: 'Geral')],
+              tabs: const [
+                Tab(text: 'Cliente'),
+                Tab(text: 'Itens'),
+                Tab(text: 'Pagamento'),
+                Tab(text: 'Geral'),
+              ],
             ),
             Expanded(
               child: TabBarView(
@@ -969,19 +989,27 @@ class _NovoPedidoModalState extends State<NovoPedidoModal> with SingleTickerProv
                 children: [
                   FilledButton.icon(
                     focusNode: _criarFocus,
-                    onPressed: _saving ? null : () {
-                      if (_abas.index < 3) {
-                        _abas.animateTo(_abas.index + 1);
-                        return;
-                      }
-                      final forma = _formas.where((f) => f.id == _formaId).map((f) => f.nome).firstOrNull ?? '';
-                      if (forma.isNotEmpty && !_obs.text.contains('Pagamento:')) _obs.text = 'Pagamento: $forma\n${_obs.text}'.trim();
-                      _criar();
-                    },
+                    onPressed: _saving
+                        ? null
+                        : () {
+                            if (_abas.index < 3) {
+                              _abas.animateTo(_abas.index + 1);
+                              return;
+                            }
+                            final forma = _formas.where((f) => f.id == _formaId).map((f) => f.nome).firstOrNull ?? '';
+                            if (forma.isNotEmpty && !_obs.text.contains('Pagamento:')) {
+                              _obs.text = 'Pagamento: $forma\n${_obs.text}'.trim();
+                            }
+                            _criar();
+                          },
                     style: FilledButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
                     icon: Icon(_abas.index < 3 ? Icons.arrow_forward : Icons.check, size: 18),
                     label: _saving
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
                         : Text(_abas.index < 3 ? 'Avançar' : 'Criar'),
                   ),
                 ],

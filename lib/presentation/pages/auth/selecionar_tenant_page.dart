@@ -95,7 +95,7 @@ class SelecionarTenantPage extends StatelessWidget {
                           itemCount: contas.length,
                           itemBuilder: (context, index) => _ContaCard(
                             conta: contas[index],
-                            onTap: () => _selecionarEmpresa(context, contas[index].tenantId),
+                            onTap: () => _selecionarEmpresa(context, contas[index].tenant.id),
                           ),
                         )
                       : ListView.separated(
@@ -103,7 +103,7 @@ class SelecionarTenantPage extends StatelessWidget {
                           separatorBuilder: (_, _) => const SizedBox(height: 12),
                           itemBuilder: (context, index) => _ContaCard(
                             conta: contas[index],
-                            onTap: () => _selecionarEmpresa(context, contas[index].tenantId),
+                            onTap: () => _selecionarEmpresa(context, contas[index].tenant.id),
                           ),
                         ),
                 ),
@@ -137,7 +137,20 @@ class SelecionarTenantPage extends StatelessWidget {
     );
   }
 
-  Future<void> _selecionarEmpresa(BuildContext context, int tenantId) async {
+  Future<void> _selecionarEmpresa(BuildContext context, int? tenantId) async {
+    if (tenantId == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Empresa inválida.'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.selectTenant(tenantId);
 
@@ -198,7 +211,7 @@ class _ContaCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Empresa #${conta.tenantId}',
+                      '${conta.tenant.id} - ${conta.tenant.nome}',
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 2),

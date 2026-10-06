@@ -16,8 +16,7 @@ class _TokenRow {
     this.id,
     required String token,
     this.origem = ProdutoTokenOrigem.nome,
-    this.removido = false,
-  }) : tokenCtrl = TextEditingController(text: token);
+  }) : removido = false, tokenCtrl = TextEditingController(text: token);
 
   factory _TokenRow.fromModel(ProdutoTokenModel m) => _TokenRow(id: m.id, token: m.token, origem: m.origem);
 

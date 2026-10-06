@@ -172,11 +172,12 @@ class _ClientesPageState extends State<ClientesPage> {
       padding: const EdgeInsets.all(16),
       itemCount: provider.clientes.length + (provider.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == provider.clientes.length)
+        if (index == provider.clientes.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
           );
+        }
         return _ClienteCard(cliente: provider.clientes[index]);
       },
     );

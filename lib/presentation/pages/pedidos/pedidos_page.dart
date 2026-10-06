@@ -594,7 +594,7 @@ class _PedidosPageState extends State<PedidosPage> {
             child: ListView.separated(
               controller: _scrollController,
               itemCount: filtrados.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.borderLight),
+              separatorBuilder: (_, _) => const Divider(height: 1, color: AppColors.borderLight),
               itemBuilder: (context, index) {
                 final pedido = filtrados[index];
                 return InkWell(

@@ -252,3 +252,10 @@ commit-llm-tab:
 	git checkout -- makefile Makefile || true
 	git commit -m "feat(tenants): aba LLM no modal de empresa (#31)"
 	git push origin ciclo
+
+.PHONY: subir
+subir:
+	git add -A
+	git commit -m "feat(auth): nome da empresa no login e ajustes do modal de pedido"
+	git push -u origin HEAD
+	git status -sb

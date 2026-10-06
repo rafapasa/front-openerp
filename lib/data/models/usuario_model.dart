@@ -52,7 +52,7 @@ class UsuarioModel {
       tokenExpires: conta.expiresAt,
       role: conta.role,
       tenants: null,
-      tenantAtivoId: conta.tenantId,
+      tenantAtivoId: conta.tenant.id,
     );
   }
 

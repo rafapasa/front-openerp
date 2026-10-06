@@ -16,7 +16,7 @@ class AuthRepository {
     await _authService.ativarConta(conta);
     await LocalStorage.setToken(conta.token);
     await LocalStorage.setTokenExpires(conta.expiresAt);
-    await LocalStorage.saveData('tenant_ativo_id', conta.tenantId);
+    await LocalStorage.saveData('tenant_ativo_id', conta.tenant.id);
     final usuario = UsuarioModel.fromLoginConta(conta);
     await LocalStorage.saveData('usuario', usuario.toJson());
     return usuario;
@@ -40,7 +40,7 @@ class AuthRepository {
     final contas = await getContas() ?? const <LoginConta>[];
     LoginConta? conta;
     for (final c in contas) {
-      if (c.tenantId == tenantId) {
+      if (c.tenant.id == tenantId) {
         conta = c;
         break;
       }
