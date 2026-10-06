@@ -252,11 +252,3 @@ commit-llm-tab:
 	git checkout -- makefile Makefile || true
 	git commit -m "feat(tenants): aba LLM no modal de empresa (#31)"
 	git push origin ciclo
-
-.PHONY: limpar
-limpar:
-	git rm -f tmp-push.sh
-	git add makefile
-	git commit -m 'chore: remove script temporario'
-	git push origin dev
-	git status -sb
