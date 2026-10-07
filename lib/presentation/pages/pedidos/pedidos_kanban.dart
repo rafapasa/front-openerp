@@ -44,10 +44,7 @@ class PedidosKanban extends StatelessWidget {
         final quadro = Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (var i = 0; i < colunas.length; i++) ...[
-              if (i > 0) SizedBox(width: gap),
-              Expanded(child: colunas[i]),
-            ],
+            for (var i = 0; i < colunas.length; i++) ...[if (i > 0) SizedBox(width: gap), Expanded(child: colunas[i])],
           ],
         );
         return SizedBox(
@@ -68,6 +65,8 @@ class _Coluna extends StatelessWidget {
 
   Future<void> _receber(BuildContext context, PedidoModel pedido) async {
     if (!_aceitaDrop(pedido, status)) return;
+
+    final pedidoProvider = context.read<PedidoProvider>();
     String? motivo;
     if (status == StatusPedido.cancelado) {
       final ctrl = TextEditingController();
@@ -88,12 +87,12 @@ class _Coluna extends StatelessWidget {
       );
       if (motivo == null) return;
     }
-    final ok = await context.read<PedidoProvider>().updateStatus(pedido.id, status, motivo: motivo);
+
+    final ok = await pedidoProvider.updateStatus(pedido.id, status, motivo: motivo);
     if (!context.mounted) return;
     if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.read<PedidoProvider>().error ?? 'Nao foi possivel mover o pedido')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(pedidoProvider.error ?? 'Nao foi possivel mover o pedido')));
     }
   }
 

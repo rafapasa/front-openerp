@@ -60,29 +60,29 @@ class ClienteService {
           'inscricao_federal': inscricaoFederal.trim(),
       },
     );
-    final map = response.data is Map ? JsonHelper.asMap(response.data);
-    final data = map['data'] is Map<String, dynamic> ? JsonHelper.asMap(map['data'] ?? map);
+    final map = response.data is Map ? JsonHelper.asMap(response.data) : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? JsonHelper.asMap(map['data'] ?? map) : <String, dynamic>{};
     return ClienteModel.fromJson(data);
   }
 
   Future<EnderecoModel> createEndereco(int clienteId, Map<String, dynamic> body) async {
     final response = await _apiService.post('/clientes/$clienteId/enderecos', data: body);
-    final map = response.data is Map ? JsonHelper.asMap(response.data);
-    final data = map['data'] is Map<String, dynamic> ? JsonHelper.asMap(map['data'] ?? map);
+    final map = response.data is Map ? JsonHelper.asMap(response.data) : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? JsonHelper.asMap(map['data'] ?? map) : <String, dynamic>{};
     return EnderecoModel.fromJson(data);
   }
 
   Future<ClienteModel> updateCliente(int id, Map<String, dynamic> payload) async {
     final response = await _apiService.put('/clientes/$id', data: payload);
-    final map = response.data is Map ? JsonHelper.asMap(response.data);
-    final data = map['data'] is Map<String, dynamic> ? JsonHelper.asMap(map['data'] ?? map);
+    final map = response.data is Map ? JsonHelper.asMap(response.data) : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? JsonHelper.asMap(map['data'] ?? map) : <String, dynamic>{};
     return ClienteModel.fromJson(data);
   }
 
   Future<EnderecoModel> updateEndereco(int clienteId, int enderecoId, Map<String, dynamic> body) async {
     final response = await _apiService.patch('/clientes/$clienteId/enderecos/$enderecoId', data: body);
-    final map = response.data is Map ? JsonHelper.asMap(response.data);
-    final data = map['data'] is Map<String, dynamic> ? JsonHelper.asMap(map['data'] ?? map);
+    final map = response.data is Map ? JsonHelper.asMap(response.data) : <String, dynamic>{};
+    final data = map['data'] is Map<String, dynamic> ? JsonHelper.asMap(map['data'] ?? map) : <String, dynamic>{};
     return EnderecoModel.fromJson(data);
   }
 

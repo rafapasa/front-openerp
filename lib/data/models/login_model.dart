@@ -62,7 +62,14 @@ class LoginConta {
   Map<String, dynamic> toJson() => {
     'token': token,
     'expires_at': expiresAt,
-    'user': {'id': id, 'tenant_id': tenant.id, 'tenant': {'id': tenant.id, 'nome': tenant.nome}, 'nome': nome, 'email': email, 'role': role},
+    'user': {
+      'id': id,
+      'tenant_id': tenant.id,
+      'tenant': {'id': tenant.id, 'nome': tenant.nome},
+      'nome': nome,
+      'email': email,
+      'role': role,
+    },
   };
 
   /// Rótulo amigável do perfil (role) exibido na tela de seleção de empresa.
@@ -90,7 +97,7 @@ TenantModel _tenantDoLogin(Map<String, dynamic> user) {
   return TenantModel.fromJson(map);
 }
 
-gt class LoginResultado {
+class LoginResultado {
   final int count;
   final List<LoginConta> contas;
 

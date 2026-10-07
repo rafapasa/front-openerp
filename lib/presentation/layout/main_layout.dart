@@ -61,145 +61,152 @@ class MainLayout extends StatelessWidget {
               children: [
                 _BarraLateral(
                   builder: (recolhida, recolher) => Container(
-                  width: recolhida ? 76 : 268,
-                  color: AppColors.primaryDark,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          tooltip: recolhida ? 'Expandir menu' : 'Recolher menu',
-                          onPressed: recolher,
-                          icon: Icon(recolhida ? Icons.chevron_right : Icons.chevron_left, color: Colors.white),
-                        ),
-                      ),
-                      if (!recolhida) Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Image.asset(
-                          'assets/images/Logo_openerp_3D.png',
-                          width: double.infinity,
-                          fit: BoxFit.fitWidth,
-                          filterQuality: FilterQuality.high,
-                          errorBuilder: (_, _, _) => const Text(
-                            'OpenERP',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 20),
+                    width: recolhida ? 76 : 268,
+                    color: AppColors.primaryDark,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            tooltip: recolhida ? 'Expandir menu' : 'Recolher menu',
+                            onPressed: recolher,
+                            icon: Icon(recolhida ? Icons.chevron_right : Icons.chevron_left, color: Colors.white),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      _SideItem(
-                        icon: Icons.dashboard_outlined,
-                        label: 'Dashboard',
-                        compact: recolhida,
-                        selected: currentIndex == 0,
-                        onTap: () => onTap(0),
-                      ),
-                      _SideItem(
-                        icon: Icons.shopping_cart_outlined,
-                        label: 'Pedidos',
-                        compact: recolhida,
-                        selected: currentIndex == 1,
-                        onTap: () => onTap(1),
-                      ),
-                      _SideItem(
-                        icon: Icons.people_outline,
-                        label: 'Clientes',
-                        compact: recolhida,
-                        selected: currentIndex == 2,
-                        onTap: () => onTap(2),
-                      ),
-                      _SideItem(
-                        icon: Icons.inventory_2_outlined,
-                        label: 'Produtos',
-                        compact: recolhida,
-                        selected: currentIndex == 3,
-                        onTap: () => onTap(3),
-                      ),
-                      _SideItem(
-                        icon: Icons.business_outlined,
-                        label: 'Empresas',
-                        compact: recolhida,
-                        selected: currentIndex == 4,
-                        onTap: () => onTap(4),
-                      ),
-                      const Spacer(),
-                      Container(
-                        height: 1,
-                        color: Colors.white.withValues(alpha: 0.1),
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                      const SizedBox(height: 12),
-                      if (auth.hasMultipleTenants)
+                        if (!recolhida)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Image.asset(
+                              'assets/images/Logo_openerp_3D.png',
+                              width: double.infinity,
+                              fit: BoxFit.fitWidth,
+                              filterQuality: FilterQuality.high,
+                              errorBuilder: (_, _, _) => const Text(
+                                'OpenERP',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 20),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 20),
                         _SideItem(
-                          icon: Icons.swap_horiz,
-                          label: 'Trocar empresa',
+                          icon: Icons.dashboard_outlined,
+                          label: 'Dashboard',
+                          compact: recolhida,
+                          selected: currentIndex == 0,
+                          onTap: () => onTap(0),
+                        ),
+                        _SideItem(
+                          icon: Icons.shopping_cart_outlined,
+                          label: 'Pedidos',
+                          compact: recolhida,
+                          selected: currentIndex == 1,
+                          onTap: () => onTap(1),
+                        ),
+                        _SideItem(
+                          icon: Icons.people_outline,
+                          label: 'Clientes',
+                          compact: recolhida,
+                          selected: currentIndex == 2,
+                          onTap: () => onTap(2),
+                        ),
+                        _SideItem(
+                          icon: Icons.inventory_2_outlined,
+                          label: 'Produtos',
+                          compact: recolhida,
+                          selected: currentIndex == 3,
+                          onTap: () => onTap(3),
+                        ),
+                        _SideItem(
+                          icon: Icons.business_outlined,
+                          label: 'Empresas',
+                          compact: recolhida,
+                          selected: currentIndex == 4,
+                          onTap: () => onTap(4),
+                        ),
+                        const Spacer(),
+                        Container(
+                          height: 1,
+                          color: Colors.white.withValues(alpha: 0.1),
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                        ),
+                        const SizedBox(height: 12),
+                        if (auth.hasMultipleTenants)
+                          _SideItem(
+                            icon: Icons.swap_horiz,
+                            label: 'Trocar empresa',
+                            compact: recolhida,
+                            selected: false,
+                            onTap: () => _trocarEmpresa(context),
+                          ),
+                        _SideItem(
+                          icon: Icons.logout,
+                          label: 'Sair',
                           compact: recolhida,
                           selected: false,
-                          onTap: () => _trocarEmpresa(context),
+                          onTap: () => _sair(context),
                         ),
-                      _SideItem(icon: Icons.logout, label: 'Sair', compact: recolhida, selected: false, onTap: () => _sair(context)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.06),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 32,
-                                height: 32,
-                                decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                                child: Center(
-                                  child: Text(
-                                    inicial,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.06),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                                  child: Center(
+                                    child: Text(
+                                      inicial,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      nome,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        nome,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    // ✅ role agora é String não-nulo
-                                    Text(role, style: const TextStyle(color: Colors.white60, fontSize: 11)),
-                                  ],
+                                      // ✅ role agora é String não-nulo
+                                      Text(role, style: const TextStyle(color: Colors.white60, fontSize: 11)),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Text(
-                          'OpenERP by eTools',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.35), fontSize: 10),
+                        const SizedBox(height: 12),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            'OpenERP by eTools',
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.35), fontSize: 10),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
-                ),
                 ),
                 Expanded(
                   child: Column(
@@ -244,7 +251,9 @@ class MainLayout extends StatelessWidget {
                               tooltip: 'Conta',
                               onSelected: (v) {
                                 if (v == 'empresa') _trocarEmpresa(context);
-                                if (v == 'conta') Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ContaPage()));
+                                if (v == 'conta') {
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ContaPage()));
+                                }
                                 if (v == 'sair') _sair(context);
                               },
                               itemBuilder: (_) => const [
@@ -316,31 +325,26 @@ class MainLayout extends StatelessWidget {
                   icon: Icon(Icons.dashboard_outlined),
                   activeIcon: Icon(Icons.dashboard),
                   label: 'Dashboard',
-                        compact: recolhida,
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.shopping_cart_outlined),
                   activeIcon: Icon(Icons.shopping_cart),
                   label: 'Pedidos',
-                        compact: recolhida,
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.people_outline),
                   activeIcon: Icon(Icons.people),
                   label: 'Clientes',
-                        compact: recolhida,
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.inventory_2_outlined),
                   activeIcon: Icon(Icons.inventory_2),
                   label: 'Produtos',
-                        compact: recolhida,
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.business_outlined),
                   activeIcon: Icon(Icons.business),
                   label: 'Empresas',
-                        compact: recolhida,
                 ),
               ],
             ),
@@ -376,7 +380,13 @@ class _SideItem extends StatelessWidget {
   final bool compact;
   final VoidCallback onTap;
 
-  const _SideItem({required this.icon, required this.label, required this.selected, required this.onTap, this.compact = false});
+  const _SideItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.compact = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -389,10 +399,16 @@ class _SideItem extends StatelessWidget {
       ),
       child: ListTile(
         leading: Icon(icon, color: Colors.white, size: 20),
-        title: compact ? null : Text(
-          label,
-          style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: selected ? FontWeight.w700 : FontWeight.w500),
-        ),
+        title: compact
+            ? null
+            : Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
         trailing: !compact && selected
             ? Container(
                 width: 6,

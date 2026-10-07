@@ -29,6 +29,8 @@ Future<bool> showPagamentoPedidoDialog(BuildContext context, PedidoModel pedido)
   int? formaId = formas.isEmpty ? null : formas.first.id;
   final valorCtrl = TextEditingController(text: pedido.total.toStringAsFixed(2));
 
+  if (!context.mounted) return false;
+
   final ok = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
