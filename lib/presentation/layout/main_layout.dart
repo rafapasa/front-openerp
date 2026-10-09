@@ -118,11 +118,18 @@ class MainLayout extends StatelessWidget {
                           onTap: () => onTap(3),
                         ),
                         _SideItem(
-                          icon: Icons.business_outlined,
-                          label: 'Empresas',
+                          icon: Icons.category_outlined,
+                          label: 'Categorias',
                           compact: recolhida,
                           selected: currentIndex == 4,
                           onTap: () => onTap(4),
+                        ),
+                        _SideItem(
+                          icon: Icons.business_outlined,
+                          label: 'Empresas',
+                          compact: recolhida,
+                          selected: currentIndex == 5,
+                          onTap: () => onTap(5),
                         ),
                         const Spacer(),
                         Container(
@@ -342,6 +349,11 @@ class MainLayout extends StatelessWidget {
                   label: 'Produtos',
                 ),
                 BottomNavigationBarItem(
+                  icon: Icon(Icons.category_outlined),
+                  activeIcon: Icon(Icons.category),
+                  label: 'Categorias',
+                ),
+                BottomNavigationBarItem(
                   icon: Icon(Icons.business_outlined),
                   activeIcon: Icon(Icons.business),
                   label: 'Empresas',
@@ -355,7 +367,7 @@ class MainLayout extends StatelessWidget {
   }
 
   String _getTitle(int i) {
-    const titles = ['Dashboard', 'Pedidos', 'Clientes', 'Produtos', 'Empresas'];
+    const titles = ['Dashboard', 'Pedidos', 'Clientes', 'Produtos', 'Categorias', 'Empresas'];
     return titles[i.clamp(0, titles.length - 1)];
   }
 }
